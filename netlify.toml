@@ -1,0 +1,48 @@
+[build]
+  command = "npm run build:web"
+  publish = "dist"
+
+[[redirects]]
+  from = "/exercises/:id/edit"
+  to = "/exercises/[id]/edit.html"
+  status = 200
+
+[[redirects]]
+  from = "/exercises/:id"
+  to = "/exercises/[id].html"
+  status = 200
+
+[[redirects]]
+  from = "/routines/:id/edit"
+  to = "/routines/[id]/edit.html"
+  status = 200
+
+[[redirects]]
+  from = "/routines/:id"
+  to = "/routines/[id].html"
+  status = 200
+
+[[redirects]]
+  from = "/workout/:id/summary"
+  to = "/workout/[id]/summary.html"
+  status = 200
+
+[[redirects]]
+  from = "/history/:id"
+  to = "/history/[id].html"
+  status = 200
+
+[[redirects]]
+  from = "/splits/:split"
+  to = "/splits/[split].html"
+  status = 200
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

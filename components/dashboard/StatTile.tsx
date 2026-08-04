@@ -1,0 +1,116 @@
+import { useState } from 'react';
+import { Platform, Pressable, Text, View } from 'react-native';
+
+import {
+  DASHBOARD_TILE_BG,
+  dashboardCardFrameStyle,
+  dashboardHoverStyle,
+} from '@/lib/dashboard/cardStyles';
+import type { StatDeltaTone } from '@/lib/dashboard/statTiles';
+import { fonts } from '@/constants/theme';
+
+const MUTED = 'rgba(240,237,232,0.5)';
+const DELTA_POSITIVE = '#c8ff5a';
+const DELTA_NEGATIVE = '#ff5f5f';
+
+interface StatTileProps {
+  label: string;
+  value: string;
+  unit?: string;
+  accentColor: string;
+  delta: string;
+  deltaTone: StatDeltaTone;
+  onPress?: () => void;
+}
+
+function deltaColor(tone: StatDeltaTone): string {
+  if (tone === 'positive') return DELTA_POSITIVE;
+  if (tone === 'negative') return DELTA_NEGATIVE;
+  return MUTED;
+}
+
+export function StatTile({
+  label,
+  value,
+  unit,
+  accentColor,
+  delta,
+  deltaTone,
+  onPress,
+}: StatTileProps) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <Pressable
+      accessibilityLabel={`${label}, ${value}${unit ?? ''}. ${delta}`}
+      accessibilityRole="button"
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      onPress={onPress}
+      style={{
+        alignSelf: 'stretch',
+        backgroundColor: DASHBOARD_TILE_BG,
+        borderWidth: 1,
+        cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
+        flex: 1,
+        minWidth: 0,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        width: '100%',
+        ...dashboardCardFrameStyle(12),
+        ...dashboardHoverStyle(hovered),
+      }}
+    >
+      <Text
+        style={{
+          color: MUTED,
+          fontFamily: fonts.jetbrainsMono,
+          fontSize: 9,
+          letterSpacing: 2,
+          marginBottom: 7,
+          textTransform: 'uppercase',
+        }}
+      >
+        {label}
+      </Text>
+
+      <View className="flex-row items-baseline">
+        <Text
+          style={{
+            color: accentColor,
+            fontFamily: fonts.brand,
+            fontSize: 26,
+            fontWeight: '700',
+            letterSpacing: -0.5,
+            lineHeight: 26,
+          }}
+        >
+          {value}
+        </Text>
+        {unit ? (
+          <Text
+            style={{
+              color: MUTED,
+              fontFamily: fonts.brand,
+              fontSize: 13,
+              fontWeight: '400',
+            }}
+          >
+            {unit}
+          </Text>
+        ) : null}
+      </View>
+
+      <Text
+        style={{
+          color: deltaColor(deltaTone),
+          fontFamily: fonts.jetbrainsMono,
+          fontSize: 10,
+          marginTop: 5,
+        }}
+      >
+        {delta}
+      </Text>
+    </Pressable>
+  );
+}

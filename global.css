@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(1.05);
+  }
+}
+
+.flame-flicker {
+  animation: flame-flicker 1.8s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center bottom;
+}
+
+* {
+  scrollbar-color: rgba(200, 255, 90, 0.2) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  height: 3px;
+  width: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(200, 255, 90, 0.2);
+  border-radius: 2px;
+}
+
+.week-split-card {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.week-split-card-inner {
+  overflow: hidden;
+}
+
+@keyframes today-dot-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.15;
+  }
+}
+
+.today-dot-flicker {
+  animation: today-dot-flicker 1.2s ease-in-out infinite;
+}
+
+.split-selector-card {
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@keyframes pulse-today {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 255, 90, 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(200, 255, 90, 0);
+  }
+}
+
+.pulse-today-dot {
+  animation: pulse-today 2s ease-in-out infinite;
+}
+
+@keyframes rest-timer-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rest-timer-toast {
+  animation: rest-timer-slide-in 0.3s ease;
+}
