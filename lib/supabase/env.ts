@@ -10,9 +10,20 @@ const envSchema = z.object({
 export type SupabaseEnv = z.infer<typeof envSchema>;
 
 function parseEnv(): SupabaseEnv {
+  const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim() ?? '';
+  const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? '';
+
+  // Allow CI/static export to finish when env vars are injected at runtime only.
+  if (!url || !key) {
+    return {
+      EXPO_PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co',
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: 'placeholder-key',
+    };
+  }
+
   const result = envSchema.safeParse({
-    EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
-    EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    EXPO_PUBLIC_SUPABASE_URL: url,
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: key,
   });
 
   if (!result.success) {
