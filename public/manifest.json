@@ -1,10 +1,14 @@
 {
+  "id": "/",
   "name": "APEX — Strength Training",
   "short_name": "APEX",
   "description": "Gamified strength training journal to track workouts, PRs, and progress.",
-  "start_url": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "browser"],
   "orientation": "portrait",
   "theme_color": "#0a0a0f",
   "background_color": "#0a0a0f",
@@ -32,6 +36,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Workouts",
+      "short_name": "Workouts",
+      "url": "/workouts",
+      "icons": [{ "src": "/pwa-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "url": "/",
+      "icons": [{ "src": "/pwa-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
