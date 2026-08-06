@@ -7,7 +7,7 @@ import { BackButton } from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
-import { useActiveWorkout, useDeleteRoutine, useProfile, useRoutine } from '@/hooks/queries';
+import { useDeleteRoutine, useProfile, useRoutine } from '@/hooks/queries';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
 import { kgToDisplay, volumeLabel } from '@/lib/units';
 import { colors } from '@/constants/theme';
@@ -17,7 +17,6 @@ import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 export default function RoutineDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: routine, isLoading, isError, error } = useRoutine(id);
-  const { data: activeWorkout } = useActiveWorkout();
   const { data: profile } = useProfile();
   const deleteRoutine = useDeleteRoutine();
   const { startFromRoutine, isStarting } = useStartWorkoutSession();
@@ -93,14 +92,8 @@ export default function RoutineDetailScreen() {
           ))}
         </Card>
 
-        {activeWorkout ? (
-          <AppText className="text-accent3" variant="muted">
-            Finish your current workout before starting a new one.
-          </AppText>
-        ) : null}
-
         <Button
-          disabled={Boolean(activeWorkout) || isStarting}
+          disabled={isStarting}
           label="Start Workout"
           loading={isStarting}
           onPress={() => void handleStart()}

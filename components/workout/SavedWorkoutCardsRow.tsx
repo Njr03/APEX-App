@@ -42,7 +42,6 @@ const MUTED = 'rgba(240,237,232,0.5)';
 const CARD_GAP = 10;
 
 interface SavedWorkoutCardsRowProps {
-  hasUnfinishedSession: boolean;
   heading?: string;
   unit?: 'kg' | 'lb';
 }
@@ -50,8 +49,8 @@ interface SavedWorkoutCardsRowProps {
 function SavedWorkoutCard({
   workout,
   workouts,
-  hasUnfinishedSession,
   isDeleting,
+  isStarting,
   unit,
   onDelete,
   onEdit,
@@ -60,15 +59,15 @@ function SavedWorkoutCard({
 }: {
   workout: RoutineSummary;
   workouts: ReturnType<typeof useWorkoutHistory>['data'];
-  hasUnfinishedSession: boolean;
   isDeleting: boolean;
+  isStarting: boolean;
   unit: 'kg' | 'lb';
   onDelete: () => void;
   onEdit: () => void;
   onStart: () => void;
   cardWidth: number;
 }) {
-  const disabled = hasUnfinishedSession;
+  const disabled = isStarting;
 
   return (
     <View
@@ -182,7 +181,6 @@ function AddWorkoutCard() {
 }
 
 export function SavedWorkoutCardsRow({
-  hasUnfinishedSession,
   heading = 'Saved Workouts',
   unit = 'lb',
 }: SavedWorkoutCardsRowProps) {
@@ -298,8 +296,8 @@ export function SavedWorkoutCardsRow({
               >
                 <SavedWorkoutCard
                   cardWidth={cardWidth}
-                  hasUnfinishedSession={hasUnfinishedSession || isStarting}
                   isDeleting={deletingRoutineId === workout.id}
+                  isStarting={isStarting}
                   onDelete={() => void handleDelete(workout.id)}
                   onEdit={() => router.push(`/routines/${workout.id}/edit`)}
                   onStart={() => void handleStart(workout.id)}

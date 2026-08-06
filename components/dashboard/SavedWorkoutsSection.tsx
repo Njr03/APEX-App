@@ -8,16 +8,12 @@ import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
-import {
-  useActiveWorkout,
-  useRoutineSummaries,
-} from '@/hooks/queries';
+import { useRoutineSummaries } from '@/hooks/queries';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
 import { colors } from '@/constants/theme';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 export function SavedWorkoutsSection() {
-  const { data: activeWorkout } = useActiveWorkout();
   const {
     data: workouts,
     isLoading,
@@ -118,7 +114,7 @@ export function SavedWorkoutsSection() {
 
               <Button
                 className="mt-3"
-                disabled={Boolean(activeWorkout) || isStarting}
+                disabled={isStarting}
                 label="Start Workout"
                 loading={isStarting}
                 onPress={() => void handleStart(workout.id)}

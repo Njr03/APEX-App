@@ -7,7 +7,11 @@ import {
   invalidateWorkoutQueriesExceptActive,
 } from '@/hooks/queries/workoutCache';
 import { calculateStreakUpdate, calculateLongestStreak } from '@/lib/streak';
-import { throwIfSupabaseError, unwrapSupabaseNullable } from '@/lib/supabase/errors';
+import {
+  assertSupabaseOk,
+  throwIfSupabaseError,
+  unwrapSupabaseNullable,
+} from '@/lib/supabase/errors';
 import { supabase, type WorkoutWithDetails } from '@/lib/supabase';
 import { calculateWorkoutXP } from '@/lib/xp';
 import { didHitRoutineTargets } from '@/lib/workout/routineTarget';
@@ -117,6 +121,14 @@ export function useFinishWorkout() {
 
       throwIfSupabaseError(workoutUpdate);
 
+      const cleanupResult = await supabase
+        .from('workouts')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('status', 'in_progress');
+
+      assertSupabaseOk(cleanupResult);
+
       const profileUpdate = await supabase
         .from('profiles')
         .update({
@@ -146,6 +158,9 @@ export function useFinishWorkout() {
     onSuccess: () => {
       if (user) {
         clearActiveWorkoutCache(queryClient, user.id);
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.workouts.active(user.id),
+        });
       }
       void invalidateWorkoutQueriesExceptActive(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
