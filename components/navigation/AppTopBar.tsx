@@ -45,6 +45,13 @@ export const TOPBAR_WELCOME_TEXT_STYLE = {
   letterSpacing: 0.3,
 } as const;
 
+export const TOPBAR_SUBTITLE_TEXT_STYLE = {
+  color: colors.text,
+  fontFamily: fonts.jetbrainsMono,
+  fontSize: 11,
+  letterSpacing: 0.3,
+} as const;
+
 function getTopBarCta(
   page: AppPage,
   hasActiveWorkout: boolean,
@@ -117,8 +124,7 @@ export function AppTopBar() {
   const todayLabel = format(new Date(), 'EEE · MMM d').toUpperCase();
   const level = profile ? calculateLevel(profile.total_xp ?? 0) : null;
   const levelLabel = user && level != null ? `Level ${level}` : null;
-  const showHeaderMeta = welcomeName != null || levelLabel != null;
-  const barHeight = showHeaderMeta ? TOPBAR_HEIGHT_WITH_WELCOME : TOPBAR_HEIGHT;
+  const barHeight = TOPBAR_HEIGHT_WITH_WELCOME;
 
   return (
     <View
@@ -153,19 +159,11 @@ export function AppTopBar() {
               APX
             </Text>
             {welcomeName ? (
-              <Text
-                numberOfLines={1}
-                style={{
-                  color: colors.text,
-                  fontFamily: fonts.jetbrainsMono,
-                  fontSize: 11,
-                  letterSpacing: 0.3,
-                }}
-              >
+              <Text numberOfLines={1} style={TOPBAR_SUBTITLE_TEXT_STYLE}>
                 Welcome {welcomeName}
               </Text>
             ) : (
-              <Text numberOfLines={1} style={TOPBAR_TITLE_TEXT_STYLE}>
+              <Text numberOfLines={1} style={TOPBAR_SUBTITLE_TEXT_STYLE}>
                 {PAGE_TITLES[activePage]}
               </Text>
             )}
