@@ -162,44 +162,48 @@ function SetRow({
         />
       </View>
 
-      <Pressable
-        accessibilityLabel={isCompleted ? 'Mark set incomplete' : 'Complete set'}
-        accessibilityRole="button"
-        disabled={isBusy}
-        onPress={() => void handleToggleComplete()}
-        style={{
-          alignItems: 'center',
-          backgroundColor: isCompleted ? 'rgba(200,255,90,0.12)' : 'transparent',
-          borderColor: isCompleted ? LIME : 'rgba(255,255,255,0.11)',
-          borderRadius: 7,
-          borderWidth: isCompleted ? 1 : 1.5,
-          height: 28,
-          justifyContent: 'center',
-          width: 28,
-        }}
-      >
-        {isCompleted ? <Check color={LIME} size={16} strokeWidth={3} /> : null}
-      </Pressable>
-
-      {canRemove ? (
+      <View style={{ alignItems: 'center', flexDirection: 'row', gap: 4, width: 62 }}>
         <Pressable
-          accessibilityLabel="Remove set"
+          accessibilityLabel={isCompleted ? 'Mark set incomplete' : 'Complete set'}
           accessibilityRole="button"
           disabled={isBusy}
-          onPress={onRemove}
-          style={({ hovered, pressed }) => ({
+          onPress={() => void handleToggleComplete()}
+          style={{
             alignItems: 'center',
+            backgroundColor: isCompleted ? 'rgba(200,255,90,0.12)' : 'transparent',
+            borderColor: isCompleted ? LIME : 'rgba(255,255,255,0.11)',
+            borderRadius: 7,
+            borderWidth: isCompleted ? 1 : 1.5,
             height: 28,
             justifyContent: 'center',
-            opacity: hovered || pressed ? 0.7 : 1,
             width: 28,
-          })}
+          }}
         >
-          <Trash2 color="rgba(255,95,95,0.85)" size={15} />
+          {isCompleted ? <Check color={LIME} size={16} strokeWidth={3} /> : null}
         </Pressable>
-      ) : (
-        <View style={{ width: 28 }} />
-      )}
+
+        {canRemove ? (
+          <Pressable
+            accessibilityLabel="Remove set"
+            accessibilityRole="button"
+            disabled={isBusy}
+            onPress={onRemove}
+            style={({ hovered, pressed }) => ({
+              alignItems: 'center',
+              backgroundColor: 'rgba(255,95,95,0.08)',
+              borderColor: 'rgba(255,95,95,0.28)',
+              borderRadius: 7,
+              borderWidth: 1,
+              height: 28,
+              justifyContent: 'center',
+              opacity: hovered || pressed ? 0.75 : 1,
+              width: 28,
+            })}
+          >
+            <Trash2 color="rgba(255,95,95,0.9)" size={14} />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -254,13 +258,19 @@ export function ExerciseCard({
   const repsPlaceholder = exerciseTargets?.targetReps
     ? String(exerciseTargets.targetReps)
     : undefined;
+  const [removingSetId, setRemovingSetId] = useState<string | null>(null);
   const canRemoveSet = sets.length > 1;
 
   const handleRemoveSet = async (set: Set) => {
-    await deleteSet.mutateAsync({
-      id: set.id,
-      workoutExerciseId: workoutExercise.id,
-    });
+    setRemovingSetId(set.id);
+    try {
+      await deleteSet.mutateAsync({
+        id: set.id,
+        workoutExerciseId: workoutExercise.id,
+      });
+    } finally {
+      setRemovingSetId(null);
+    }
   };
 
   const handleAddSet = async () => {
@@ -437,32 +447,20 @@ export function ExerciseCard({
             >
               Reps
             </Text>
-            <Text
-              style={{
-                color: TABLE_HEADER,
-                fontFamily: fonts.jetbrainsMono,
-                fontSize: 9,
-                letterSpacing: 1.5,
-                textAlign: 'center',
-                textTransform: 'uppercase',
-                width: 28,
-              }}
-            >
-              ✓
-            </Text>
-            <Text
-              style={{
-                color: TABLE_HEADER,
-                fontFamily: fonts.jetbrainsMono,
-                fontSize: 9,
-                letterSpacing: 1.5,
-                textAlign: 'center',
-                textTransform: 'uppercase',
-                width: 28,
-              }}
-            >
-              {canRemoveSet ? 'Rm' : ''}
-            </Text>
+            <View style={{ alignItems: 'center', width: 62 }}>
+              <Text
+                style={{
+                  color: TABLE_HEADER,
+                  fontFamily: fonts.jetbrainsMono,
+                  fontSize: 9,
+                  letterSpacing: 1.5,
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Done
+              </Text>
+            </View>
           </View>
 
           <View style={{ gap: 8 }}>
@@ -480,7 +478,7 @@ export function ExerciseCard({
                   key={set.id}
                   canRemove={canRemoveSet}
                   exercise={workoutExercise.exercise}
-                  isRemoving={deleteSet.isPending}
+                  isRemoving={removingSetId === set.id}
                   onRemove={() => void handleRemoveSet(set)}
                   repsPlaceholder={repsPlaceholder}
                   set={set}
