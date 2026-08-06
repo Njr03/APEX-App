@@ -52,7 +52,6 @@ export function StatTile({
         backgroundColor: DASHBOARD_TILE_BG,
         borderWidth: 1,
         cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
-        flex: 1,
         minWidth: 0,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -74,7 +73,7 @@ export function StatTile({
         {label}
       </Text>
 
-      <View className="flex-row items-baseline">
+      <View style={{ alignItems: 'baseline', flexDirection: 'row' }}>
         <Text
           style={{
             color: accentColor,
