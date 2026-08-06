@@ -4,6 +4,7 @@ import { queryKeys } from '@/hooks/queries/queryKeys';
 import {
   appendSetToActiveWorkoutCache,
   invalidateWorkoutQueriesExceptActive,
+  removeSetFromActiveWorkoutCache,
   updateSetInActiveWorkoutCache,
 } from '@/hooks/queries/workoutCache';
 import { useAuth } from '@/providers/AuthProvider';
@@ -123,6 +124,7 @@ export function useUpdateSet() {
 }
 
 export function useDeleteSet() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -137,11 +139,18 @@ export function useDeleteSet() {
       assertSupabaseOk(result);
       return { id, workoutExerciseId };
     },
-    onSuccess: ({ workoutExerciseId }) => {
+    onSuccess: ({ id, workoutExerciseId }) => {
+      if (user) {
+        removeSetFromActiveWorkoutCache(queryClient, user.id, {
+          id,
+          workout_exercise_id: workoutExerciseId,
+        });
+      }
       queryClient.invalidateQueries({
         queryKey: queryKeys.sets.byWorkoutExercise(workoutExerciseId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.workouts.all });
+      void invalidateWorkoutQueriesExceptActive(queryClient);
+      queryClient.invalidateQueries({ queryKey: queryKeys.personalRecords.all });
     },
   });
 }

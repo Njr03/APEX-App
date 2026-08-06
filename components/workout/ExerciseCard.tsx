@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import { Check, ChevronDown } from 'lucide-react-native';
+import { Check, ChevronDown, Trash2 } from 'lucide-react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { useExerciseHistory } from '@/hooks/queries/useExerciseHistory';
 import { useCompleteSet, useUncompleteSet } from '@/hooks/useCompleteSet';
-import { useCreateSet, useUpdateSet } from '@/hooks/queries';
+import { useCreateSet, useDeleteSet, useUpdateSet } from '@/hooks/queries';
 import { colors, fonts } from '@/constants/theme';
 import { displayToKg, kgToDisplay } from '@/lib/units';
 import type { Exercise, Set, WorkoutExercise } from '@/lib/supabase';
@@ -27,6 +27,9 @@ interface SetRowProps {
   unit: 'kg' | 'lb';
   weightPlaceholder?: string;
   repsPlaceholder?: string;
+  canRemove: boolean;
+  isRemoving: boolean;
+  onRemove: () => void;
 }
 
 function SetRow({
@@ -35,6 +38,9 @@ function SetRow({
   unit,
   weightPlaceholder,
   repsPlaceholder,
+  canRemove,
+  isRemoving,
+  onRemove,
 }: SetRowProps) {
   const isCompleted = Boolean(set.completed_at);
   const completeSet = useCompleteSet();
@@ -92,7 +98,10 @@ function SetRow({
   };
 
   const isBusy =
-    completeSet.isPending || uncompleteSet.isPending || updateSet.isPending;
+    completeSet.isPending ||
+    uncompleteSet.isPending ||
+    updateSet.isPending ||
+    isRemoving;
 
   const inputStyle = {
     backgroundColor: INPUT_BG,
@@ -171,6 +180,26 @@ function SetRow({
       >
         {isCompleted ? <Check color={LIME} size={16} strokeWidth={3} /> : null}
       </Pressable>
+
+      {canRemove ? (
+        <Pressable
+          accessibilityLabel="Remove set"
+          accessibilityRole="button"
+          disabled={isBusy}
+          onPress={onRemove}
+          style={({ hovered, pressed }) => ({
+            alignItems: 'center',
+            height: 28,
+            justifyContent: 'center',
+            opacity: hovered || pressed ? 0.7 : 1,
+            width: 28,
+          })}
+        >
+          <Trash2 color="rgba(255,95,95,0.85)" size={15} />
+        </Pressable>
+      ) : (
+        <View style={{ width: 28 }} />
+      )}
     </View>
   );
 }
@@ -187,6 +216,7 @@ export function ExerciseCard({
   splitColor,
 }: ExerciseCardProps) {
   const createSet = useCreateSet();
+  const deleteSet = useDeleteSet();
   const expandedExerciseIds = useWorkoutSessionStore(
     (s) => s.expandedExerciseIds,
   );
@@ -224,6 +254,14 @@ export function ExerciseCard({
   const repsPlaceholder = exerciseTargets?.targetReps
     ? String(exerciseTargets.targetReps)
     : undefined;
+  const canRemoveSet = sets.length > 1;
+
+  const handleRemoveSet = async (set: Set) => {
+    await deleteSet.mutateAsync({
+      id: set.id,
+      workoutExerciseId: workoutExercise.id,
+    });
+  };
 
   const handleAddSet = async () => {
     const sortedSets = [...sets].sort((a, b) => a.set_number - b.set_number);
@@ -412,6 +450,19 @@ export function ExerciseCard({
             >
               ✓
             </Text>
+            <Text
+              style={{
+                color: TABLE_HEADER,
+                fontFamily: fonts.jetbrainsMono,
+                fontSize: 9,
+                letterSpacing: 1.5,
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                width: 28,
+              }}
+            >
+              {canRemoveSet ? 'Rm' : ''}
+            </Text>
           </View>
 
           <View style={{ gap: 8 }}>
@@ -427,7 +478,10 @@ export function ExerciseCard({
               return (
                 <SetRow
                   key={set.id}
+                  canRemove={canRemoveSet}
                   exercise={workoutExercise.exercise}
+                  isRemoving={deleteSet.isPending}
+                  onRemove={() => void handleRemoveSet(set)}
                   repsPlaceholder={repsPlaceholder}
                   set={set}
                   unit={unit}

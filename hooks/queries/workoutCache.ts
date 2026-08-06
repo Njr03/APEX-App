@@ -75,6 +75,31 @@ export function updateSetInActiveWorkoutCache(
   );
 }
 
+export function removeSetFromActiveWorkoutCache(
+  queryClient: QueryClient,
+  userId: string,
+  deletedSet: Pick<Set, 'id' | 'workout_exercise_id'>,
+) {
+  queryClient.setQueryData<WorkoutWithDetails | null>(
+    queryKeys.workouts.active(userId),
+    (current) => {
+      if (!current) return current;
+
+      return {
+        ...current,
+        workout_exercises: current.workout_exercises.map((we) =>
+          we.id === deletedSet.workout_exercise_id
+            ? {
+                ...we,
+                sets: we.sets.filter((set) => set.id !== deletedSet.id),
+              }
+            : we,
+        ),
+      };
+    },
+  );
+}
+
 /** Refreshes workout lists/history but leaves the active-workout slot as-is. */
 export function invalidateWorkoutQueriesExceptActive(
   queryClient: QueryClient,
