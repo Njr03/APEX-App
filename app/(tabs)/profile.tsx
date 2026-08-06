@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
 import { PwaInstallCard } from '@/components/pwa/PwaInstallCard';
 import { AppText } from '@/components/ui/AppText';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
@@ -48,9 +49,7 @@ export default function ProfileScreen() {
         contentContainerClassName="gap-4 p-5 pb-10"
       >
         <View className="flex-row items-center justify-between">
-          <AppText className="text-3xl" variant="display">
-            Profile
-          </AppText>
+          <TabPageHeading title="Profile" />
           <Pressable
             accessibilityLabel="Open settings"
             accessibilityRole="button"

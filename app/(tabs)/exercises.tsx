@@ -10,6 +10,7 @@ import { Pencil, Search, Trash2 } from 'lucide-react-native';
 
 import { FilterChips } from '@/components/exercises/FilterChips';
 import { AppText } from '@/components/ui/AppText';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Screen } from '@/components/ui/Screen';
@@ -125,9 +126,7 @@ export default function ExercisesTabScreen() {
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <View className="flex-1 px-5 pt-5">
-        <AppText className="text-3xl" variant="display">
-          Exercise Library
-        </AppText>
+        <TabPageHeading title="Exercise Library" />
         <AppText className="mt-2 mb-4" variant="muted">
           {isLoading
             ? 'Loading exercises…'

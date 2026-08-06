@@ -16,6 +16,7 @@ import { KeyLiftsProgression } from '@/components/progress/KeyLiftsProgression';
 import { SplitVolumeTrendChart } from '@/components/progress/SplitVolumeTrendChart';
 import { StreakHistoryChart } from '@/components/progress/StreakHistoryChart';
 import { AppText } from '@/components/ui/AppText';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { QueryError } from '@/components/ui/QueryState';
@@ -72,9 +73,7 @@ export default function ProgressScreen() {
   if (isError || !progressData) {
     return (
       <Screen className="px-5 pt-5">
-        <AppText className="text-3xl" variant="display">
-          Progress
-        </AppText>
+        <TabPageHeading title="Progress" />
         <QueryError
           message={getSupabaseErrorMessage(error)}
           onRetry={() => void refetch()}
@@ -90,9 +89,7 @@ export default function ProgressScreen() {
         contentContainerClassName="gap-4 p-5 pb-10"
         showsVerticalScrollIndicator={false}
       >
-        <AppText className="text-3xl" variant="display">
-          Progress
-        </AppText>
+        <TabPageHeading title="Progress" />
 
         <SplitVolumeTrendChart data={progressData.splitVolumeTrend} />
 
