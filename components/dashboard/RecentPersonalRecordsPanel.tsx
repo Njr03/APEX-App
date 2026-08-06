@@ -10,6 +10,7 @@ import {
   dashboardCardFrameStyle,
   dashboardHoverStyle,
   dashboardTileHoverHandlers,
+  dashboardTileWebClassName,
 } from '@/lib/dashboard/cardStyles';
 import { useDashboardRecentPRs } from '@/hooks/useDashboardRecentPRs';
 import type { DashboardRecentPR } from '@/lib/dashboard/recentPRs';
@@ -32,7 +33,7 @@ function PRCard({
   return (
     <Pressable
       accessibilityRole="button"
-      className={Platform.OS === 'web' ? 'dashboard-tile' : undefined}
+      className={dashboardTileWebClassName()}
       {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignItems: 'center',
@@ -121,7 +122,7 @@ function PREmptyCard({ onPress }: { onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      className={Platform.OS === 'web' ? 'dashboard-tile' : undefined}
+      className={dashboardTileWebClassName()}
       {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignSelf: 'stretch',

@@ -44,9 +44,24 @@
     box-shadow 0.2s ease;
 }
 
+.dashboard-tile {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+@media (hover: hover) {
+  .dashboard-tile:hover {
+    border-color: rgba(200, 255, 90, 0.4);
+    box-shadow: 0 0 32px rgba(200, 255, 90, 0.12);
+  }
+}
+
+body.dashboard-tiles-hover-suppressed .dashboard-tile:hover,
 .dashboard-tile:focus,
-.dashboard-tile:focus-visible {
-  outline: none;
+.dashboard-tile:focus-visible,
+.dashboard-tile:active {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .week-split-card-inner {

@@ -4,6 +4,7 @@ import { X } from 'lucide-react-native';
 import { useRoutine } from '@/hooks/queries';
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
 import { colors, fonts } from '@/constants/theme';
+import { wrapDashboardModalClose } from '@/lib/dashboard/cardStyles';
 import { kgToDisplay } from '@/lib/units';
 
 const CARD_BG = '#0d0d1b';
@@ -23,16 +24,17 @@ export function RoutineCardBreakdownModal({
   visible,
   onClose,
 }: RoutineCardBreakdownModalProps) {
+  const handleClose = wrapDashboardModalClose(onClose);
   const { data: routineDetail } = useRoutine(routine?.id);
 
   if (!routine) return null;
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal animationType="fade" transparent visible={visible} onRequestClose={handleClose}>
       <Pressable
         className="flex-1 items-center justify-center px-5"
         style={{ backgroundColor: 'rgba(0,0,0,0.72)' }}
-        onPress={onClose}
+        onPress={handleClose}
       >
         <Pressable
           onPress={(event) => event.stopPropagation()}
@@ -79,7 +81,7 @@ export function RoutineCardBreakdownModal({
                 </Text>
               ) : null}
             </View>
-            <Pressable accessibilityLabel="Close" onPress={onClose}>
+            <Pressable accessibilityLabel="Close" onPress={handleClose}>
               <X color={MUTED} size={18} />
             </Pressable>
           </View>

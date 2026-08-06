@@ -7,6 +7,8 @@ import { Check } from 'lucide-react-native';
 import {
   DASHBOARD_WORKOUT_CARD_RADIUS,
   dashboardHoverStyle,
+  dashboardTileHoverHandlers,
+  dashboardTileWebClassName,
 } from '@/lib/dashboard/cardStyles';
 import type { DashboardWorkoutCardModel } from '@/lib/dashboard/routineCardDisplay';
 import {
@@ -408,10 +410,8 @@ export function DashboardWorkoutCard({
   return (
     <Pressable
       accessibilityRole="button"
-      className={Platform.OS === 'web' ? 'week-split-card' : undefined}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={onPress}
+      className={dashboardTileWebClassName('week-split-card')}
+      {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignSelf: 'stretch',
         borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS,

@@ -6,7 +6,7 @@ import { MuscleBalanceRadar } from '@/components/dashboard/MuscleBalanceRadar';
 import { WeeklyConsistencyDetailModal } from '@/components/dashboard/WeeklyConsistencyDetailModal';
 import { WeeklyConsistencyTracker } from '@/components/dashboard/WeeklyConsistencyTracker';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
-import { dashboardCardFrameStyle, dashboardHoverStyle, dashboardTileHoverHandlers } from '@/lib/dashboard/cardStyles';
+import { dashboardCardFrameStyle, dashboardHoverStyle, dashboardTileHoverHandlers, dashboardTileWebClassName } from '@/lib/dashboard/cardStyles';
 import { useMuscleBalance } from '@/hooks/useMuscleBalance';
 import { useWeeklyConsistency } from '@/hooks/useWeeklyConsistency';
 import type { WeeklyConsistencyEntry } from '@/lib/training/weeklyConsistency';
@@ -27,7 +27,7 @@ function InsightCard({
   return (
     <Pressable
       accessibilityRole="button"
-      className={Platform.OS === 'web' ? 'week-split-card dashboard-tile' : undefined}
+      className={dashboardTileWebClassName('week-split-card')}
       {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignSelf: 'stretch',

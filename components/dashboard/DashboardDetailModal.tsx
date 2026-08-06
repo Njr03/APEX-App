@@ -3,6 +3,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { X } from 'lucide-react-native';
 
 import { colors, fonts } from '@/constants/theme';
+import { wrapDashboardModalClose } from '@/lib/dashboard/cardStyles';
 
 const CARD_BG = '#0d0d1b';
 const CARD_BORDER = 'rgba(255,255,255,0.06)';
@@ -27,12 +28,14 @@ export function DashboardDetailModal({
   subtitle,
   children,
 }: DashboardDetailModalProps) {
+  const handleClose = wrapDashboardModalClose(onClose);
+
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal animationType="fade" transparent visible={visible} onRequestClose={handleClose}>
       <Pressable
         className="flex-1 items-center justify-center px-5"
         style={{ backgroundColor: 'rgba(0,0,0,0.72)' }}
-        onPress={onClose}
+        onPress={handleClose}
       >
         <Pressable
           onPress={(event) => event.stopPropagation()}
@@ -78,7 +81,7 @@ export function DashboardDetailModal({
                 </Text>
               ) : null}
             </View>
-            <Pressable accessibilityLabel="Close" onPress={onClose}>
+            <Pressable accessibilityLabel="Close" onPress={handleClose}>
               <X color={MUTED} size={18} />
             </Pressable>
           </View>

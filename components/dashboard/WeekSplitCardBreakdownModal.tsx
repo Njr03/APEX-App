@@ -6,6 +6,7 @@ import { X } from 'lucide-react-native';
 import { useWorkout } from '@/hooks/queries';
 import type { WeekSplitCardData } from '@/hooks/useThisWeekSplits';
 import { colors, fonts } from '@/constants/theme';
+import { wrapDashboardModalClose } from '@/lib/dashboard/cardStyles';
 import { getSplitTemplate } from '@/lib/training/splitTemplates';
 import {
   formatSplitDay,
@@ -59,6 +60,7 @@ export function WeekSplitCardBreakdownModal({
   visible,
   onClose,
 }: WeekSplitCardBreakdownModalProps) {
+  const handleClose = wrapDashboardModalClose(onClose);
   const workoutId = card?.completedWorkoutId ?? null;
   const { data: workout, isLoading } = useWorkout(workoutId ?? undefined);
 
@@ -69,11 +71,11 @@ export function WeekSplitCardBreakdownModal({
   const template = getSplitTemplate(definition.id);
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal animationType="fade" transparent visible={visible} onRequestClose={handleClose}>
       <Pressable
         className="flex-1 items-center justify-center px-5"
         style={{ backgroundColor: 'rgba(0,0,0,0.72)' }}
-        onPress={onClose}
+        onPress={handleClose}
       >
         <Pressable
           onPress={(event) => event.stopPropagation()}
@@ -115,7 +117,7 @@ export function WeekSplitCardBreakdownModal({
                 {card.targetMuscles || definition.muscles}
               </Text>
             </View>
-            <Pressable accessibilityLabel="Close" onPress={onClose}>
+            <Pressable accessibilityLabel="Close" onPress={handleClose}>
               <X color={MUTED} size={18} />
             </Pressable>
           </View>
