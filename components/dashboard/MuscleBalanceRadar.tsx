@@ -19,6 +19,7 @@ import {
   radarPolygonPoints,
   type MuscleBalancePoint,
 } from '@/lib/muscleBalance';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 const GRID_STROKE = 'rgba(255,255,255,0.06)';
@@ -124,9 +125,18 @@ function RadarChart({ points }: { points: MuscleBalancePoint[] }) {
   );
 }
 
-function ImbalancePanel({ points }: { points: MuscleBalancePoint[] }) {
+function ImbalancePanel({
+  points,
+  compact = false,
+}: {
+  points: MuscleBalancePoint[];
+  compact?: boolean;
+}) {
   return (
-    <View className="min-w-[148px] flex-1" style={{ gap: 10 }}>
+    <View
+      className={compact ? 'w-full' : 'min-w-[148px] flex-1'}
+      style={{ alignSelf: compact ? 'stretch' : undefined, gap: 10 }}
+    >
       {points.map((point) => {
         const textColor = getMuscleTextColor(point.value, colors.muted);
         const barFill = getMuscleBarFillColor(point.value, 'rgba(240,237,232,0.25)');
@@ -177,7 +187,9 @@ function ImbalancePanel({ points }: { points: MuscleBalancePoint[] }) {
   );
 }
 
-export function MuscleBalanceRadar() {
+export function MuscleBalanceRadar({ compact = false }: { compact?: boolean }) {
+  const { isCompact: layoutCompact } = useLayoutBreakpoint();
+  const stacked = compact || layoutCompact;
   const { data, isLoading, isError, error, refetch } = useMuscleBalance();
 
   if (isLoading) {
@@ -197,9 +209,12 @@ export function MuscleBalanceRadar() {
     <View style={{ gap: 14 }}>
       <InsightSectionHeading title="Muscle Balance" />
 
-      <View className="flex-row items-start" style={{ gap: 16 }}>
+      <View
+        className={stacked ? 'flex-col items-center' : 'flex-row items-start'}
+        style={{ gap: stacked ? 14 : 16 }}
+      >
         <RadarChart points={data.points} />
-        <ImbalancePanel points={data.points} />
+        <ImbalancePanel compact={stacked} points={data.points} />
       </View>
 
       <Text

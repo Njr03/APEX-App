@@ -6,6 +6,7 @@ import { StatTileDetailModal } from '@/components/dashboard/StatTileDetailModal'
 import { QueryError } from '@/components/ui/QueryState';
 import { useDashboardStatTiles, type StatTileData } from '@/hooks/useDashboardStatTiles';
 import { colors } from '@/constants/theme';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 interface StatTilesRowProps {
@@ -13,6 +14,7 @@ interface StatTilesRowProps {
 }
 
 export function StatTilesRow({ unit = 'kg' }: StatTilesRowProps) {
+  const { isCompact } = useLayoutBreakpoint();
   const { data, isLoading, isError, error, refetch } = useDashboardStatTiles(unit);
   const [selectedTile, setSelectedTile] = useState<StatTileData | null>(null);
 
@@ -35,7 +37,10 @@ export function StatTilesRow({ unit = 'kg' }: StatTilesRowProps) {
 
   return (
     <>
-      <View className="w-full flex-row" style={{ gap: 12 }}>
+      <View
+        className={isCompact ? 'w-full flex-col' : 'w-full flex-row'}
+        style={{ gap: 12 }}
+      >
         {data.tiles.map((tile) => (
           <View key={tile.label} style={{ flex: 1, minWidth: 0 }}>
             <StatTile {...tile} onPress={() => setSelectedTile(tile)} />

@@ -25,6 +25,7 @@ import {
 } from '@/lib/training/splits';
 import { buildCalendarDayMarkers } from '@/lib/training/scheduledSessions';
 import { workoutsOnDate } from '@/lib/progress/stats';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import type { Workout } from '@/lib/supabase';
 import {
@@ -317,6 +318,7 @@ function HistoryChartSvg({
 }
 
 export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
+  const { isCompact } = useLayoutBreakpoint();
   const { data: workouts, isLoading, isError, error, refetch } = useWorkoutHistory();
   const { data: weekSplits } = useThisWeekSplits();
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
@@ -361,7 +363,10 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
 
   return (
     <>
-      <View className="flex-row" style={{ alignItems: 'stretch', gap: 12 }}>
+      <View
+        className={isCompact ? 'flex-col' : 'flex-row'}
+        style={{ alignItems: 'stretch', gap: 12 }}
+      >
         <View style={{ ...PANEL_STYLE, flex: 1, minHeight: 320, minWidth: 0 }}>
           <View style={{ gap: 4 }}>
             <InsightSectionHeading title="Session Timeline" />

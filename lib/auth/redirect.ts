@@ -4,16 +4,18 @@ import { Platform } from 'react-native';
 /**
  * Builds the redirect URL Supabase uses after OAuth / email flows.
  * Native: apex://auth/callback
- * Web: http://localhost:8081/auth/callback (or EXPO_PUBLIC_SITE_URL)
+ * Web: always uses the current browser origin so OAuth works on any Vercel URL.
  */
 export function getAuthRedirectUrl(path = ''): string {
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
 
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    const base =
-      process.env.EXPO_PUBLIC_SITE_URL?.replace(/\/$/, '') ??
-      window.location.origin;
-    return `${base}/${normalizedPath}`;
+    return `${window.location.origin}/${normalizedPath}`;
+  }
+
+  const configuredSite = process.env.EXPO_PUBLIC_SITE_URL?.replace(/\/$/, '');
+  if (configuredSite) {
+    return `${configuredSite}/${normalizedPath}`;
   }
 
   return Linking.createURL(normalizedPath);

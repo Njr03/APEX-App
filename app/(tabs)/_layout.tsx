@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { AnimatedPageContent } from '@/components/navigation/AnimatedPageContent';
-import { AppSidebar } from '@/components/navigation/AppSidebar';
+import { AppBottomBar } from '@/components/navigation/AppBottomBar';
 import { AppTopBar } from '@/components/navigation/AppTopBar';
 import {
   segmentToAppPage,
@@ -26,49 +26,47 @@ export default function TabLayout() {
     <View className="flex-1 bg-bg">
       <NavigationSync />
       <AppTopBar />
-      <View className="flex-1 flex-row">
-        <AppSidebar />
-        <AnimatedPageContent className="flex-1">
-          <Tabs
-            screenOptions={{
-              headerShown: false,
-              tabBarStyle: { display: 'none' },
+      <AnimatedPageContent className="min-h-0 flex-1">
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: { display: 'none' },
+          }}
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Dashboard',
             }}
-          >
-            <Tabs.Screen
-              name="index"
-              options={{
-                title: 'Dashboard',
-              }}
-            />
-            <Tabs.Screen
-              name="workouts"
-              options={{
-                title: 'Workouts',
-              }}
-            />
-            <Tabs.Screen
-              name="exercises"
-              options={{
-                title: 'Exercises',
-              }}
-            />
-            <Tabs.Screen
-              name="progress"
-              options={{
-                title: 'Progress',
-              }}
-            />
-            <Tabs.Screen
-              name="profile"
-              options={{
-                title: 'Account',
-                href: null,
-              }}
-            />
-          </Tabs>
-        </AnimatedPageContent>
-      </View>
+          />
+          <Tabs.Screen
+            name="workouts"
+            options={{
+              title: 'Workouts',
+            }}
+          />
+          <Tabs.Screen
+            name="exercises"
+            options={{
+              title: 'Exercises',
+            }}
+          />
+          <Tabs.Screen
+            name="progress"
+            options={{
+              title: 'Progress',
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: 'Account',
+              href: null,
+            }}
+          />
+        </Tabs>
+      </AnimatedPageContent>
+      <AppBottomBar />
     </View>
   );
 }

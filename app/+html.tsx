@@ -1,6 +1,8 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 import type { ReactNode } from 'react';
 
+import { APPLE_SPLASH_SCREENS } from '@/lib/pwa/appleSplashScreens';
+
 const APP_BG = '#0a0a0f';
 const THEME_COLOR = '#0a0a0f';
 
@@ -21,6 +23,7 @@ export default function Root({ children }: { children: ReactNode }) {
         <meta name="theme-color" content={THEME_COLOR} />
         <meta name="application-name" content="APEX" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="APEX" />
         <meta
@@ -29,7 +32,11 @@ export default function Root({ children }: { children: ReactNode }) {
         />
 
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {APPLE_SPLASH_SCREENS.map(({ href, media }) => (
+          <link key={href} href={href} media={media} rel="apple-touch-startup-image" />
+        ))}
 
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerRegistration }} />
 

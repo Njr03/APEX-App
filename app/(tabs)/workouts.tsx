@@ -43,7 +43,7 @@ export default function WorkoutsScreen() {
   const unit = resolveUnitPreference(profile?.unit_preference);
 
   return (
-    <Screen>
+    <Screen edges={['left', 'right', 'bottom']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-5 p-5 pb-10"

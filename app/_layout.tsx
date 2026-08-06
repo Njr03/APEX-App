@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
@@ -36,11 +37,13 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
-    </QueryProvider>
+    <SafeAreaProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
+      </QueryProvider>
+    </SafeAreaProvider>
   );
 }
 

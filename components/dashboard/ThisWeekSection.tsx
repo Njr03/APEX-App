@@ -22,6 +22,7 @@ import { useThisWeekSplits, type WeekSplitCardData } from '@/hooks/useThisWeekSp
 import { colors } from '@/constants/theme';
 import { dashboardCardKey } from '@/lib/dashboard/dashboardCards';
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import { inferSplitFromWorkoutName } from '@/lib/training/splits';
 import { useDashboardCardsStore } from '@/stores/dashboardCardsStore';
@@ -60,6 +61,7 @@ export function ThisWeekHeading({ onEdit }: { onEdit?: () => void }) {
 }
 
 export function SplitCardsRow({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
+  const { isCompact } = useLayoutBreakpoint();
   const { data, isLoading, isError, error, refetch } = useThisWeekSplits();
   const { data: routines } = useRoutineSummaries();
   const { data: workouts } = useWorkoutHistory();
@@ -173,7 +175,7 @@ export function SplitCardsRow({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
 
       {cardItems.length === 0 ? (
         <DashboardEmptyCardSlot onPress={() => setAddVisible(true)} />
-      ) : cardItems.length > 3 ? (
+      ) : cardItems.length > (isCompact ? 1 : 3) ? (
         <DashboardCardsCarousel items={cardItems} />
       ) : (
         <DashboardCardsGrid items={cardItems} />

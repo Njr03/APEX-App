@@ -1,15 +1,9 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import {
-  Dumbbell,
-  LayoutGrid,
-  LineChart,
-  ListChecks,
-  type LucideIcon,
-} from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { NAV_ITEMS, PROFILE_NAV } from '@/components/navigation/navItems';
 import { SIDEBAR_WIDTH } from '@/components/navigation/shellConstants';
 import {
   useNavigationStore,
@@ -24,45 +18,9 @@ const NAV_HOVER_BG = '#141427';
 const NAV_ACTIVE_BG = 'rgba(200,255,90,0.10)';
 const NAV_ACTIVE_BORDER = 'rgba(200,255,90,0.18)';
 
-type TabRoute = Exclude<AppPage, 'profile'>;
-
-interface NavItem {
-  route: TabRoute;
-  href: Href;
-  label: string;
-  icon: LucideIcon;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    route: 'index',
-    href: '/',
-    label: 'Dashboard',
-    icon: LayoutGrid,
-  },
-  {
-    route: 'workouts',
-    href: '/workouts',
-    label: 'Workouts',
-    icon: ListChecks,
-  },
-  {
-    route: 'exercises',
-    href: '/exercises',
-    label: 'Exercises',
-    icon: Dumbbell,
-  },
-  {
-    route: 'progress',
-    href: '/progress',
-    label: 'Progress',
-    icon: LineChart,
-  },
-];
-
 interface SidebarNavButtonProps {
   label: string;
-  icon: LucideIcon;
+  icon: (typeof NAV_ITEMS)[number]['icon'];
   active: boolean;
   onPress: () => void;
 }
@@ -200,8 +158,8 @@ export function AppSidebar() {
       </View>
 
       <SidebarProfileButton
-        active={activePage === 'profile'}
-        onPress={() => navigateTo('profile', '/profile')}
+        active={activePage === PROFILE_NAV.route}
+        onPress={() => navigateTo(PROFILE_NAV.route, PROFILE_NAV.href)}
       />
     </View>
   );

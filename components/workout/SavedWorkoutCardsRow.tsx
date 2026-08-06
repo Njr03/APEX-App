@@ -29,6 +29,7 @@ import {
   dashboardHoverStyle,
 } from '@/lib/dashboard/cardStyles';
 import { dedupeSavedWorkoutsForSession } from '@/lib/routines/sessionWorkouts';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 const CARD_BG = '#0d0d1b';
@@ -50,6 +51,8 @@ function SavedWorkoutCard({
   onDelete,
   onEdit,
   onStart,
+  compact,
+  cardWidth,
 }: {
   workout: RoutineSummary;
   workouts: ReturnType<typeof useWorkoutHistory>['data'];
@@ -59,6 +62,8 @@ function SavedWorkoutCard({
   onDelete: () => void;
   onEdit: () => void;
   onStart: () => void;
+  compact: boolean;
+  cardWidth: number;
 }) {
   const disabled = hasUnfinishedSession;
 
@@ -66,10 +71,10 @@ function SavedWorkoutCard({
     <View
       style={{
         alignSelf: 'stretch',
-        flex: 1,
-        minWidth: 220,
+        flex: compact ? undefined : 1,
+        minWidth: compact ? 0 : 220,
         opacity: disabled ? 0.5 : 1,
-        width: 240,
+        width: compact ? cardWidth : 240,
       }}
     >
       <DashboardWorkoutCard
@@ -188,6 +193,8 @@ export function SavedWorkoutCardsRow({
   heading = 'Saved Workouts',
   unit = 'lb',
 }: SavedWorkoutCardsRowProps) {
+  const { isCompact, width: viewportWidth } = useLayoutBreakpoint();
+  const cardWidth = Math.min(280, Math.max(240, viewportWidth - 48));
   const {
     data: savedWorkouts,
     isLoading,
@@ -269,6 +276,8 @@ export function SavedWorkoutCardsRow({
           {sessionWorkouts.map((workout) => (
             <SavedWorkoutCard
               key={workout.id}
+              compact={isCompact}
+              cardWidth={cardWidth}
               hasUnfinishedSession={hasUnfinishedSession || isStarting}
               isDeleting={deletingRoutineId === workout.id}
               onDelete={() => void handleDelete(workout.id)}

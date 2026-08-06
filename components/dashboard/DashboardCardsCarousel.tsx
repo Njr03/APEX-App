@@ -9,10 +9,12 @@ import {
   type NativeScrollEvent,
 } from 'react-native';
 
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { colors } from '@/constants/theme';
 
 const CARD_GAP = 12;
-const VISIBLE_CARD_COUNT = 3;
+const DESKTOP_VISIBLE_CARD_COUNT = 3;
+const MOBILE_VISIBLE_CARD_COUNT = 1;
 const TRACK_COLOR = 'rgba(255,255,255,0.08)';
 
 export interface DashboardCarouselItem {
@@ -83,14 +85,18 @@ interface DashboardCardsCarouselProps {
 }
 
 export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
+  const { isCompact } = useLayoutBreakpoint();
+  const visibleCardCount = isCompact
+    ? MOBILE_VISIBLE_CARD_COUNT
+    : DESKTOP_VISIBLE_CARD_COUNT;
   const scrollRef = useRef<ScrollView>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [scrollIndex, setScrollIndex] = useState(0);
 
-  const maxScrollIndex = Math.max(0, items.length - VISIBLE_CARD_COUNT);
+  const maxScrollIndex = Math.max(0, items.length - visibleCardCount);
   const cardWidth =
     viewportWidth > 0
-      ? (viewportWidth - CARD_GAP * (VISIBLE_CARD_COUNT - 1)) / VISIBLE_CARD_COUNT
+      ? (viewportWidth - CARD_GAP * (visibleCardCount - 1)) / visibleCardCount
       : 0;
   const cardStep = cardWidth + CARD_GAP;
 
@@ -163,12 +169,20 @@ interface DashboardCardsGridProps {
 }
 
 export function DashboardCardsGrid({ items }: DashboardCardsGridProps) {
+  const { isCompact } = useLayoutBreakpoint();
+
   return (
-    <View className="flex-row flex-wrap" style={{ gap: CARD_GAP }}>
+    <View className={isCompact ? 'flex-col' : 'flex-row flex-wrap'} style={{ gap: CARD_GAP }}>
       {items.map((item) => (
         <View
           key={item.key}
-          style={{ alignSelf: 'stretch', flexBasis: '30%', flexGrow: 1, minWidth: 180 }}
+          style={{
+            alignSelf: 'stretch',
+            flexBasis: isCompact ? '100%' : '30%',
+            flexGrow: 1,
+            minWidth: isCompact ? 0 : 180,
+            width: isCompact ? '100%' : undefined,
+          }}
         >
           {item.node}
         </View>

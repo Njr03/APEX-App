@@ -2,6 +2,7 @@ import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { format } from 'date-fns';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LevelDetailModal } from '@/components/dashboard/LevelDetailModal';
 import { WorkoutHistoryModal } from '@/components/history/WorkoutHistoryModal';
@@ -10,7 +11,6 @@ import {
   TOPBAR_BORDER,
   TOPBAR_HEIGHT,
   TOPBAR_HEIGHT_WITH_WELCOME,
-  SIDEBAR_WIDTH,
 } from '@/components/navigation/shellConstants';
 import { useActiveWorkout, useProfile } from '@/hooks/queries';
 import { useAuth } from '@/providers/AuthProvider';
@@ -97,6 +97,7 @@ function TopBarCta({
 }
 
 export function AppTopBar() {
+  const insets = useSafeAreaInsets();
   const activePage = useNavigationStore((state) => state.activePage);
   const { user } = useAuth();
   const { data: profile } = useProfile();
@@ -131,54 +132,47 @@ export function AppTopBar() {
         borderBottomColor: TOPBAR_BORDER,
         borderBottomWidth: 1,
         minHeight: barHeight,
+        paddingTop: insets.top,
       }}
     >
       <View
-        className="items-center justify-center border-r border-border"
+        className="min-w-0 flex-1 flex-row items-center justify-between"
         style={{
-          backgroundColor: TOPBAR_BG,
           minHeight: barHeight,
-          width: SIDEBAR_WIDTH,
+          paddingHorizontal: 16,
         }}
       >
-        <Text
-          accessibilityRole="header"
-          style={{
-            color: colors.accent,
-            fontFamily: fonts.brand,
-            fontSize: 17,
-            fontWeight: '700',
-            letterSpacing: 0.5,
-          }}
-        >
-          APX
-        </Text>
-      </View>
+        <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 10 }}>
+          <Text
+            accessibilityRole="header"
+            style={{
+              color: colors.accent,
+              fontFamily: fonts.brand,
+              fontSize: 16,
+              fontWeight: '700',
+              letterSpacing: 0.5,
+            }}
+          >
+            APX
+          </Text>
 
-      <View
-        className="min-w-0 flex-1 flex-row items-center justify-between px-5"
-        style={{ minHeight: barHeight }}
-      >
-        {welcomeName ? (
-          <View className="min-w-0 flex-1 justify-center">
+          {welcomeName ? (
+            <View className="min-w-0 flex-1 justify-center">
+              <Text
+                numberOfLines={1}
+                style={{
+                  ...TOPBAR_WELCOME_TEXT_STYLE,
+                }}
+              >
+                Welcome {welcomeName}
+              </Text>
+            </View>
+          ) : (
             <Text numberOfLines={1} style={TOPBAR_TITLE_TEXT_STYLE}>
               {PAGE_TITLES[activePage]}
             </Text>
-            <Text
-              numberOfLines={1}
-              style={{
-                ...TOPBAR_WELCOME_TEXT_STYLE,
-                marginTop: 2,
-              }}
-            >
-              Welcome {welcomeName}
-            </Text>
-          </View>
-        ) : (
-          <Text numberOfLines={1} style={TOPBAR_TITLE_TEXT_STYLE}>
-            {PAGE_TITLES[activePage]}
-          </Text>
-        )}
+          )}
+        </View>
 
         <View className="shrink-0 flex-row items-center gap-2">
           <View className="items-end" style={{ gap: 2 }}>

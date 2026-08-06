@@ -3,11 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "packageManager": "pnpm@11.8.0",
-  "pnpm": {
-    "onlyBuiltDependencies": []
-  },
   "dependencies": {
-    "iceberg-js": "^0.8.1",
     "@expo-google-fonts/dm-mono": "^0.4.2",
     "@expo-google-fonts/instrument-sans": "^0.4.2",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
@@ -30,6 +26,7 @@
     "expo-status-bar": "~56.0.4",
     "expo-symbols": "~56.0.6",
     "expo-web-browser": "~56.0.5",
+    "iceberg-js": "^0.8.1",
     "lucide-react-native": "^1.21.0",
     "nativewind": "^4.2.5",
     "react": "19.2.3",
@@ -53,6 +50,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "sharp": "^0.35.3",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -65,10 +63,11 @@
     "build:web:pwa": "expo export -p web && npx --yes workbox-cli generateSW workbox-config.js",
     "build:web:local": "bash scripts/generate-pwa-icons.sh && pnpm run build:web",
     "preview:web": "expo serve",
+    "pwa:assets": "bash scripts/generate-pwa-icons.sh",
     "db:types": "bash scripts/generate-types.sh"
   },
   "private": true,
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   }
 }

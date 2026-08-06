@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { useState } from 'react';
 
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
+import { PwaInstallCard } from '@/components/pwa/PwaInstallCard';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -41,7 +42,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <Screen>
+    <Screen edges={['left', 'right', 'bottom']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
@@ -93,6 +94,8 @@ export default function ProfileScreen() {
             onRetry={() => void refetch()}
           />
         ) : null}
+
+        <PwaInstallCard />
 
         {signOutError ? <AuthErrorBanner message={signOutError} /> : null}
 

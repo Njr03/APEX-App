@@ -123,7 +123,7 @@ export default function ExercisesTabScreen() {
   };
 
   return (
-    <Screen>
+    <Screen edges={['left', 'right', 'bottom']}>
       <View className="flex-1 px-5 pt-5">
         <AppText className="text-3xl" variant="display">
           Exercise Library
