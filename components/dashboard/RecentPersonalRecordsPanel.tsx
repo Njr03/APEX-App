@@ -8,9 +8,9 @@ import { colors, fonts } from '@/constants/theme';
 import {
   DASHBOARD_TILE_BG,
   dashboardCardFrameStyle,
-  dashboardHoverStyle,
-  dashboardTileHoverHandlers,
+  dashboardPressStyle,
   dashboardTileWebClassName,
+  useDashboardTilePress,
 } from '@/lib/dashboard/cardStyles';
 import { useDashboardRecentPRs } from '@/hooks/useDashboardRecentPRs';
 import type { DashboardRecentPR } from '@/lib/dashboard/recentPRs';
@@ -27,14 +27,14 @@ function PRCard({
   record: DashboardRecentPR;
   onPress: () => void;
 }) {
-  const [hovered, setHovered] = useState(false);
+  const { pressed, handlers } = useDashboardTilePress(onPress);
   const valueLabel = record.weightDisplayValue;
 
   return (
     <Pressable
       accessibilityRole="button"
       className={dashboardTileWebClassName()}
-      {...dashboardTileHoverHandlers(setHovered, onPress)}
+      {...handlers}
       style={{
         alignItems: 'center',
         alignSelf: 'stretch',
@@ -48,7 +48,7 @@ function PRCard({
         paddingVertical: 12,
         width: '100%',
         ...dashboardCardFrameStyle(10),
-        ...dashboardHoverStyle(hovered),
+        ...dashboardPressStyle(pressed),
       }}
     >
       <View
@@ -116,13 +116,13 @@ function PRCard({
 }
 
 function PREmptyCard({ onPress }: { onPress: () => void }) {
-  const [hovered, setHovered] = useState(false);
+  const { pressed, handlers } = useDashboardTilePress(onPress);
 
   return (
     <Pressable
       accessibilityRole="button"
       className={dashboardTileWebClassName()}
-      {...dashboardTileHoverHandlers(setHovered, onPress)}
+      {...handlers}
       style={{
         alignSelf: 'stretch',
         backgroundColor: DASHBOARD_TILE_BG,
@@ -132,7 +132,7 @@ function PREmptyCard({ onPress }: { onPress: () => void }) {
         paddingVertical: 16,
         width: '100%',
         ...dashboardCardFrameStyle(10),
-        ...dashboardHoverStyle(hovered),
+        ...dashboardPressStyle(pressed),
       }}
     >
       <Text

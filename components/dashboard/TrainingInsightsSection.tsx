@@ -1,12 +1,17 @@
 import { type ReactNode, useState } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { MuscleBalanceDetailModal } from '@/components/dashboard/MuscleBalanceDetailModal';
 import { MuscleBalanceRadar } from '@/components/dashboard/MuscleBalanceRadar';
 import { WeeklyConsistencyDetailModal } from '@/components/dashboard/WeeklyConsistencyDetailModal';
 import { WeeklyConsistencyTracker } from '@/components/dashboard/WeeklyConsistencyTracker';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
-import { dashboardCardFrameStyle, dashboardHoverStyle, dashboardTileHoverHandlers, dashboardTileWebClassName } from '@/lib/dashboard/cardStyles';
+import {
+  dashboardCardFrameStyle,
+  dashboardPressStyle,
+  dashboardTileWebClassName,
+  useDashboardTilePress,
+} from '@/lib/dashboard/cardStyles';
 import { useMuscleBalance } from '@/hooks/useMuscleBalance';
 import { useWeeklyConsistency } from '@/hooks/useWeeklyConsistency';
 import type { WeeklyConsistencyEntry } from '@/lib/training/weeklyConsistency';
@@ -22,13 +27,13 @@ function InsightCard({
   onPress: () => void;
   compact: boolean;
 }) {
-  const [hovered, setHovered] = useState(false);
+  const { pressed, handlers } = useDashboardTilePress(onPress);
 
   return (
     <Pressable
       accessibilityRole="button"
       className={dashboardTileWebClassName('week-split-card')}
-      {...dashboardTileHoverHandlers(setHovered, onPress)}
+      {...handlers}
       style={{
         alignSelf: 'stretch',
         backgroundColor: CARD_BG,
@@ -36,7 +41,7 @@ function InsightCard({
         padding: compact ? 16 : 18,
         width: '100%',
         ...dashboardCardFrameStyle(14),
-        ...dashboardHoverStyle(hovered),
+        ...dashboardPressStyle(pressed),
       }}
     >
       {children}

@@ -1,11 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  ScrollView,
-  View,
-  type LayoutChangeEvent,
-  type NativeSyntheticEvent,
-  type NativeScrollEvent,
-} from 'react-native';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Platform, View, type LayoutChangeEvent } from 'react-native';
 
 import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
@@ -29,7 +23,6 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
   const visibleCardCount = isCompact
     ? MOBILE_VISIBLE_CARD_COUNT
     : DESKTOP_VISIBLE_CARD_COUNT;
-  const scrollRef = useRef<ScrollView>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [scrollIndex, setScrollIndex] = useState(0);
 
@@ -44,24 +37,12 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
     setScrollIndex((current) => Math.min(current, maxScrollIndex));
   }, [maxScrollIndex]);
 
-  useEffect(() => {
-    if (cardStep <= 0) return;
-    scrollRef.current?.scrollTo({ x: scrollIndex * cardStep, animated: false });
-  }, [cardStep]);
-
-  const scrollToIndex = (index: number) => {
-    const nextIndex = Math.max(0, Math.min(maxScrollIndex, index));
-    setScrollIndex(nextIndex);
-    if (cardStep > 0) {
-      scrollRef.current?.scrollTo({ x: nextIndex * cardStep, animated: true });
-    }
-  };
-
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (cardStep <= 0) return;
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardStep);
-    setScrollIndex(Math.max(0, Math.min(maxScrollIndex, nextIndex)));
-  };
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      setScrollIndex(Math.max(0, Math.min(maxScrollIndex, index)));
+    },
+    [maxScrollIndex],
+  );
 
   return (
     <View
@@ -69,31 +50,29 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
         setViewportWidth(event.nativeEvent.layout.width);
       }}
     >
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        contentContainerStyle={{ alignItems: 'stretch' }}
-        decelerationRate="fast"
-        onMomentumScrollEnd={handleScrollEnd}
-        onScrollEndDrag={handleScrollEnd}
-        scrollEventThrottle={16}
-        showsHorizontalScrollIndicator={false}
-        snapToAlignment="start"
-        snapToInterval={cardStep > 0 ? cardStep : undefined}
-      >
-        {items.map((item, index) => (
-          <View
-            key={item.key}
-            style={{
-              alignSelf: 'stretch',
-              marginRight: index < items.length - 1 ? CARD_GAP : 0,
-              width: cardWidth > 0 ? cardWidth : undefined,
-            }}
-          >
-            {item.node}
-          </View>
-        ))}
-      </ScrollView>
+      <View style={{ overflow: 'hidden', width: '100%' }}>
+        <View
+          className={Platform.OS === 'web' ? 'card-row-slider' : undefined}
+          style={{
+            alignItems: 'stretch',
+            flexDirection: 'row',
+            transform: [{ translateX: -scrollIndex * cardStep }],
+          }}
+        >
+          {items.map((item, index) => (
+            <View
+              key={item.key}
+              style={{
+                flexShrink: 0,
+                marginRight: index < items.length - 1 ? CARD_GAP : 0,
+                width: cardWidth > 0 ? cardWidth : undefined,
+              }}
+            >
+              {item.node}
+            </View>
+          ))}
+        </View>
+      </View>
 
       <CardScrollSlider
         max={maxScrollIndex}

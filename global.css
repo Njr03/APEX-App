@@ -39,28 +39,73 @@
 }
 
 .week-split-card {
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: box-shadow 0.15s ease;
 }
 
 .dashboard-tile {
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-@media (hover: hover) {
-  .dashboard-tile:hover {
-    border-color: rgba(200, 255, 90, 0.4);
-    box-shadow: 0 0 32px rgba(200, 255, 90, 0.12);
-  }
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .dashboard-tile:focus,
 .dashboard-tile:focus-visible,
-.dashboard-tile:active {
-  border-color: rgba(200, 255, 90, 0.4) !important;
-  box-shadow: 0 0 32px rgba(200, 255, 90, 0.12);
+.dashboard-tile:focus-within,
+.dashboard-tile:active,
+.dashboard-tile:hover {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
   outline: none !important;
+}
+
+.card-row-slider {
+  transition: transform 0.28s ease;
+  will-change: transform;
+}
+
+.card-scroll-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  cursor: pointer;
+  display: block;
+  height: 4px;
+  margin: 10px 0;
+  outline: none;
+  width: 100%;
+}
+
+.card-scroll-range::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  height: 4px;
+}
+
+.card-scroll-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
+  border-radius: 999px;
+  height: 12px;
+  margin-top: -4px;
+  width: 12px;
+}
+
+.card-scroll-range::-moz-range-track {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 999px;
+  height: 4px;
+}
+
+.card-scroll-range::-moz-range-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
+  border-radius: 999px;
+  height: 12px;
+  width: 12px;
 }
 
 .week-split-card-inner {

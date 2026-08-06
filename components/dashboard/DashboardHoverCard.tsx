@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode } from 'react';
 import {
   Platform,
   Pressable,
@@ -6,7 +6,11 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { dashboardHoverStyle, dashboardTileHoverHandlers, dashboardTileWebClassName } from '@/lib/dashboard/cardStyles';
+import {
+  dashboardPressStyle,
+  dashboardTileWebClassName,
+  useDashboardTilePress,
+} from '@/lib/dashboard/cardStyles';
 
 interface DashboardHoverCardProps {
   children: ReactNode;
@@ -21,7 +25,7 @@ export function DashboardHoverCard({
   accessibilityLabel,
   style,
 }: DashboardHoverCardProps) {
-  const [hovered, setHovered] = useState(false);
+  const { pressed, handlers } = useDashboardTilePress(onPress);
 
   return (
     <Pressable
@@ -30,10 +34,10 @@ export function DashboardHoverCard({
       accessibilityRole={onPress ? 'button' : undefined}
       disabled={!onPress}
       className={dashboardTileWebClassName()}
-      {...dashboardTileHoverHandlers(setHovered, onPress)}
+      {...handlers}
       style={[
         style,
-        dashboardHoverStyle(hovered),
+        dashboardPressStyle(pressed),
         onPress && Platform.OS === 'web' ? { cursor: 'pointer' as const } : null,
       ]}
     >

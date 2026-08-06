@@ -1,14 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { Animated, Platform, Pressable, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 
 import {
   DASHBOARD_WORKOUT_CARD_RADIUS,
-  dashboardHoverStyle,
-  dashboardTileHoverHandlers,
+  dashboardPressStyle,
   dashboardTileWebClassName,
+  useDashboardTilePress,
 } from '@/lib/dashboard/cardStyles';
 import type { DashboardWorkoutCardModel } from '@/lib/dashboard/routineCardDisplay';
 import {
@@ -402,7 +402,7 @@ export function DashboardWorkoutCard({
   compact = false,
   footer,
 }: DashboardWorkoutCardProps) {
-  const [hovered, setHovered] = useState(false);
+  const { pressed, handlers } = useDashboardTilePress(onPress);
   const padding = compact ? 16 : 20;
   const titleSize = compact ? 17 : 20;
   const eyebrowSize = compact ? 8 : 9;
@@ -411,7 +411,7 @@ export function DashboardWorkoutCard({
     <Pressable
       accessibilityRole="button"
       className={dashboardTileWebClassName('week-split-card')}
-      {...dashboardTileHoverHandlers(setHovered, onPress)}
+      {...handlers}
       style={{
         alignSelf: 'stretch',
         borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS,
@@ -419,7 +419,7 @@ export function DashboardWorkoutCard({
         cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
         flex: 1,
         overflow: Platform.OS === 'web' ? ('visible' as const) : undefined,
-        ...dashboardHoverStyle(hovered),
+        ...dashboardPressStyle(pressed),
       }}
     >
       <View

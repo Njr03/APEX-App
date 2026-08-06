@@ -1,12 +1,11 @@
-import { useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 
 import {
   DASHBOARD_TILE_BG,
   dashboardCardFrameStyle,
-  dashboardHoverStyle,
-  dashboardTileHoverHandlers,
+  dashboardPressStyle,
   dashboardTileWebClassName,
+  useDashboardTilePress,
 } from '@/lib/dashboard/cardStyles';
 import type { StatDeltaTone } from '@/lib/dashboard/statTiles';
 import { fonts } from '@/constants/theme';
@@ -40,14 +39,14 @@ export function StatTile({
   deltaTone,
   onPress,
 }: StatTileProps) {
-  const [hovered, setHovered] = useState(false);
+  const { pressed, handlers } = useDashboardTilePress(onPress);
 
   return (
     <Pressable
       accessibilityLabel={`${label}, ${value}${unit ?? ''}. ${delta}`}
       accessibilityRole="button"
       className={dashboardTileWebClassName()}
-      {...dashboardTileHoverHandlers(setHovered, onPress)}
+      {...handlers}
       style={{
         alignSelf: 'stretch',
         backgroundColor: DASHBOARD_TILE_BG,
@@ -59,7 +58,7 @@ export function StatTile({
         paddingVertical: 14,
         width: '100%',
         ...dashboardCardFrameStyle(12),
-        ...dashboardHoverStyle(hovered),
+        ...dashboardPressStyle(pressed),
       }}
     >
       <Text
