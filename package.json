@@ -60,7 +60,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "expo export -p web",
-    "vercel-build": "expo export -p web && test -f dist/index.html",
+    "vercel-build": "bash scripts/vercel-build.sh",
     "build:web:pwa": "expo export -p web && npx --yes workbox-cli generateSW workbox-config.js",
     "build:web:local": "bash scripts/generate-pwa-icons.sh && pnpm run build:web",
     "preview:web": "expo serve",
