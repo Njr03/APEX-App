@@ -20,6 +20,7 @@ import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import {
   useAddWorkoutExercise,
+  useClearUnfinishedWorkouts,
   useCreateSet,
   useProfile,
 } from '@/hooks/queries';
@@ -46,6 +47,7 @@ export default function ActiveWorkoutScreen() {
   } = useBootstrapActiveWorkout();
   const { data: profile } = useProfile();
   const finishWorkout = useFinishWorkout();
+  const clearUnfinished = useClearUnfinishedWorkouts();
   const activeSplit = useWorkoutSessionStore((s) => s.activeSplit);
   const addExercise = useAddWorkoutExercise();
   const createSet = useCreateSet();
@@ -81,6 +83,12 @@ export default function ActiveWorkoutScreen() {
     } finally {
       setIsAddingExercise(false);
     }
+  };
+
+  const handleCancel = async () => {
+    await clearUnfinished.mutateAsync();
+    resetSession();
+    router.replace('/(tabs)/workouts');
   };
 
   const handleFinish = async () => {
@@ -136,13 +144,13 @@ export default function ActiveWorkoutScreen() {
   return (
     <Screen className="relative" edges={isCompact ? ['top', 'left', 'right'] : undefined}>
       <WorkoutHeader
+        isCancelling={clearUnfinished.isPending}
         isFinishing={finishWorkout.isPending}
         name={workout.name}
+        onCancel={() => void handleCancel()}
         onFinish={handleFinish}
         showFinishButton={!isCompact}
         startedAt={workout.started_at}
-        unit={unit}
-        workoutExercises={workout.workout_exercises}
       />
 
       <ScrollView

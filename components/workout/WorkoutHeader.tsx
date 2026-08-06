@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Flag, Pause, Play } from 'lucide-react-native';
+import { Flag } from 'lucide-react-native';
 
 import {
   formatElapsedDuration,
@@ -13,12 +12,6 @@ import {
   SPLIT_DEFINITIONS,
   type TrainingSplit,
 } from '@/lib/training/splits';
-import { formatSessionVolume } from '@/lib/workout/formatSessionVolume';
-import {
-  calculateWorkoutVolume,
-  collectWorkoutSets,
-} from '@/lib/workout/volume';
-import type { WorkoutExercise, Set, Exercise } from '@/lib/supabase';
 import { useWorkoutSessionStore } from '@/stores/workoutSessionStore';
 
 const CARD_BG = '#0d0d1b';
@@ -26,14 +19,15 @@ const BORDER = 'rgba(255,255,255,0.06)';
 const MUTED = 'rgba(240,237,232,0.5)';
 const LIME = '#c8ff5a';
 const TEXT_DARK = '#08080f';
+const DANGER = '#ff5f5f';
 
 interface WorkoutHeaderProps {
   name: string;
   startedAt: string;
   isFinishing: boolean;
-  unit: 'kg' | 'lb';
-  workoutExercises: Array<WorkoutExercise & { exercise: Exercise; sets: Set[] }>;
+  isCancelling?: boolean;
   onFinish: () => void;
+  onCancel: () => void;
   showFinishButton?: boolean;
 }
 
@@ -42,6 +36,61 @@ function resolveActiveSplit(
   storedSplit: TrainingSplit | null,
 ): TrainingSplit | null {
   return storedSplit ?? inferSplitFromWorkoutName(name);
+}
+
+function HeaderTextButton({
+  label,
+  onPress,
+  disabled = false,
+  variant = 'primary',
+}: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary' | 'danger';
+}) {
+  const isPrimary = variant === 'primary';
+  const isDanger = variant === 'danger';
+
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ hovered, pressed }) => ({
+        alignItems: 'center',
+        backgroundColor: isPrimary
+          ? LIME
+          : isDanger
+            ? 'rgba(255,95,95,0.1)'
+            : 'rgba(255,255,255,0.04)',
+        borderColor: isPrimary
+          ? LIME
+          : isDanger
+            ? 'rgba(255,95,95,0.35)'
+            : 'rgba(255,255,255,0.12)',
+        borderRadius: 10,
+        borderWidth: 1,
+        justifyContent: 'center',
+        minWidth: 72,
+        opacity: disabled ? 0.55 : hovered || pressed ? 0.88 : 1,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+      })}
+    >
+      <Text
+        style={{
+          color: isPrimary ? TEXT_DARK : isDanger ? DANGER : colors.text,
+          fontFamily: fonts.brand,
+          fontSize: 12,
+          fontWeight: '700',
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
 }
 
 function FinishButton({
@@ -88,38 +137,38 @@ function FinishButton({
   );
 }
 
-function PauseButton({
+function SessionControls({
   isWorkoutPaused,
+  isCancelling,
+  isFinishing,
   onPause,
   onResume,
+  onCancel,
 }: {
   isWorkoutPaused: boolean;
+  isCancelling?: boolean;
+  isFinishing: boolean;
   onPause: () => void;
   onResume: () => void;
+  onCancel: () => void;
 }) {
+  const controlsDisabled = isFinishing || isCancelling;
+
   return (
-    <Pressable
-      accessibilityLabel={isWorkoutPaused ? 'Resume workout' : 'Pause workout'}
-      accessibilityRole="button"
-      onPress={isWorkoutPaused ? onResume : onPause}
-      style={({ hovered, pressed }) => ({
-        alignItems: 'center',
-        backgroundColor: isWorkoutPaused ? LIME : 'rgba(255,255,255,0.06)',
-        borderColor: isWorkoutPaused ? LIME : 'rgba(255,255,255,0.12)',
-        borderRadius: 10,
-        borderWidth: 1,
-        justifyContent: 'center',
-        opacity: hovered || pressed ? 0.88 : 1,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-      })}
-    >
-      {isWorkoutPaused ? (
-        <Play color={TEXT_DARK} fill={TEXT_DARK} size={16} />
-      ) : (
-        <Pause color={colors.text} size={16} />
-      )}
-    </Pressable>
+    <View style={{ alignItems: 'center', flexDirection: 'row', gap: 8 }}>
+      <HeaderTextButton
+        disabled={controlsDisabled}
+        label={isWorkoutPaused ? 'Resume' : 'Pause'}
+        onPress={isWorkoutPaused ? onResume : onPause}
+        variant="primary"
+      />
+      <HeaderTextButton
+        disabled={controlsDisabled}
+        label="Cancel"
+        onPress={onCancel}
+        variant="danger"
+      />
+    </View>
   );
 }
 
@@ -127,9 +176,9 @@ export function WorkoutHeader({
   name,
   startedAt,
   isFinishing,
-  unit,
-  workoutExercises,
+  isCancelling = false,
   onFinish,
+  onCancel,
   showFinishButton = true,
 }: WorkoutHeaderProps) {
   const { isCompact } = useLayoutBreakpoint();
@@ -141,11 +190,6 @@ export function WorkoutHeader({
 
   const activeSplit = resolveActiveSplit(name, storedSplit);
   const definition = activeSplit ? SPLIT_DEFINITIONS[activeSplit] : null;
-
-  const totalVolume = useMemo(
-    () => calculateWorkoutVolume(collectWorkoutSets(workoutExercises)),
-    [workoutExercises],
-  );
 
   if (isCompact) {
     return (
@@ -194,38 +238,14 @@ export function WorkoutHeader({
               </Text>
             </View>
 
-            <PauseButton
+            <SessionControls
+              isCancelling={isCancelling}
+              isFinishing={isFinishing}
               isWorkoutPaused={isWorkoutPaused}
+              onCancel={onCancel}
               onPause={pauseWorkout}
               onResume={resumeWorkout}
             />
-
-            <View style={{ alignItems: 'flex-end', flex: 1, minWidth: 0 }}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  color: definition?.color ?? colors.accent,
-                  fontFamily: fonts.brand,
-                  fontSize: 22,
-                  fontWeight: '700',
-                }}
-              >
-                {formatSessionVolume(totalVolume, unit)}
-              </Text>
-              <Text
-                style={{
-                  color: MUTED,
-                  fontFamily: fonts.jetbrainsMono,
-                  fontSize: 9,
-                  letterSpacing: 1,
-                  marginTop: 2,
-                  textAlign: 'right',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Volume
-              </Text>
-            </View>
           </View>
 
           {definition ? (
@@ -279,7 +299,8 @@ export function WorkoutHeader({
           borderRadius: 14,
           borderWidth: 1,
           flexDirection: 'row',
-          gap: 16,
+          flexWrap: 'wrap',
+          gap: 12,
           paddingHorizontal: 22,
           paddingVertical: 18,
         }}
@@ -310,38 +331,14 @@ export function WorkoutHeader({
           </Text>
         </View>
 
-        <PauseButton
+        <SessionControls
+          isCancelling={isCancelling}
+          isFinishing={isFinishing}
           isWorkoutPaused={isWorkoutPaused}
+          onCancel={onCancel}
           onPause={pauseWorkout}
           onResume={resumeWorkout}
         />
-
-        <View style={{ backgroundColor: BORDER, height: 44, width: 1 }} />
-
-        <View style={{ flex: 1, minWidth: 100 }}>
-          <Text
-            style={{
-              color: definition?.color ?? colors.accent,
-              fontFamily: fonts.brand,
-              fontSize: 28,
-              fontWeight: '700',
-            }}
-          >
-            {formatSessionVolume(totalVolume, unit)}
-          </Text>
-          <Text
-            style={{
-              color: MUTED,
-              fontFamily: fonts.jetbrainsMono,
-              fontSize: 9,
-              letterSpacing: 1,
-              marginTop: 2,
-              textTransform: 'uppercase',
-            }}
-          >
-            Volume this session
-          </Text>
-        </View>
 
         {definition ? (
           <View style={{ minWidth: 72 }}>
