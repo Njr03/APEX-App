@@ -41,12 +41,11 @@ function PRCard({
         backgroundColor: DASHBOARD_TILE_BG,
         borderWidth: 1,
         cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
-        flex: 1,
         flexDirection: 'row',
-        gap: 10,
+        gap: 12,
         minWidth: 0,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
         width: '100%',
         ...dashboardCardFrameStyle(10),
         ...dashboardHoverStyle(hovered),
@@ -149,31 +148,22 @@ function PREmptyCard({ onPress }: { onPress: () => void }) {
   );
 }
 
-function PRGrid({
+function PRList({
   records,
   onRecordPress,
 }: {
   records: DashboardRecentPR[];
   onRecordPress: (record: DashboardRecentPR) => void;
 }) {
-  const topRow = records.slice(0, 2);
-  const bottomRow = records.slice(2, 4);
-
-  const renderRow = (row: DashboardRecentPR[]) => (
-    <View className="w-full flex-row" style={{ gap: 12 }}>
-      {row.map((record) => (
-        <View key={record.exerciseId} style={{ flex: 1, minWidth: 0 }}>
-          <PRCard onPress={() => onRecordPress(record)} record={record} />
-        </View>
-      ))}
-      {row.length === 1 ? <View style={{ flex: 1, minWidth: 0 }} /> : null}
-    </View>
-  );
-
   return (
-    <View className="w-full" style={{ gap: 12 }}>
-      {topRow.length > 0 ? renderRow(topRow) : null}
-      {bottomRow.length > 0 ? renderRow(bottomRow) : null}
+    <View className="w-full" style={{ gap: 10 }}>
+      {records.map((record) => (
+        <PRCard
+          key={record.id}
+          onPress={() => onRecordPress(record)}
+          record={record}
+        />
+      ))}
     </View>
   );
 }
@@ -239,7 +229,7 @@ export function RecentPersonalRecordsPanel({
         {!data?.length ? (
           <PREmptyCard onPress={openSummary} />
         ) : (
-          <PRGrid onRecordPress={openRecord} records={data} />
+          <PRList onRecordPress={openRecord} records={data} />
         )}
       </View>
 
