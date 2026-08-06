@@ -222,11 +222,13 @@ export function SavedWorkoutCardsRow({
   const maxScrollIndex = Math.max(0, itemCount - visibleCardCount);
 
   const {
-    animatedRowStyle,
+    handleScroll,
+    handleScrollEnd,
     handleSliderChange,
     handleSliderEnd,
-    panGesture,
     scrollOffset,
+    scrollRef,
+    snapOffsets,
   } = useCardRowScroller({ cardStep, maxScrollIndex });
 
   const handleDelete = async (routineId: string) => {
@@ -277,9 +279,12 @@ export function SavedWorkoutCardsRow({
           }}
         >
           <SwipeableCardRow
-            animatedRowStyle={animatedRowStyle}
             containerStyle={{ paddingBottom: 4, paddingTop: 4 }}
-            panGesture={panGesture}
+            contentContainerStyle={{ paddingRight: 4 }}
+            onScroll={handleScroll}
+            onScrollEnd={handleScrollEnd}
+            scrollRef={scrollRef}
+            snapOffsets={snapOffsets}
           >
             {sessionWorkouts.map((workout) => (
               <View

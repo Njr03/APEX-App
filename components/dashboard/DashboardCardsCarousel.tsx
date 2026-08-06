@@ -35,11 +35,13 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
   const cardStep = cardWidth + CARD_GAP;
 
   const {
-    animatedRowStyle,
+    handleScroll,
+    handleScrollEnd,
     handleSliderChange,
     handleSliderEnd,
-    panGesture,
     scrollOffset,
+    scrollRef,
+    snapOffsets,
   } = useCardRowScroller({ cardStep, maxScrollIndex });
 
   return (
@@ -48,7 +50,12 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
         setViewportWidth(event.nativeEvent.layout.width);
       }}
     >
-      <SwipeableCardRow animatedRowStyle={animatedRowStyle} panGesture={panGesture}>
+      <SwipeableCardRow
+        onScroll={handleScroll}
+        onScrollEnd={handleScrollEnd}
+        scrollRef={scrollRef}
+        snapOffsets={snapOffsets}
+      >
         {items.map((item, index) => (
           <View
             key={item.key}

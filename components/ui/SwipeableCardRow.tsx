@@ -1,41 +1,49 @@
-import type { ReactNode } from 'react';
-import { View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { type AnimatedStyle } from 'react-native-reanimated';
+import type { ReactNode, RefObject } from 'react';
+import { Platform, ScrollView, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
 interface SwipeableCardRowProps {
-  animatedRowStyle: AnimatedStyle<ViewStyle>;
   children: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
+  contentContainerStyle?: StyleProp<ViewStyle>;
   onLayout?: (event: LayoutChangeEvent) => void;
-  panGesture: ReturnType<typeof Gesture.Pan>;
-  rowStyle?: StyleProp<ViewStyle>;
+  onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onScrollEnd: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  scrollRef: RefObject<ScrollView | null>;
+  snapOffsets: number[];
 }
 
 export function SwipeableCardRow({
-  animatedRowStyle,
   children,
   containerStyle,
+  contentContainerStyle,
   onLayout,
-  panGesture,
-  rowStyle,
+  onScroll,
+  onScrollEnd,
+  scrollRef,
+  snapOffsets,
 }: SwipeableCardRowProps) {
   return (
-    <View onLayout={onLayout} style={[{ overflow: 'hidden', width: '100%' }, containerStyle]}>
-      <GestureDetector gesture={panGesture}>
-        <Animated.View
-          style={[
-            {
-              alignItems: 'stretch',
-              flexDirection: 'row',
-            },
-            rowStyle,
-            animatedRowStyle,
-          ]}
-        >
-          {children}
-        </Animated.View>
-      </GestureDetector>
+    <View onLayout={onLayout} style={[{ width: '100%' }, containerStyle]}>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        nestedScrollEnabled
+        className={Platform.OS === 'web' ? 'card-scroll-row' : undefined}
+        contentContainerStyle={[{ alignItems: 'stretch' }, contentContainerStyle]}
+        decelerationRate="fast"
+        directionalLockEnabled
+        onMomentumScrollEnd={onScrollEnd}
+        onScroll={onScroll}
+        onScrollEndDrag={onScrollEnd}
+        scrollEventThrottle={16}
+        showsHorizontalScrollIndicator={false}
+        snapToAlignment="start"
+        snapToOffsets={snapOffsets.length > 0 ? snapOffsets : undefined}
+        style={Platform.OS === 'web' ? { overflow: 'scroll' as const } : undefined}
+      >
+        {children}
+      </ScrollView>
     </View>
   );
 }

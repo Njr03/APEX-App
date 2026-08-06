@@ -58,6 +58,12 @@
   outline: none !important;
 }
 
+.card-scroll-row {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 .card-row-slider {
   will-change: transform;
 }
