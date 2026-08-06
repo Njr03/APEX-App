@@ -65,11 +65,6 @@ function getTopBarCta(
         label: 'View History',
         href: '/history',
       };
-    case 'profile':
-      return {
-        label: 'Account Settings',
-        href: '/profile/settings',
-      };
     default:
       return {
         label: 'Start Workout',
@@ -117,7 +112,8 @@ export function AppTopBar() {
     activePage !== 'index' &&
     activePage !== 'workouts' &&
     activePage !== 'exercises' &&
-    activePage !== 'progress';
+    activePage !== 'progress' &&
+    activePage !== 'profile';
   const todayLabel = format(new Date(), 'EEE · MMM d').toUpperCase();
   const level = profile ? calculateLevel(profile.total_xp ?? 0) : null;
   const levelLabel = user && level != null ? `Level ${level}` : null;
