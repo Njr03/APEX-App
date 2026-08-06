@@ -384,7 +384,7 @@ export function ExerciseCard({
                 textTransform: 'uppercase',
               }}
             >
-              Kg
+              {unit === 'lb' ? 'Lb' : 'Kg'}
             </Text>
             <Text
               style={{

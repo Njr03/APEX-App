@@ -6,6 +6,7 @@ import {
   formatElapsedDuration,
   useWorkoutTimer,
 } from '@/hooks/useWorkoutTimer';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { colors, fonts } from '@/constants/theme';
 import {
   inferSplitFromWorkoutName,
@@ -33,6 +34,7 @@ interface WorkoutHeaderProps {
   unit: 'kg' | 'lb';
   workoutExercises: Array<WorkoutExercise & { exercise: Exercise; sets: Set[] }>;
   onFinish: () => void;
+  showFinishButton?: boolean;
 }
 
 function resolveActiveSplit(
@@ -42,6 +44,85 @@ function resolveActiveSplit(
   return storedSplit ?? inferSplitFromWorkoutName(name);
 }
 
+function FinishButton({
+  isFinishing,
+  onFinish,
+  fullWidth = false,
+}: {
+  isFinishing: boolean;
+  onFinish: () => void;
+  fullWidth?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityLabel="Finish workout"
+      accessibilityRole="button"
+      disabled={isFinishing}
+      onPress={onFinish}
+      style={({ hovered, pressed }) => ({
+        alignItems: 'center',
+        alignSelf: fullWidth ? ('stretch' as const) : undefined,
+        backgroundColor: LIME,
+        borderRadius: 10,
+        flexDirection: 'row',
+        gap: 8,
+        justifyContent: 'center',
+        opacity: isFinishing ? 0.6 : hovered || pressed ? 0.88 : 1,
+        paddingHorizontal: fullWidth ? 16 : 22,
+        paddingVertical: 12,
+        width: fullWidth ? '100%' : undefined,
+      })}
+    >
+      <Flag color={TEXT_DARK} size={16} />
+      <Text
+        style={{
+          color: TEXT_DARK,
+          fontFamily: fonts.brand,
+          fontSize: 13,
+          fontWeight: '700',
+        }}
+      >
+        Finish Workout
+      </Text>
+    </Pressable>
+  );
+}
+
+function PauseButton({
+  isWorkoutPaused,
+  onPause,
+  onResume,
+}: {
+  isWorkoutPaused: boolean;
+  onPause: () => void;
+  onResume: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityLabel={isWorkoutPaused ? 'Resume workout' : 'Pause workout'}
+      accessibilityRole="button"
+      onPress={isWorkoutPaused ? onResume : onPause}
+      style={({ hovered, pressed }) => ({
+        alignItems: 'center',
+        backgroundColor: isWorkoutPaused ? LIME : 'rgba(255,255,255,0.06)',
+        borderColor: isWorkoutPaused ? LIME : 'rgba(255,255,255,0.12)',
+        borderRadius: 10,
+        borderWidth: 1,
+        justifyContent: 'center',
+        opacity: hovered || pressed ? 0.88 : 1,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+      })}
+    >
+      {isWorkoutPaused ? (
+        <Play color={TEXT_DARK} fill={TEXT_DARK} size={16} />
+      ) : (
+        <Pause color={colors.text} size={16} />
+      )}
+    </Pressable>
+  );
+}
+
 export function WorkoutHeader({
   name,
   startedAt,
@@ -49,7 +130,9 @@ export function WorkoutHeader({
   unit,
   workoutExercises,
   onFinish,
+  showFinishButton = true,
 }: WorkoutHeaderProps) {
+  const { isCompact } = useLayoutBreakpoint();
   const storedSplit = useWorkoutSessionStore((s) => s.activeSplit);
   const isWorkoutPaused = useWorkoutSessionStore((s) => s.isWorkoutPaused);
   const pauseWorkout = useWorkoutSessionStore((s) => s.pauseWorkout);
@@ -63,6 +146,128 @@ export function WorkoutHeader({
     () => calculateWorkoutVolume(collectWorkoutSets(workoutExercises)),
     [workoutExercises],
   );
+
+  if (isCompact) {
+    return (
+      <View className="px-5 pb-3 pt-3">
+        <View
+          style={{
+            backgroundColor: CARD_BG,
+            borderColor: BORDER,
+            borderRadius: 14,
+            borderWidth: 1,
+            gap: 14,
+            paddingHorizontal: 16,
+            paddingVertical: 16,
+          }}
+        >
+          <View
+            style={{
+              alignItems: 'center',
+              flexDirection: 'row',
+              gap: 12,
+            }}
+          >
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text
+                style={{
+                  color: isWorkoutPaused ? MUTED : colors.text,
+                  fontFamily: fonts.brand,
+                  fontSize: 32,
+                  fontWeight: '700',
+                  letterSpacing: -1,
+                }}
+              >
+                {formatElapsedDuration(elapsed)}
+              </Text>
+              <Text
+                style={{
+                  color: isWorkoutPaused ? colors.accent : MUTED,
+                  fontFamily: fonts.jetbrainsMono,
+                  fontSize: 9,
+                  letterSpacing: 2,
+                  marginTop: 2,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {isWorkoutPaused ? 'Paused' : 'Elapsed'}
+              </Text>
+            </View>
+
+            <PauseButton
+              isWorkoutPaused={isWorkoutPaused}
+              onPause={pauseWorkout}
+              onResume={resumeWorkout}
+            />
+
+            <View style={{ alignItems: 'flex-end', flex: 1, minWidth: 0 }}>
+              <Text
+                numberOfLines={1}
+                style={{
+                  color: definition?.color ?? colors.accent,
+                  fontFamily: fonts.brand,
+                  fontSize: 22,
+                  fontWeight: '700',
+                }}
+              >
+                {formatSessionVolume(totalVolume, unit)}
+              </Text>
+              <Text
+                style={{
+                  color: MUTED,
+                  fontFamily: fonts.jetbrainsMono,
+                  fontSize: 9,
+                  letterSpacing: 1,
+                  marginTop: 2,
+                  textAlign: 'right',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Volume
+              </Text>
+            </View>
+          </View>
+
+          {definition ? (
+            <View
+              style={{
+                borderColor: BORDER,
+                borderTopWidth: 1,
+                paddingTop: 12,
+              }}
+            >
+              <Text
+                style={{
+                  color: MUTED,
+                  fontFamily: fonts.jetbrainsMono,
+                  fontSize: 9,
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {definition.eyebrow}
+              </Text>
+              <Text
+                style={{
+                  color: definition.color,
+                  fontFamily: fonts.brand,
+                  fontSize: 14,
+                  fontWeight: '700',
+                  marginTop: 2,
+                }}
+              >
+                {definition.name}
+              </Text>
+            </View>
+          ) : null}
+
+          {showFinishButton ? (
+            <FinishButton fullWidth isFinishing={isFinishing} onFinish={onFinish} />
+          ) : null}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="px-5 pb-4 pt-3">
@@ -105,28 +310,11 @@ export function WorkoutHeader({
           </Text>
         </View>
 
-        <Pressable
-          accessibilityLabel={isWorkoutPaused ? 'Resume workout' : 'Pause workout'}
-          accessibilityRole="button"
-          onPress={isWorkoutPaused ? resumeWorkout : pauseWorkout}
-          style={({ hovered, pressed }) => ({
-            alignItems: 'center',
-            backgroundColor: isWorkoutPaused ? LIME : 'rgba(255,255,255,0.06)',
-            borderColor: isWorkoutPaused ? LIME : 'rgba(255,255,255,0.12)',
-            borderRadius: 10,
-            borderWidth: 1,
-            justifyContent: 'center',
-            opacity: hovered || pressed ? 0.88 : 1,
-            paddingHorizontal: 12,
-            paddingVertical: 12,
-          })}
-        >
-          {isWorkoutPaused ? (
-            <Play color={TEXT_DARK} fill={TEXT_DARK} size={16} />
-          ) : (
-            <Pause color={colors.text} size={16} />
-          )}
-        </Pressable>
+        <PauseButton
+          isWorkoutPaused={isWorkoutPaused}
+          onPause={pauseWorkout}
+          onResume={resumeWorkout}
+        />
 
         <View style={{ backgroundColor: BORDER, height: 44, width: 1 }} />
 
@@ -182,34 +370,9 @@ export function WorkoutHeader({
           </View>
         ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Finish workout"
-          disabled={isFinishing}
-          onPress={onFinish}
-          style={({ hovered, pressed }) => ({
-            alignItems: 'center',
-            backgroundColor: LIME,
-            borderRadius: 10,
-            flexDirection: 'row',
-            gap: 8,
-            opacity: isFinishing ? 0.6 : hovered || pressed ? 0.88 : 1,
-            paddingHorizontal: 22,
-            paddingVertical: 12,
-          })}
-        >
-          <Flag color={TEXT_DARK} size={16} />
-          <Text
-            style={{
-              color: TEXT_DARK,
-              fontFamily: fonts.brand,
-              fontSize: 13,
-              fontWeight: '700',
-            }}
-          >
-            Finish Workout
-          </Text>
-        </Pressable>
+        {showFinishButton ? (
+          <FinishButton isFinishing={isFinishing} onFinish={onFinish} />
+        ) : null}
       </View>
     </View>
   );

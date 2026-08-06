@@ -108,6 +108,8 @@ export async function populateWorkoutFromRoutine(
       await callbacks.createSet({
         workout_exercise_id: workoutExercise.id,
         set_number: setNumber,
+        weight: re.target_weight ?? null,
+        reps: re.target_reps ?? null,
       });
     }
 

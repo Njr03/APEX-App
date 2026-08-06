@@ -5,6 +5,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ExerciseCard } from '@/components/workout/ExerciseCard';
 import { ExercisePickerModal } from '@/components/workout/ExercisePickerModal';
@@ -16,6 +17,7 @@ import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useBootstrapActiveWorkout } from '@/hooks/useBootstrapActiveWorkout';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
+import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import {
   useAddWorkoutExercise,
   useCreateSet,
@@ -32,6 +34,8 @@ import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import { useWorkoutSessionStore } from '@/stores/workoutSessionStore';
 
 export default function ActiveWorkoutScreen() {
+  const { isCompact } = useLayoutBreakpoint();
+  const insets = useSafeAreaInsets();
   const {
     workout,
     isLoading,
@@ -130,11 +134,12 @@ export default function ActiveWorkoutScreen() {
     : colors.accent;
 
   return (
-    <Screen className="relative">
+    <Screen className="relative" edges={isCompact ? ['top', 'left', 'right'] : undefined}>
       <WorkoutHeader
         isFinishing={finishWorkout.isPending}
         name={workout.name}
         onFinish={handleFinish}
+        showFinishButton={!isCompact}
         startedAt={workout.started_at}
         unit={unit}
         workoutExercises={workout.workout_exercises}
@@ -142,7 +147,7 @@ export default function ActiveWorkoutScreen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-3 p-5 pb-32"
+        contentContainerClassName={isCompact ? 'gap-3 p-5 pb-28' : 'gap-3 p-5 pb-32'}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -184,6 +189,19 @@ export default function ActiveWorkoutScreen() {
           variant="secondary"
         />
       </ScrollView>
+
+      {isCompact ? (
+        <View
+          className="absolute bottom-0 left-0 right-0 border-t border-border bg-bg px-5 pt-3"
+          style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+        >
+          <Button
+            label="Finish Workout"
+            loading={finishWorkout.isPending}
+            onPress={() => void handleFinish()}
+          />
+        </View>
+      ) : null}
 
       <ExercisePickerModal
         excludeExerciseIds={existingExerciseIds}
