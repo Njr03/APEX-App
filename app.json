@@ -31,7 +31,7 @@
       "themeColor": "#0a0a0f",
       "backgroundColor": "#0a0a0f",
       "display": "standalone",
-      "orientation": "portrait",
+      "orientation": "portrait-primary",
       "startUrl": "/",
       "scope": "/"
     },

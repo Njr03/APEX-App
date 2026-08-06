@@ -38,6 +38,7 @@ export default function Root({ children }: { children: ReactNode }) {
           <link key={href} href={href} media={media} rel="apple-touch-startup-image" />
         ))}
 
+        <script dangerouslySetInnerHTML={{ __html: portraitOrientationLock }} />
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerRegistration }} />
 
         {/*
@@ -56,7 +57,43 @@ export default function Root({ children }: { children: ReactNode }) {
 const responsiveBackground = `
 body {
   background-color: ${APP_BG};
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    transform: rotate(90deg) translateY(-100%);
+    transform-origin: top left;
+    background-color: ${APP_BG};
+  }
 }`;
+
+const portraitOrientationLock = `
+function lockPortraitOrientation() {
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('portrait').catch(function () {});
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', lockPortraitOrientation);
+  window.addEventListener('orientationchange', lockPortraitOrientation);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) {
+      lockPortraitOrientation();
+    }
+  });
+}
+`;
 
 const serviceWorkerRegistration = `
 if ('serviceWorker' in navigator) {
