@@ -13,34 +13,11 @@ export const DASHBOARD_WORKOUT_CARD_RADIUS = 16;
 
 export const DASHBOARD_TILE_WEB_CLASS = 'dashboard-tile';
 
-let suppressHoverUntil = 0;
-let suppressHoverTimeout: ReturnType<typeof setTimeout> | null = null;
-
-/** Prevent hover/focus outlines from sticking after opening or closing tile modals on web. */
-export function suppressDashboardTileHover(durationMs = 500) {
-  if (Platform.OS !== 'web' || typeof document === 'undefined') {
-    return;
-  }
-
-  suppressHoverUntil = Date.now() + durationMs;
-  document.body.classList.add('dashboard-tiles-hover-suppressed');
-  (document.activeElement as HTMLElement | null)?.blur?.();
-
-  if (suppressHoverTimeout) {
-    clearTimeout(suppressHoverTimeout);
-  }
-
-  suppressHoverTimeout = setTimeout(() => {
-    if (Date.now() >= suppressHoverUntil) {
-      document.body.classList.remove('dashboard-tiles-hover-suppressed');
-    }
-    suppressHoverTimeout = null;
-  }, durationMs);
-}
-
 export function wrapDashboardModalClose(onClose: () => void) {
   return () => {
-    suppressDashboardTileHover();
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    }
     onClose();
   };
 }
@@ -54,41 +31,30 @@ export function dashboardCardFrameStyle(borderRadius: number): ViewStyle {
   };
 }
 
-export function dashboardHoverStyle(hovered: boolean) {
-  const showHover = Platform.OS !== 'web' && hovered;
-
+export function dashboardHoverStyle(active: boolean) {
   return {
-    borderColor: showHover ? DASHBOARD_HOVER_BORDER : DASHBOARD_TILE_BORDER,
+    borderColor: active ? DASHBOARD_HOVER_BORDER : DASHBOARD_TILE_BORDER,
     ...(Platform.OS === 'web'
       ? {
           boxShadow: 'none',
         }
       : {
-          transform: [{ translateY: showHover ? -2 : 0 }] as const,
+          transform: [{ translateY: active ? -2 : 0 }] as const,
         }),
   };
 }
 
 export const dashboardTileHoverHandlers = (
-  setHovered: (hovered: boolean) => void,
+  setActive: (active: boolean) => void,
   onPress?: () => void,
-) => {
-  const handlePress = () => {
-    suppressDashboardTileHover();
-    onPress?.();
-  };
-
-  if (Platform.OS === 'web') {
-    return { onPress: handlePress };
-  }
-
-  return {
-    onHoverIn: () => setHovered(true),
-    onHoverOut: () => setHovered(false),
-    onBlur: () => setHovered(false),
-    onPress: handlePress,
-  };
-};
+) => ({
+  onHoverIn: () => setActive(true),
+  onHoverOut: () => setActive(false),
+  onPressIn: () => setActive(true),
+  onPressOut: () => setActive(false),
+  onBlur: () => setActive(false),
+  onPress: () => onPress?.(),
+});
 
 export function dashboardTileWebClassName(extra?: string) {
   if (Platform.OS !== 'web') {

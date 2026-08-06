@@ -377,7 +377,7 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
                 fontSize: 11,
               }}
             >
-              Each dot is a completed workout positioned by day and start time.
+              Each dot is a completed workout.
             </Text>
           </View>
 

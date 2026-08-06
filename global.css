@@ -55,12 +55,11 @@
   }
 }
 
-body.dashboard-tiles-hover-suppressed .dashboard-tile:hover,
 .dashboard-tile:focus,
 .dashboard-tile:focus-visible,
 .dashboard-tile:active {
-  border-color: rgba(255, 255, 255, 0.06) !important;
-  box-shadow: none !important;
+  border-color: rgba(200, 255, 90, 0.4) !important;
+  box-shadow: 0 0 32px rgba(200, 255, 90, 0.12);
   outline: none !important;
 }
 
