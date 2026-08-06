@@ -59,53 +59,52 @@
 }
 
 .card-row-slider {
-  transition: transform 0.28s ease;
   will-change: transform;
 }
 
 .card-scroll-range {
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
   cursor: pointer;
   display: block;
-  height: 4px;
-  margin: 10px 0;
+  height: 2px;
+  margin: 8px 0;
   outline: none;
   width: 100%;
 }
 
 .card-scroll-range::-webkit-slider-runnable-track {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
-  height: 4px;
+  height: 2px;
 }
 
 .card-scroll-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.35);
+  background: transparent;
   border: none;
-  border-radius: 999px;
-  height: 12px;
-  margin-top: -4px;
-  width: 12px;
+  box-shadow: none;
+  height: 20px;
+  margin-top: -9px;
+  width: 20px;
 }
 
 .card-scroll-range::-moz-range-track {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   border: none;
   border-radius: 999px;
-  height: 4px;
+  height: 2px;
 }
 
 .card-scroll-range::-moz-range-thumb {
-  background: rgba(255, 255, 255, 0.35);
+  background: transparent;
   border: none;
-  border-radius: 999px;
-  height: 12px;
-  width: 12px;
+  box-shadow: none;
+  height: 20px;
+  width: 20px;
 }
 
 .week-split-card-inner {

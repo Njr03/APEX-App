@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -8,6 +8,12 @@ import {
   View,
   type LayoutChangeEvent,
 } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
@@ -155,24 +161,22 @@ function AddWorkoutCard() {
         borderStyle: 'dashed',
         borderWidth: 1,
         cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
-        flexGrow: 1,
-        height: Platform.OS === 'web' ? ('100%' as const) : undefined,
+        flex: 1,
         justifyContent: 'center',
-        minHeight: 220,
-        paddingHorizontal: 16,
-        paddingVertical: 32,
+        paddingHorizontal: 8,
+        paddingVertical: 16,
         width: '100%',
         ...dashboardPressStyle(pressed),
       }}
     >
-      <Plus color={colors.accent} size={28} strokeWidth={2.5} />
+      <Plus color={colors.accent} size={22} strokeWidth={2.5} />
       <Text
         style={{
           color: colors.accent,
           fontFamily: fonts.brand,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '700',
-          marginTop: 8,
+          marginTop: 6,
         }}
       >
         Add
@@ -188,7 +192,11 @@ export function SavedWorkoutCardsRow({
 }: SavedWorkoutCardsRowProps) {
   const { width: viewportWidth } = useLayoutBreakpoint();
   const [rowWidth, setRowWidth] = useState(0);
-  const [scrollIndex, setScrollIndex] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [deletingRoutineId, setDeletingRoutineId] = useState<string | null>(null);
+  const [startError, setStartError] = useState<string | null>(null);
+  const isDraggingSlider = useRef(false);
+  const translateX = useSharedValue(0);
   const {
     data: savedWorkouts,
     isLoading,
@@ -199,8 +207,6 @@ export function SavedWorkoutCardsRow({
   const { data: workouts } = useWorkoutHistory();
   const deleteRoutine = useDeleteRoutine();
   const { startFromRoutineId, isStarting } = useStartWorkoutSession();
-  const [deletingRoutineId, setDeletingRoutineId] = useState<string | null>(null);
-  const [startError, setStartError] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -215,6 +221,7 @@ export function SavedWorkoutCardsRow({
 
   const layoutWidth = rowWidth > 0 ? rowWidth : viewportWidth;
   const cardWidth = Math.min(280, Math.max(240, layoutWidth - 48));
+  const addCardWidth = cardWidth / 2;
   const cardStep = cardWidth + CARD_GAP;
   const itemCount = sessionWorkouts.length + 1;
   const visibleCardCount =
@@ -222,15 +229,43 @@ export function SavedWorkoutCardsRow({
   const maxScrollIndex = Math.max(0, itemCount - visibleCardCount);
 
   useEffect(() => {
-    setScrollIndex((current) => Math.min(current, maxScrollIndex));
+    setScrollOffset((current) => Math.min(current, maxScrollIndex));
   }, [maxScrollIndex]);
 
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      setScrollIndex(Math.max(0, Math.min(maxScrollIndex, index)));
+  useEffect(() => {
+    if (isDraggingSlider.current || cardStep <= 0) return;
+    translateX.value = withTiming(-scrollOffset * cardStep, {
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [cardStep, scrollOffset, translateX]);
+
+  const handleSliderChange = useCallback(
+    (value: number) => {
+      isDraggingSlider.current = true;
+      const clamped = Math.max(0, Math.min(maxScrollIndex, value));
+      setScrollOffset(clamped);
+      translateX.value = -clamped * cardStep;
     },
-    [maxScrollIndex],
+    [cardStep, maxScrollIndex, translateX],
   );
+
+  const handleSliderEnd = useCallback(
+    (value: number) => {
+      isDraggingSlider.current = false;
+      const snapped = Math.max(0, Math.min(maxScrollIndex, Math.round(value)));
+      setScrollOffset(snapped);
+      translateX.value = withTiming(-snapped * cardStep, {
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+      });
+    },
+    [cardStep, maxScrollIndex, translateX],
+  );
+
+  const animatedRowStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const handleDelete = async (routineId: string) => {
     setDeletingRoutineId(routineId);
@@ -280,18 +315,20 @@ export function SavedWorkoutCardsRow({
           }}
         >
           <View style={{ overflow: 'hidden', paddingBottom: 4, paddingTop: 4, width: '100%' }}>
-            <View
-              className={Platform.OS === 'web' ? 'card-row-slider' : undefined}
-              style={{
-                alignItems: 'stretch',
-                flexDirection: 'row',
-                transform: [{ translateX: -scrollIndex * cardStep }],
-              }}
+            <Animated.View
+              style={[
+                {
+                  alignItems: 'stretch',
+                  flexDirection: 'row',
+                },
+                animatedRowStyle,
+              ]}
             >
               {sessionWorkouts.map((workout) => (
                 <View
                   key={workout.id}
                   style={{
+                    alignSelf: 'stretch',
                     flexShrink: 0,
                     marginRight: CARD_GAP,
                     width: cardWidth,
@@ -310,16 +347,17 @@ export function SavedWorkoutCardsRow({
                   />
                 </View>
               ))}
-              <View style={{ flexShrink: 0, width: cardWidth }}>
+              <View style={{ alignSelf: 'stretch', flexShrink: 0, width: addCardWidth }}>
                 <AddWorkoutCard />
               </View>
-            </View>
+            </Animated.View>
           </View>
 
           <CardScrollSlider
             max={maxScrollIndex}
-            onChange={scrollToIndex}
-            value={scrollIndex}
+            onChange={handleSliderChange}
+            onChangeEnd={handleSliderEnd}
+            value={scrollOffset}
           />
         </View>
       ) : null}
