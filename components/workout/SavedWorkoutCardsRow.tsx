@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -7,12 +7,16 @@ import {
   ScrollView,
   Text,
   View,
+  type LayoutChangeEvent,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from 'react-native';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
 import { AppText } from '@/components/ui/AppText';
+import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
 import { QueryError } from '@/components/ui/QueryState';
 import {
   useDeleteRoutine,
@@ -35,6 +39,7 @@ import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 const CARD_BG = '#0d0d1b';
 const BORDER = 'rgba(255,255,255,0.06)';
 const MUTED = 'rgba(240,237,232,0.5)';
+const CARD_GAP = 10;
 
 interface SavedWorkoutCardsRowProps {
   hasUnfinishedSession: boolean;
@@ -51,7 +56,6 @@ function SavedWorkoutCard({
   onDelete,
   onEdit,
   onStart,
-  compact,
   cardWidth,
 }: {
   workout: RoutineSummary;
@@ -62,7 +66,6 @@ function SavedWorkoutCard({
   onDelete: () => void;
   onEdit: () => void;
   onStart: () => void;
-  compact: boolean;
   cardWidth: number;
 }) {
   const disabled = hasUnfinishedSession;
@@ -71,10 +74,9 @@ function SavedWorkoutCard({
     <View
       style={{
         alignSelf: 'stretch',
-        flex: compact ? undefined : 1,
-        minWidth: compact ? 0 : 220,
+        minWidth: 0,
         opacity: disabled ? 0.5 : 1,
-        width: compact ? cardWidth : 240,
+        width: cardWidth,
       }}
     >
       <DashboardWorkoutCard
@@ -135,56 +137,58 @@ function SavedWorkoutCard({
   );
 }
 
-function AddWorkoutCard() {
+function AddWorkoutCard({ cardWidth }: { cardWidth: number }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <Pressable
-      accessibilityLabel="Create workout"
-      accessibilityRole="button"
-      className={Platform.OS === 'web' ? 'week-split-card' : undefined}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={() => router.push('/routines/new')}
-      style={{
-        alignSelf: 'stretch',
-        borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS,
-        borderStyle: hovered ? 'solid' : 'dashed',
-        borderWidth: 1,
-        cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
-        flex: 1,
-        minWidth: 96,
-        overflow: Platform.OS === 'web' ? ('visible' as const) : undefined,
-        ...dashboardHoverStyle(hovered),
-        borderColor: hovered ? DASHBOARD_HOVER_BORDER : 'rgba(200,255,90,0.25)',
-      }}
-    >
-      <View
+    <View style={{ alignSelf: 'stretch', width: cardWidth }}>
+      <Pressable
+        accessibilityLabel="Create workout"
+        accessibilityRole="button"
+        className={Platform.OS === 'web' ? 'week-split-card' : undefined}
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
+        onPress={() => router.push('/routines/new')}
         style={{
-          alignItems: 'center',
-          backgroundColor: CARD_BG,
-          borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS - 2,
-          flex: 1,
-          justifyContent: 'center',
-          margin: 1,
-          paddingHorizontal: 16,
-          paddingVertical: 24,
+          alignSelf: 'stretch',
+          borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS,
+          borderStyle: hovered ? 'solid' : 'dashed',
+          borderWidth: 1,
+          cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
+          minHeight: 180,
+          overflow: Platform.OS === 'web' ? ('visible' as const) : undefined,
+          ...dashboardHoverStyle(hovered),
+          borderColor: hovered ? DASHBOARD_HOVER_BORDER : 'rgba(200,255,90,0.25)',
         }}
       >
-        <Plus color={colors.accent} size={22} />
-        <Text
+        <View
           style={{
-            color: colors.accent,
-            fontFamily: fonts.brand,
-            fontSize: 12,
-            fontWeight: '700',
-            marginTop: 6,
+            alignItems: 'center',
+            backgroundColor: CARD_BG,
+            borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS - 2,
+            flex: 1,
+            justifyContent: 'center',
+            margin: 1,
+            minHeight: 178,
+            paddingHorizontal: 16,
+            paddingVertical: 24,
           }}
         >
-          Add
-        </Text>
-      </View>
-    </Pressable>
+          <Plus color={colors.accent} size={22} />
+          <Text
+            style={{
+              color: colors.accent,
+              fontFamily: fonts.brand,
+              fontSize: 12,
+              fontWeight: '700',
+              marginTop: 6,
+            }}
+          >
+            Add
+          </Text>
+        </View>
+      </Pressable>
+    </View>
   );
 }
 
@@ -193,8 +197,11 @@ export function SavedWorkoutCardsRow({
   heading = 'Saved Workouts',
   unit = 'lb',
 }: SavedWorkoutCardsRowProps) {
-  const { isCompact, width: viewportWidth } = useLayoutBreakpoint();
+  const { width: viewportWidth } = useLayoutBreakpoint();
   const cardWidth = Math.min(280, Math.max(240, viewportWidth - 48));
+  const scrollRef = useRef<ScrollView>(null);
+  const [rowWidth, setRowWidth] = useState(0);
+  const [scrollIndex, setScrollIndex] = useState(0);
   const {
     data: savedWorkouts,
     isLoading,
@@ -218,6 +225,29 @@ export function SavedWorkoutCardsRow({
     () => dedupeSavedWorkoutsForSession(savedWorkouts ?? []),
     [savedWorkouts],
   );
+
+  const cardStep = cardWidth + CARD_GAP;
+  const itemCount = sessionWorkouts.length + 1;
+  const visibleCardCount = Math.max(
+    1,
+    rowWidth > 0 ? Math.floor((rowWidth + CARD_GAP) / cardStep) : 1,
+  );
+  const maxScrollIndex = Math.max(0, itemCount - visibleCardCount);
+
+  useEffect(() => {
+    setScrollIndex((current) => Math.min(current, maxScrollIndex));
+  }, [maxScrollIndex]);
+
+  const scrollToIndex = (index: number) => {
+    const nextIndex = Math.max(0, Math.min(maxScrollIndex, index));
+    setScrollIndex(nextIndex);
+    scrollRef.current?.scrollTo({ x: nextIndex * cardStep, animated: true });
+  };
+
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardStep);
+    setScrollIndex(Math.max(0, Math.min(maxScrollIndex, nextIndex)));
+  };
 
   const handleDelete = async (routineId: string) => {
     setDeletingRoutineId(routineId);
@@ -261,35 +291,53 @@ export function SavedWorkoutCardsRow({
       ) : null}
 
       {!isLoading && !isError ? (
-        <ScrollView
-          horizontal
-          contentContainerStyle={{
-            alignItems: 'stretch',
-            gap: 10,
-            paddingBottom: 4,
-            paddingRight: 4,
-            paddingTop: 4,
+        <View
+          onLayout={(event: LayoutChangeEvent) => {
+            setRowWidth(event.nativeEvent.layout.width);
           }}
-          showsHorizontalScrollIndicator={false}
-          style={Platform.OS === 'web' ? { overflow: 'visible' as const } : undefined}
         >
-          {sessionWorkouts.map((workout) => (
-            <SavedWorkoutCard
-              key={workout.id}
-              compact={isCompact}
-              cardWidth={cardWidth}
-              hasUnfinishedSession={hasUnfinishedSession || isStarting}
-              isDeleting={deletingRoutineId === workout.id}
-              onDelete={() => void handleDelete(workout.id)}
-              onEdit={() => router.push(`/routines/${workout.id}/edit`)}
-              onStart={() => void handleStart(workout.id)}
-              unit={unit}
-              workout={workout}
-              workouts={workouts}
-            />
-          ))}
-          <AddWorkoutCard />
-        </ScrollView>
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            contentContainerStyle={{
+              alignItems: 'stretch',
+              gap: CARD_GAP,
+              paddingBottom: 4,
+              paddingRight: 4,
+              paddingTop: 4,
+            }}
+            decelerationRate="fast"
+            onMomentumScrollEnd={handleScrollEnd}
+            onScrollEndDrag={handleScrollEnd}
+            scrollEventThrottle={16}
+            showsHorizontalScrollIndicator={false}
+            snapToAlignment="start"
+            snapToInterval={cardStep}
+            style={Platform.OS === 'web' ? { overflow: 'visible' as const } : undefined}
+          >
+            {sessionWorkouts.map((workout) => (
+              <SavedWorkoutCard
+                key={workout.id}
+                cardWidth={cardWidth}
+                hasUnfinishedSession={hasUnfinishedSession || isStarting}
+                isDeleting={deletingRoutineId === workout.id}
+                onDelete={() => void handleDelete(workout.id)}
+                onEdit={() => router.push(`/routines/${workout.id}/edit`)}
+                onStart={() => void handleStart(workout.id)}
+                unit={unit}
+                workout={workout}
+                workouts={workouts}
+              />
+            ))}
+            <AddWorkoutCard cardWidth={cardWidth} />
+          </ScrollView>
+
+          <CardScrollSlider
+            max={maxScrollIndex}
+            onChange={scrollToIndex}
+            value={scrollIndex}
+          />
+        </View>
       ) : null}
     </View>
   );
