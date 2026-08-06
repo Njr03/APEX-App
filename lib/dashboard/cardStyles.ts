@@ -32,3 +32,16 @@ export function dashboardHoverStyle(hovered: boolean) {
         }),
   };
 }
+
+export const dashboardTileHoverHandlers = (
+  setHovered: (hovered: boolean) => void,
+  onPress?: () => void,
+) => ({
+  onHoverIn: () => setHovered(true),
+  onHoverOut: () => setHovered(false),
+  onBlur: () => setHovered(false),
+  onPress: () => {
+    setHovered(false);
+    onPress?.();
+  },
+});

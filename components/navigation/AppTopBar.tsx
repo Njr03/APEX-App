@@ -138,36 +138,38 @@ export function AppTopBar() {
           paddingHorizontal: 16,
         }}
       >
-        <View className="min-w-0 flex-1 flex-row items-center" style={{ gap: 10 }}>
-          <Text
-            accessibilityRole="header"
-            style={{
-              color: colors.accent,
-              fontFamily: fonts.brand,
-              fontSize: 16,
-              fontWeight: '700',
-              letterSpacing: 0.5,
-            }}
-          >
-            APX
-          </Text>
-
-          {welcomeName ? (
-            <View className="min-w-0 flex-1 justify-center">
+        <View className="min-w-0 flex-1 justify-center">
+          <View style={{ gap: 2 }}>
+            <Text
+              accessibilityRole="header"
+              style={{
+                color: colors.accent,
+                fontFamily: fonts.brand,
+                fontSize: 16,
+                fontWeight: '700',
+                letterSpacing: 0.5,
+              }}
+            >
+              APX
+            </Text>
+            {welcomeName ? (
               <Text
                 numberOfLines={1}
                 style={{
-                  ...TOPBAR_WELCOME_TEXT_STYLE,
+                  color: colors.text,
+                  fontFamily: fonts.jetbrainsMono,
+                  fontSize: 11,
+                  letterSpacing: 0.3,
                 }}
               >
                 Welcome {welcomeName}
               </Text>
-            </View>
-          ) : (
-            <Text numberOfLines={1} style={TOPBAR_TITLE_TEXT_STYLE}>
-              {PAGE_TITLES[activePage]}
-            </Text>
-          )}
+            ) : (
+              <Text numberOfLines={1} style={TOPBAR_TITLE_TEXT_STYLE}>
+                {PAGE_TITLES[activePage]}
+              </Text>
+            )}
+          </View>
         </View>
 
         <View className="shrink-0 flex-row items-center gap-2">

@@ -9,6 +9,7 @@ import {
   DASHBOARD_TILE_BG,
   dashboardCardFrameStyle,
   dashboardHoverStyle,
+  dashboardTileHoverHandlers,
 } from '@/lib/dashboard/cardStyles';
 import { useDashboardRecentPRs } from '@/hooks/useDashboardRecentPRs';
 import type { DashboardRecentPR } from '@/lib/dashboard/recentPRs';
@@ -31,9 +32,8 @@ function PRCard({
   return (
     <Pressable
       accessibilityRole="button"
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={onPress}
+      className={Platform.OS === 'web' ? 'dashboard-tile' : undefined}
+      {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignItems: 'center',
         alignSelf: 'stretch',
@@ -121,9 +121,8 @@ function PREmptyCard({ onPress }: { onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={onPress}
+      className={Platform.OS === 'web' ? 'dashboard-tile' : undefined}
+      {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignSelf: 'stretch',
         backgroundColor: DASHBOARD_TILE_BG,
@@ -231,7 +230,7 @@ export function RecentPersonalRecordsPanel({
 
   return (
     <>
-      <View className="w-full" style={{ gap: 12 }}>
+      <View className="w-full" style={{ gap: 12, position: 'relative', zIndex: 1 }}>
         <Pressable accessibilityRole="button" onPress={openSummary}>
           <InsightSectionHeading title="Recent Personal Records" />
         </Pressable>

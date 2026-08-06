@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { RecentPersonalRecordsPanel } from '@/components/dashboard/RecentPersonalRecordsPanel';
 import { SplitCardsRow } from '@/components/dashboard/ThisWeekSection';
@@ -38,7 +38,9 @@ export default function HomeScreen() {
 
         <TrainingInsightsSection />
 
-        <RecentPersonalRecordsPanel unit={unit} />
+        <View style={{ marginTop: 4 }}>
+          <RecentPersonalRecordsPanel unit={unit} />
+        </View>
 
         {isProfileLoading ? (
           <ActivityIndicator color={colors.accent} />

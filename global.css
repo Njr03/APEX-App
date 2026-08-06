@@ -44,6 +44,11 @@
     box-shadow 0.2s ease;
 }
 
+.dashboard-tile:focus,
+.dashboard-tile:focus-visible {
+  outline: none;
+}
+
 .week-split-card-inner {
   overflow: hidden;
 }

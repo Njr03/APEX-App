@@ -6,7 +6,7 @@ import { MuscleBalanceRadar } from '@/components/dashboard/MuscleBalanceRadar';
 import { WeeklyConsistencyDetailModal } from '@/components/dashboard/WeeklyConsistencyDetailModal';
 import { WeeklyConsistencyTracker } from '@/components/dashboard/WeeklyConsistencyTracker';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
-import { dashboardCardFrameStyle, dashboardHoverStyle } from '@/lib/dashboard/cardStyles';
+import { dashboardCardFrameStyle, dashboardHoverStyle, dashboardTileHoverHandlers } from '@/lib/dashboard/cardStyles';
 import { useMuscleBalance } from '@/hooks/useMuscleBalance';
 import { useWeeklyConsistency } from '@/hooks/useWeeklyConsistency';
 import type { WeeklyConsistencyEntry } from '@/lib/training/weeklyConsistency';
@@ -27,19 +27,14 @@ function InsightCard({
   return (
     <Pressable
       accessibilityRole="button"
-      className={Platform.OS === 'web' ? 'week-split-card' : undefined}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={onPress}
+      className={Platform.OS === 'web' ? 'week-split-card dashboard-tile' : undefined}
+      {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignSelf: 'stretch',
         backgroundColor: CARD_BG,
         borderWidth: 1,
-        flex: compact ? undefined : 1,
-        flexBasis: compact ? '100%' : undefined,
-        minWidth: compact ? 0 : 300,
         padding: compact ? 16 : 18,
-        width: compact ? '100%' : undefined,
+        width: '100%',
         ...dashboardCardFrameStyle(14),
         ...dashboardHoverStyle(hovered),
       }}
@@ -72,16 +67,15 @@ export function TrainingInsightsSection() {
 
   return (
     <>
-      <View
-        className={isCompact ? 'flex-col' : 'flex-row flex-wrap'}
-        style={{ alignItems: 'stretch', gap: isCompact ? 16 : 20 }}
-      >
-        <InsightCard compact={isCompact} onPress={openConsistencyOverview}>
-          <WeeklyConsistencyTracker onWeekPress={openConsistencyWeek} />
-        </InsightCard>
-        <InsightCard compact={isCompact} onPress={() => setMuscleVisible(true)}>
-          <MuscleBalanceRadar compact={isCompact} />
-        </InsightCard>
+      <View style={{ gap: isCompact ? 16 : 20 }}>
+        <View className="flex-col" style={{ alignItems: 'stretch', gap: isCompact ? 16 : 20 }}>
+          <InsightCard compact={isCompact} onPress={openConsistencyOverview}>
+            <WeeklyConsistencyTracker onWeekPress={openConsistencyWeek} />
+          </InsightCard>
+          <InsightCard compact={isCompact} onPress={() => setMuscleVisible(true)}>
+            <MuscleBalanceRadar compact={isCompact} />
+          </InsightCard>
+        </View>
       </View>
 
       <WeeklyConsistencyDetailModal

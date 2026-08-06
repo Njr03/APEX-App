@@ -145,7 +145,7 @@ export function WeeklyConsistencyTracker({
   }
 
   return (
-    <View style={{ gap: 14 }}>
+    <View style={{ gap: 12 }}>
       <InsightSectionHeading title="Weekly Consistency" />
 
       <View className="flex-row items-start justify-center" style={{ gap: COLUMN_GAP }}>

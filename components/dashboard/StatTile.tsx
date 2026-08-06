@@ -5,6 +5,7 @@ import {
   DASHBOARD_TILE_BG,
   dashboardCardFrameStyle,
   dashboardHoverStyle,
+  dashboardTileHoverHandlers,
 } from '@/lib/dashboard/cardStyles';
 import type { StatDeltaTone } from '@/lib/dashboard/statTiles';
 import { fonts } from '@/constants/theme';
@@ -44,9 +45,8 @@ export function StatTile({
     <Pressable
       accessibilityLabel={`${label}, ${value}${unit ?? ''}. ${delta}`}
       accessibilityRole="button"
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={onPress}
+      className={Platform.OS === 'web' ? 'dashboard-tile' : undefined}
+      {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={{
         alignSelf: 'stretch',
         backgroundColor: DASHBOARD_TILE_BG,

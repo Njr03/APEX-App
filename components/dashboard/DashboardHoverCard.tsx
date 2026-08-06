@@ -6,7 +6,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { dashboardHoverStyle } from '@/lib/dashboard/cardStyles';
+import { dashboardHoverStyle, dashboardTileHoverHandlers } from '@/lib/dashboard/cardStyles';
 
 interface DashboardHoverCardProps {
   children: ReactNode;
@@ -29,9 +29,8 @@ export function DashboardHoverCard({
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={onPress ? 'button' : undefined}
       disabled={!onPress}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onPress={onPress}
+      className={Platform.OS === 'web' ? 'dashboard-tile' : undefined}
+      {...dashboardTileHoverHandlers(setHovered, onPress)}
       style={[
         style,
         dashboardHoverStyle(hovered),

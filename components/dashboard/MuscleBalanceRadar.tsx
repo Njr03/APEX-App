@@ -206,7 +206,7 @@ export function MuscleBalanceRadar({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <View style={{ gap: 14 }}>
+    <View style={{ gap: 12 }}>
       <InsightSectionHeading title="Muscle Balance" />
 
       <View
