@@ -10,11 +10,8 @@ import { Search, X } from 'lucide-react-native';
 
 import { AllTimePRsPanel } from '@/components/progress/AllTimePRsPanel';
 import { BodyweightSection } from '@/components/progress/BodyweightSection';
-import { EstimatedOneRmGrid } from '@/components/progress/EstimatedOneRmGrid';
 import { ExerciseProgressCharts } from '@/components/progress/ExerciseProgressCharts';
 import { KeyLiftsProgression } from '@/components/progress/KeyLiftsProgression';
-import { SplitVolumeTrendChart } from '@/components/progress/SplitVolumeTrendChart';
-import { StreakHistoryChart } from '@/components/progress/StreakHistoryChart';
 import { AppText } from '@/components/ui/AppText';
 import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Card } from '@/components/ui/Card';
@@ -91,18 +88,9 @@ export default function ProgressScreen() {
       >
         <TabPageHeading title="Progress" />
 
-        <SplitVolumeTrendChart data={progressData.splitVolumeTrend} />
-
         <KeyLiftsProgression rows={progressData.keyLifts} />
 
-        <EstimatedOneRmGrid tiles={progressData.estimatedOneRm} />
-
         <AllTimePRsPanel records={progressData.allTimePrs} />
-
-        <StreakHistoryChart
-          longestStreak={progressData.longestStreak}
-          runs={progressData.streakRuns}
-        />
 
         <View className="gap-2">
           <AppText variant="display">Exercise progress</AppText>
