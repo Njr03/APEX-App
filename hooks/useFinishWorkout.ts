@@ -19,6 +19,9 @@ import {
   resolveWorkoutNameForSplitTracking,
 } from '@/lib/workout/finalizeWorkoutSession';
 import {
+  resolveWorkoutSplit,
+} from '@/lib/training/splits';
+import {
   calculateWorkoutVolume,
   collectWorkoutSets,
   countWorkoutPRSets,
@@ -50,7 +53,15 @@ export function useFinishWorkout() {
 
       const completedAt = new Date();
       const finalizedWorkout = await finalizeWorkoutSets(workout, completedAt);
-      const activeSplit = useWorkoutSessionStore.getState().activeSplit;
+      const muscleGroups = finalizedWorkout.workout_exercises.flatMap((we) =>
+        we.exercise?.muscle_group ? [we.exercise.muscle_group] : [],
+      );
+      const activeSplit =
+        useWorkoutSessionStore.getState().activeSplit ??
+        resolveWorkoutSplit({
+          name: workout.name,
+          muscleGroups,
+        });
       const trackedName = resolveWorkoutNameForSplitTracking(
         workout.name,
         activeSplit,

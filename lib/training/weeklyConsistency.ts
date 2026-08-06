@@ -6,7 +6,11 @@ import {
   subWeeks,
 } from 'date-fns';
 
-import { inferSplitFromWorkoutName, SPLIT_DEFINITIONS, type TrainingSplit } from '@/lib/training/splits';
+import {
+  resolveWorkoutSplit,
+  SPLIT_DEFINITIONS,
+  type TrainingSplit,
+} from '@/lib/training/splits';
 import type { Workout } from '@/lib/supabase';
 
 export const WEEKLY_CONSISTENCY_WEEKS = 8;
@@ -28,8 +32,45 @@ export interface WeeklyConsistencySummary {
   label: string;
 }
 
+export interface WeeklyConsistencyData {
+  entries: WeeklyConsistencyEntry[];
+  summary: WeeklyConsistencySummary;
+}
+
+export type WorkoutForWeeklyConsistency = Pick<
+  Workout,
+  'name' | 'status' | 'started_at' | 'completed_at' | 'routine_id'
+> & {
+  routines?: { name: string } | null;
+  workout_exercises?: Array<{
+    exercise?: { muscle_group: string } | null;
+  }> | null;
+};
+
+function workoutSessionDate(workout: WorkoutForWeeklyConsistency): Date {
+  return parseISO(workout.completed_at ?? workout.started_at);
+}
+
+function workoutMuscleGroups(
+  workout: WorkoutForWeeklyConsistency,
+): string[] {
+  return (workout.workout_exercises ?? [])
+    .map((entry) => entry.exercise?.muscle_group)
+    .filter((group): group is string => Boolean(group));
+}
+
+export function resolveWorkoutSplitForConsistency(
+  workout: WorkoutForWeeklyConsistency,
+): TrainingSplit | null {
+  return resolveWorkoutSplit({
+    name: workout.name,
+    routineName: workout.routines?.name ?? null,
+    muscleGroups: workoutMuscleGroups(workout),
+  });
+}
+
 export function buildWeeklyConsistencyEntries(
-  workouts: Workout[],
+  workouts: WorkoutForWeeklyConsistency[],
   referenceDate = new Date(),
 ): WeeklyConsistencyEntry[] {
   const completed = workouts.filter((workout) => workout.status === 'completed');
@@ -43,19 +84,21 @@ export function buildWeeklyConsistencyEntries(
     const splits = new Set<TrainingSplit>();
 
     for (const workout of completed) {
-      const startedAt = parseISO(workout.started_at);
-      if (!isWithinInterval(startedAt, { start: weekStart, end: weekEnd })) {
+      const sessionDate = workoutSessionDate(workout);
+      if (!isWithinInterval(sessionDate, { start: weekStart, end: weekEnd })) {
         continue;
       }
 
-      const split = inferSplitFromWorkoutName(workout.name);
+      const split = resolveWorkoutSplitForConsistency(workout);
       if (split) {
         splits.add(split);
       }
     }
 
+    const isCurrentWeek = weeksAgo === 0;
+
     return {
-      week: `W${index + 1}`,
+      week: isCurrentWeek ? 'Now' : `W${index + 1}`,
       weekIndex: index + 1,
       weekStart: weekStart.toISOString(),
       weekEnd: weekEnd.toISOString(),

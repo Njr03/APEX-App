@@ -6,7 +6,7 @@ import {
 } from '@/hooks/queries/useWorkouts';
 import { setActiveWorkoutCache } from '@/hooks/queries/workoutCache';
 import type { SplitWorkoutPlan } from '@/lib/training/splitTemplates';
-import { inferSplitFromWorkoutName } from '@/lib/training/splits';
+import { inferSplitFromWorkoutName, resolveWorkoutSplit } from '@/lib/training/splits';
 import { throwIfSupabaseError } from '@/lib/supabase/errors';
 import {
   supabase,
@@ -116,7 +116,16 @@ export async function populateWorkoutFromRoutine(
     setExerciseExpanded(workoutExercise.id, index === 0);
   }
 
-  initSession(inferSplitFromWorkoutName(workout.name), workout.started_at);
+  initSession(
+    resolveWorkoutSplit({
+      name: workout.name,
+      routineName: routine.name,
+      muscleGroups: routine.routine_exercises.map(
+        (entry) => entry.exercise?.muscle_group,
+      ),
+    }),
+    workout.started_at,
+  );
 }
 
 export async function hydrateActiveWorkoutCache(

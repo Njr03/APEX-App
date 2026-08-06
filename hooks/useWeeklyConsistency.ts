@@ -5,17 +5,29 @@ import {
   buildWeeklyConsistencyEntries,
   summarizeWeeklyConsistency,
   weeklyConsistencyQueryStart,
+  type WeeklyConsistencyData,
   type WeeklyConsistencyEntry,
   type WeeklyConsistencySummary,
+  type WorkoutForWeeklyConsistency,
 } from '@/lib/training/weeklyConsistency';
 import { throwIfSupabaseError } from '@/lib/supabase/errors';
-import { supabase, type Workout } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
 
-export interface WeeklyConsistencyData {
-  entries: WeeklyConsistencyEntry[];
-  summary: WeeklyConsistencySummary;
-}
+export type { WeeklyConsistencyData, WeeklyConsistencyEntry, WeeklyConsistencySummary };
+
+const WEEKLY_CONSISTENCY_SELECT = `
+  id,
+  name,
+  status,
+  started_at,
+  completed_at,
+  routine_id,
+  routines ( name ),
+  workout_exercises (
+    exercise:exercises ( muscle_group )
+  )
+`;
 
 export function useWeeklyConsistency() {
   const { user } = useAuth();
@@ -30,13 +42,13 @@ export function useWeeklyConsistency() {
 
       const result = await supabase
         .from('workouts')
-        .select('id, name, status, started_at')
+        .select(WEEKLY_CONSISTENCY_SELECT)
         .eq('user_id', user!.id)
         .eq('status', 'completed')
         .gte('started_at', since)
-        .order('started_at', { ascending: false });
+        .order('completed_at', { ascending: false });
 
-      const workouts = throwIfSupabaseError(result) as Workout[];
+      const workouts = throwIfSupabaseError(result) as WorkoutForWeeklyConsistency[];
       const entries = buildWeeklyConsistencyEntries(workouts);
 
       return {

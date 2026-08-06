@@ -60,15 +60,80 @@ const SPLIT_NAME_PATTERNS: Record<TrainingSplit, RegExp[]> = {
     /\bupper\s*a\b/i,
     /\bpush\b/i,
     /\barms?\s*(?:&|and)\s*chest\b/i,
+    /\bchest\b/i,
   ],
   B: [
     /\bsplit\s*b\b/i,
     /\bupper\s*b\b/i,
     /\bpull\b/i,
     /\bback\s*(?:&|and)\s*shoulders\b/i,
+    /\bshoulders?\b/i,
   ],
-  L: [/\bsplit\s*l\b/i, /\blegs?\b/i, /\blower\b/i],
+  L: [/\bsplit\s*l\b/i, /\blegs?\b/i, /\blower\b/i, /\bglutes?\b/i],
 };
+
+export function inferSplitFromMuscleGroups(
+  muscleGroups: Iterable<string | null | undefined>,
+): TrainingSplit | null {
+  const scores: Record<TrainingSplit, number> = { A: 0, B: 0, L: 0 };
+
+  for (const group of muscleGroups) {
+    if (!group) continue;
+
+    switch (group) {
+      case 'chest':
+      case 'arms':
+        scores.A += 1;
+        break;
+      case 'back':
+      case 'shoulders':
+        scores.B += 1;
+        break;
+      case 'legs':
+        scores.L += 2;
+        break;
+      case 'full_body':
+        scores.A += 1;
+        scores.B += 1;
+        scores.L += 1;
+        break;
+      default:
+        break;
+    }
+  }
+
+  const bestSplit = SPLIT_ROTATION.reduce((winner, split) =>
+    scores[split] > scores[winner] ? split : winner,
+  );
+
+  return scores[bestSplit] > 0 ? bestSplit : null;
+}
+
+export interface WorkoutSplitInput {
+  name: string;
+  routineName?: string | null;
+  muscleGroups?: Iterable<string | null | undefined>;
+}
+
+export function resolveWorkoutSplit({
+  name,
+  routineName,
+  muscleGroups,
+}: WorkoutSplitInput): TrainingSplit | null {
+  const fromWorkoutName = inferSplitFromWorkoutName(name);
+  if (fromWorkoutName) return fromWorkoutName;
+
+  if (routineName) {
+    const fromRoutineName = inferSplitFromWorkoutName(routineName);
+    if (fromRoutineName) return fromRoutineName;
+  }
+
+  if (muscleGroups) {
+    return inferSplitFromMuscleGroups(muscleGroups);
+  }
+
+  return null;
+}
 
 export function inferSplitFromWorkoutName(name: string): TrainingSplit | null {
   for (const split of SPLIT_ROTATION) {
