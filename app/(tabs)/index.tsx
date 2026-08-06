@@ -8,6 +8,7 @@ import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
 import { useAutoSeedDemoData } from '@/hooks/useAutoSeedDemoData';
+import { useRefreshDashboardOnFocus } from '@/hooks/useRefreshDashboardOnFocus';
 import { colors } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
@@ -24,6 +25,7 @@ export default function HomeScreen() {
   const unit = resolveUnitPreference(profile?.unit_preference);
 
   useAutoSeedDemoData();
+  useRefreshDashboardOnFocus();
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>

@@ -108,6 +108,8 @@ export function useThisWeekSplits() {
   return useQuery({
     queryKey: [...queryKeys.workouts.lists(), 'this-week-splits', user?.id] as const,
     enabled: Boolean(user),
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: async (): Promise<ThisWeekSplitsData> => {
       const now = new Date();
       const weekStart = startOfWeek(now, { weekStartsOn: 1 });

@@ -3,7 +3,6 @@ import type { QueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import type { Set, WorkoutWithDetails } from '@/lib/supabase';
 
-/** Clears the active-workout query without triggering a refetch that restores stale data. */
 export function clearActiveWorkoutCache(
   queryClient: QueryClient,
   userId: string,
@@ -84,4 +83,22 @@ export function invalidateWorkoutQueriesExceptActive(
     queryKey: queryKeys.workouts.all,
     predicate: (query) => query.queryKey[1] !== 'active',
   });
+}
+
+/** Refreshes dashboard tiles, insights, history, routines, and profile metrics. */
+export async function invalidateDashboardMetrics(
+  queryClient: QueryClient,
+  userId?: string,
+) {
+  await Promise.all([
+    invalidateWorkoutQueriesExceptActive(queryClient),
+    queryClient.invalidateQueries({ queryKey: queryKeys.profile.all }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.personalRecords.all }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.routines.all }),
+    userId
+      ? queryClient.invalidateQueries({
+          queryKey: queryKeys.workouts.active(userId),
+        })
+      : Promise.resolve(),
+  ]);
 }

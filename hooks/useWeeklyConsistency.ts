@@ -23,6 +23,8 @@ export function useWeeklyConsistency() {
   return useQuery({
     queryKey: [...queryKeys.workouts.lists(), 'weekly-consistency', user?.id] as const,
     enabled: Boolean(user),
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: async (): Promise<WeeklyConsistencyData> => {
       const since = weeklyConsistencyQueryStart();
 

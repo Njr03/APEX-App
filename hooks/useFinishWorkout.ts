@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 
-import { queryKeys } from '@/hooks/queries/queryKeys';
 import {
   clearActiveWorkoutCache,
-  invalidateWorkoutQueriesExceptActive,
+  invalidateDashboardMetrics,
 } from '@/hooks/queries/workoutCache';
 import { calculateStreakUpdate, calculateLongestStreak } from '@/lib/streak';
 import {
@@ -16,11 +15,16 @@ import { supabase, type WorkoutWithDetails } from '@/lib/supabase';
 import { calculateWorkoutXP } from '@/lib/xp';
 import { didHitRoutineTargets } from '@/lib/workout/routineTarget';
 import {
+  finalizeWorkoutSets,
+  resolveWorkoutNameForSplitTracking,
+} from '@/lib/workout/finalizeWorkoutSession';
+import {
   calculateWorkoutVolume,
   collectWorkoutSets,
   countWorkoutPRSets,
 } from '@/lib/workout/volume';
 import { useAuth } from '@/providers/AuthProvider';
+import { useWorkoutSessionStore } from '@/stores/workoutSessionStore';
 
 export interface FinishWorkoutResult {
   workoutId: string;
@@ -44,16 +48,23 @@ export function useFinishWorkout() {
     }): Promise<FinishWorkoutResult> => {
       if (!user) throw new Error('Not authenticated');
 
-      const prCount = countWorkoutPRSets(workout.workout_exercises);
-
       const completedAt = new Date();
+      const finalizedWorkout = await finalizeWorkoutSets(workout, completedAt);
+      const activeSplit = useWorkoutSessionStore.getState().activeSplit;
+      const trackedName = resolveWorkoutNameForSplitTracking(
+        workout.name,
+        activeSplit,
+      );
+
+      const prCount = countWorkoutPRSets(finalizedWorkout.workout_exercises);
+
       const startedAt = new Date(workout.started_at);
       const durationSeconds = Math.max(
         0,
         Math.floor((completedAt.getTime() - startedAt.getTime()) / 1000),
       );
 
-      const allSets = collectWorkoutSets(workout.workout_exercises);
+      const allSets = collectWorkoutSets(finalizedWorkout.workout_exercises);
       const totalVolume = calculateWorkoutVolume(allSets);
 
       let hitRoutineTarget = false;
@@ -72,7 +83,7 @@ export function useFinishWorkout() {
 
         const routine = throwIfSupabaseError(routineResult);
 
-        hitRoutineTarget = didHitRoutineTargets(workout, {
+        hitRoutineTarget = didHitRoutineTargets(finalizedWorkout, {
           ...routine,
           routine_exercises: [...(routine.routine_exercises ?? [])].sort(
             (a, b) => a.order_index - b.order_index,
@@ -110,6 +121,7 @@ export function useFinishWorkout() {
       const workoutUpdate = await supabase
         .from('workouts')
         .update({
+          name: trackedName,
           status: 'completed',
           completed_at: completedAt.toISOString(),
           duration_seconds: durationSeconds,
@@ -158,12 +170,8 @@ export function useFinishWorkout() {
     onSuccess: () => {
       if (user) {
         clearActiveWorkoutCache(queryClient, user.id);
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.workouts.active(user.id),
-        });
       }
-      void invalidateWorkoutQueriesExceptActive(queryClient);
-      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
+      void invalidateDashboardMetrics(queryClient, user?.id);
     },
   });
 }

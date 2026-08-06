@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile, useWorkout, useWorkoutSessionRecords } from '@/hooks/queries';
-import { clearActiveWorkoutCache } from '@/hooks/queries/workoutCache';
+import { clearActiveWorkoutCache, invalidateDashboardMetrics } from '@/hooks/queries/workoutCache';
 import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
 import { colors } from '@/constants/theme';
 import { formatDashboardPRValue } from '@/lib/dashboard/recentPRs';
@@ -60,6 +60,7 @@ export default function WorkoutSummaryScreen() {
   const handleDone = () => {
     if (user) {
       clearActiveWorkoutCache(queryClient, user.id);
+      void invalidateDashboardMetrics(queryClient, user.id);
     }
     router.replace('/(tabs)');
   };

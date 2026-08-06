@@ -23,6 +23,8 @@ export function useDashboardRecentPRs(unit: 'kg' | 'lb' = 'kg') {
       unit,
     ] as const,
     enabled: Boolean(user),
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: async () => {
       const result = await supabase
         .from('personal_records')

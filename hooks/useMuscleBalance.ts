@@ -31,6 +31,8 @@ export function useMuscleBalance() {
   return useQuery({
     queryKey: [...queryKeys.workouts.lists(), 'muscle-balance', user?.id] as const,
     enabled: Boolean(user),
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: async (): Promise<MuscleBalanceData> => {
       const since = muscleBalanceQueryStart();
 

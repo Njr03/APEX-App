@@ -5,6 +5,7 @@ import {
   routineSummariesQueryKey,
   type RoutineSummary,
 } from '@/hooks/queries/useRoutineSummaries';
+import { invalidateDashboardMetrics } from '@/hooks/queries/workoutCache';
 import { upsertRoutineSummary } from '@/lib/routines/sessionWorkouts';
 import { assertSupabaseOk, throwIfSupabaseError } from '@/lib/supabase/errors';
 import {
@@ -123,6 +124,7 @@ export function useCreateRoutine() {
       );
 
       queryClient.invalidateQueries({ queryKey: queryKeys.routines.all });
+      void invalidateDashboardMetrics(queryClient, user?.id);
     },
   });
 }
@@ -151,6 +153,7 @@ export function useUpdateRoutine() {
         queryKey: queryKeys.routines.detail(data.id),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.routines.all });
+      void invalidateDashboardMetrics(queryClient);
     },
   });
 }
@@ -188,6 +191,7 @@ export function useDeleteRoutine() {
     onSuccess: (id) => {
       queryClient.removeQueries({ queryKey: queryKeys.routines.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.routines.all });
+      void invalidateDashboardMetrics(queryClient, user?.id);
     },
   });
 }
@@ -246,6 +250,7 @@ export function useUpsertRoutineExercises() {
         queryKey: queryKeys.routines.detail(variables.routineId),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.routines.all });
+      void invalidateDashboardMetrics(queryClient, user?.id);
     },
   });
 }

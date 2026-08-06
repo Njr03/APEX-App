@@ -72,6 +72,8 @@ export function useDashboardStatTiles(unit: 'kg' | 'lb' = 'kg') {
   return useQuery({
     queryKey: [...queryKeys.workouts.lists(), 'stat-tiles', user?.id, unit] as const,
     enabled: Boolean(user),
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: async (): Promise<DashboardStatTiles> => {
       const now = new Date();
       const twoWeekWindowStart = startOfWeek(subWeeks(now, 1), {
