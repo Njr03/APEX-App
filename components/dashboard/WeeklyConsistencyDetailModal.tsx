@@ -8,7 +8,6 @@ import {
 import type { WeeklyConsistencyEntry } from '@/lib/training/weeklyConsistency';
 import {
   SPLIT_CELL_ORDER,
-  formatWeeklyConsistencyTooltip,
   splitCellColor,
 } from '@/lib/training/weeklyConsistency';
 import { SPLIT_DEFINITIONS } from '@/lib/training/splits';
@@ -107,16 +106,6 @@ export function WeeklyConsistencyDetailModal({
       </DashboardDetailSection>
 
       {focusEntry ? <WeekBreakdown entry={focusEntry} /> : null}
-
-      <DashboardDetailSection title="All weeks">
-        {entries.map((entry) => (
-          <DashboardDetailRow
-            key={entry.week}
-            label={entry.week}
-            value={formatWeeklyConsistencyTooltip(entry).replace(`${entry.week}: `, '')}
-          />
-        ))}
-      </DashboardDetailSection>
     </DashboardDetailModal>
   );
 }
