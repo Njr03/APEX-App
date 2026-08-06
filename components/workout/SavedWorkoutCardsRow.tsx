@@ -1,4 +1,3 @@
-import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,12 +7,6 @@ import {
   View,
   type LayoutChangeEvent,
 } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
@@ -21,11 +14,13 @@ import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHead
 import { AppText } from '@/components/ui/AppText';
 import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
 import { QueryError } from '@/components/ui/QueryState';
+import { SwipeableCardRow } from '@/components/ui/SwipeableCardRow';
 import {
   useDeleteRoutine,
   useRoutineSummaries,
   useWorkoutHistory,
 } from '@/hooks/queries';
+import { useCardRowScroller } from '@/hooks/useCardRowScroller';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
 import { colors, fonts } from '@/constants/theme';
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
@@ -39,6 +34,7 @@ import {
 import { dedupeSavedWorkoutsForSession } from '@/lib/routines/sessionWorkouts';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+import { router, useFocusEffect } from 'expo-router';
 
 const CARD_BG = '#0d0d1b';
 const BORDER = 'rgba(255,255,255,0.06)';
@@ -192,11 +188,8 @@ export function SavedWorkoutCardsRow({
 }: SavedWorkoutCardsRowProps) {
   const { width: viewportWidth } = useLayoutBreakpoint();
   const [rowWidth, setRowWidth] = useState(0);
-  const [scrollOffset, setScrollOffset] = useState(0);
   const [deletingRoutineId, setDeletingRoutineId] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
-  const isDraggingSlider = useRef(false);
-  const translateX = useSharedValue(0);
   const {
     data: savedWorkouts,
     isLoading,
@@ -228,44 +221,13 @@ export function SavedWorkoutCardsRow({
     rowWidth > 0 ? Math.max(1, Math.floor((rowWidth + CARD_GAP) / cardStep)) : 1;
   const maxScrollIndex = Math.max(0, itemCount - visibleCardCount);
 
-  useEffect(() => {
-    setScrollOffset((current) => Math.min(current, maxScrollIndex));
-  }, [maxScrollIndex]);
-
-  useEffect(() => {
-    if (isDraggingSlider.current || cardStep <= 0) return;
-    translateX.value = withTiming(-scrollOffset * cardStep, {
-      duration: 320,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [cardStep, scrollOffset, translateX]);
-
-  const handleSliderChange = useCallback(
-    (value: number) => {
-      isDraggingSlider.current = true;
-      const clamped = Math.max(0, Math.min(maxScrollIndex, value));
-      setScrollOffset(clamped);
-      translateX.value = -clamped * cardStep;
-    },
-    [cardStep, maxScrollIndex, translateX],
-  );
-
-  const handleSliderEnd = useCallback(
-    (value: number) => {
-      isDraggingSlider.current = false;
-      const snapped = Math.max(0, Math.min(maxScrollIndex, Math.round(value)));
-      setScrollOffset(snapped);
-      translateX.value = withTiming(-snapped * cardStep, {
-        duration: 280,
-        easing: Easing.out(Easing.cubic),
-      });
-    },
-    [cardStep, maxScrollIndex, translateX],
-  );
-
-  const animatedRowStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
+  const {
+    animatedRowStyle,
+    handleSliderChange,
+    handleSliderEnd,
+    panGesture,
+    scrollOffset,
+  } = useCardRowScroller({ cardStep, maxScrollIndex });
 
   const handleDelete = async (routineId: string) => {
     setDeletingRoutineId(routineId);
@@ -314,44 +276,38 @@ export function SavedWorkoutCardsRow({
             setRowWidth(event.nativeEvent.layout.width);
           }}
         >
-          <View style={{ overflow: 'hidden', paddingBottom: 4, paddingTop: 4, width: '100%' }}>
-            <Animated.View
-              style={[
-                {
-                  alignItems: 'stretch',
-                  flexDirection: 'row',
-                },
-                animatedRowStyle,
-              ]}
-            >
-              {sessionWorkouts.map((workout) => (
-                <View
-                  key={workout.id}
-                  style={{
-                    alignSelf: 'stretch',
-                    flexShrink: 0,
-                    marginRight: CARD_GAP,
-                    width: cardWidth,
-                  }}
-                >
-                  <SavedWorkoutCard
-                    cardWidth={cardWidth}
-                    hasUnfinishedSession={hasUnfinishedSession || isStarting}
-                    isDeleting={deletingRoutineId === workout.id}
-                    onDelete={() => void handleDelete(workout.id)}
-                    onEdit={() => router.push(`/routines/${workout.id}/edit`)}
-                    onStart={() => void handleStart(workout.id)}
-                    unit={unit}
-                    workout={workout}
-                    workouts={workouts}
-                  />
-                </View>
-              ))}
-              <View style={{ alignSelf: 'stretch', flexShrink: 0, width: addCardWidth }}>
-                <AddWorkoutCard />
+          <SwipeableCardRow
+            animatedRowStyle={animatedRowStyle}
+            containerStyle={{ paddingBottom: 4, paddingTop: 4 }}
+            panGesture={panGesture}
+          >
+            {sessionWorkouts.map((workout) => (
+              <View
+                key={workout.id}
+                style={{
+                  alignSelf: 'stretch',
+                  flexShrink: 0,
+                  marginRight: CARD_GAP,
+                  width: cardWidth,
+                }}
+              >
+                <SavedWorkoutCard
+                  cardWidth={cardWidth}
+                  hasUnfinishedSession={hasUnfinishedSession || isStarting}
+                  isDeleting={deletingRoutineId === workout.id}
+                  onDelete={() => void handleDelete(workout.id)}
+                  onEdit={() => router.push(`/routines/${workout.id}/edit`)}
+                  onStart={() => void handleStart(workout.id)}
+                  unit={unit}
+                  workout={workout}
+                  workouts={workouts}
+                />
               </View>
-            </Animated.View>
-          </View>
+            ))}
+            <View style={{ alignSelf: 'stretch', flexShrink: 0, width: addCardWidth }}>
+              <AddWorkoutCard />
+            </View>
+          </SwipeableCardRow>
 
           <CardScrollSlider
             max={maxScrollIndex}

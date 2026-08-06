@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { Platform, View, type LayoutChangeEvent } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { View, type LayoutChangeEvent } from 'react-native';
 
 import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
+import { SwipeableCardRow } from '@/components/ui/SwipeableCardRow';
+import { useCardRowScroller } from '@/hooks/useCardRowScroller';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 
 const CARD_GAP = 12;
@@ -24,7 +26,6 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
     ? MOBILE_VISIBLE_CARD_COUNT
     : DESKTOP_VISIBLE_CARD_COUNT;
   const [viewportWidth, setViewportWidth] = useState(0);
-  const [scrollIndex, setScrollIndex] = useState(0);
 
   const maxScrollIndex = Math.max(0, items.length - visibleCardCount);
   const cardWidth =
@@ -33,16 +34,13 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
       : 0;
   const cardStep = cardWidth + CARD_GAP;
 
-  useEffect(() => {
-    setScrollIndex((current) => Math.min(current, maxScrollIndex));
-  }, [maxScrollIndex]);
-
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      setScrollIndex(Math.max(0, Math.min(maxScrollIndex, index)));
-    },
-    [maxScrollIndex],
-  );
+  const {
+    animatedRowStyle,
+    handleSliderChange,
+    handleSliderEnd,
+    panGesture,
+    scrollOffset,
+  } = useCardRowScroller({ cardStep, maxScrollIndex });
 
   return (
     <View
@@ -50,34 +48,27 @@ export function DashboardCardsCarousel({ items }: DashboardCardsCarouselProps) {
         setViewportWidth(event.nativeEvent.layout.width);
       }}
     >
-      <View style={{ overflow: 'hidden', width: '100%' }}>
-        <View
-          className={Platform.OS === 'web' ? 'card-row-slider' : undefined}
-          style={{
-            alignItems: 'stretch',
-            flexDirection: 'row',
-            transform: [{ translateX: -scrollIndex * cardStep }],
-          }}
-        >
-          {items.map((item, index) => (
-            <View
-              key={item.key}
-              style={{
-                flexShrink: 0,
-                marginRight: index < items.length - 1 ? CARD_GAP : 0,
-                width: cardWidth > 0 ? cardWidth : undefined,
-              }}
-            >
-              {item.node}
-            </View>
-          ))}
-        </View>
-      </View>
+      <SwipeableCardRow animatedRowStyle={animatedRowStyle} panGesture={panGesture}>
+        {items.map((item, index) => (
+          <View
+            key={item.key}
+            style={{
+              alignSelf: 'stretch',
+              flexShrink: 0,
+              marginRight: index < items.length - 1 ? CARD_GAP : 0,
+              width: cardWidth > 0 ? cardWidth : undefined,
+            }}
+          >
+            {item.node}
+          </View>
+        ))}
+      </SwipeableCardRow>
 
       <CardScrollSlider
         max={maxScrollIndex}
-        onChange={scrollToIndex}
-        value={scrollIndex}
+        onChange={handleSliderChange}
+        onChangeEnd={handleSliderEnd}
+        value={scrollOffset}
       />
     </View>
   );
