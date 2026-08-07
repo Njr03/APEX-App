@@ -1,6 +1,7 @@
 import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { FilterSectionLabel } from '@/components/ui/FilterSectionLabel';
 import { cn } from '@/lib/cn';
 
 interface OptionPickerProps<T extends string> {
@@ -25,12 +26,13 @@ export function OptionPicker<T extends string>({
 }: OptionPickerProps<T>) {
   return (
     <View className="gap-2">
-      <AppText
-        className={sectionLabel ? 'text-xs uppercase tracking-wide' : 'text-sm'}
-        variant={sectionLabel ? 'muted' : 'body'}
-      >
-        {label}
-      </AppText>
+      {sectionLabel ? (
+        <FilterSectionLabel>{label}</FilterSectionLabel>
+      ) : (
+        <AppText className="text-sm" variant="body">
+          {label}
+        </AppText>
+      )}
       <View className="flex-row flex-wrap gap-2">
         {options.map((option) => {
           const active = option === value;

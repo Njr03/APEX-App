@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { FilterSectionLabel } from '@/components/ui/FilterSectionLabel';
 import { cn } from '@/lib/cn';
 
 interface FilterChipsProps<T extends string> {
@@ -20,9 +21,7 @@ export function FilterChips<T extends string>({
 }: FilterChipsProps<T>) {
   return (
     <View className="gap-2">
-      <AppText className="text-xs uppercase tracking-wide" variant="muted">
-        {label}
-      </AppText>
+      <FilterSectionLabel>{label}</FilterSectionLabel>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

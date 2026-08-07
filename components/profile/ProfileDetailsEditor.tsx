@@ -5,6 +5,7 @@ import { ZodError } from 'zod';
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
+import { FilterSectionLabel } from '@/components/ui/FilterSectionLabel';
 import { Input } from '@/components/ui/Input';
 import { OptionPicker } from '@/components/ui/OptionPicker';
 import { useUpdateProfile } from '@/hooks/queries';
@@ -22,14 +23,6 @@ import {
   type UpdateProfileInput,
 } from '@/lib/validations/training';
 import type { Profile } from '@/lib/supabase';
-
-function ProfileFieldLabel({ children }: { children: string }) {
-  return (
-    <AppText className="text-xs uppercase tracking-wide" variant="muted">
-      {children}
-    </AppText>
-  );
-}
 
 function buildProfilePatch(
   profile: Profile,
@@ -149,7 +142,7 @@ export function ProfileDetailsEditor({
   return (
     <View className="gap-4">
       <View className="gap-2">
-        <ProfileFieldLabel>Display name</ProfileFieldLabel>
+        <FilterSectionLabel>Display name</FilterSectionLabel>
         <Input
           accessibilityLabel="Display name"
           autoCapitalize="words"
@@ -162,7 +155,7 @@ export function ProfileDetailsEditor({
       </View>
 
       <View className="gap-2">
-        <ProfileFieldLabel>Username</ProfileFieldLabel>
+        <FilterSectionLabel>Username</FilterSectionLabel>
         <Input
           accessibilityLabel="Username"
           autoCapitalize="none"
