@@ -447,13 +447,11 @@ export function DashboardWorkoutCard({
           }}
         />
 
-        <View className="gap-3">
+        <View style={{ gap: compact ? 8 : 10 }}>
           <View
             style={{
-              gap: compact ? 8 : 10,
-              justifyContent: 'center',
-              minHeight: gradientHeight,
-              paddingBottom: compact ? 2 : 4,
+              gap: compact ? 6 : 8,
+              paddingTop: compact ? 2 : 4,
             }}
           >
             <View style={{ gap: compact ? 2 : 4 }}>
