@@ -94,17 +94,6 @@ export function WeekSplitCardBreakdownModal({
             <View style={{ flex: 1, gap: 4 }}>
               <Text
                 style={{
-                  color: definition.color,
-                  fontFamily: fonts.jetbrainsMono,
-                  fontSize: 9,
-                  letterSpacing: 2,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {definition.eyebrow}
-              </Text>
-              <Text
-                style={{
                   color: colors.text,
                   fontFamily: fonts.brand,
                   fontSize: 20,

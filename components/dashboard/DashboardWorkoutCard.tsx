@@ -405,7 +405,7 @@ export function DashboardWorkoutCard({
   const { pressed, handlers } = useDashboardTilePress(onPress);
   const padding = compact ? 16 : 20;
   const titleSize = compact ? 17 : 20;
-  const eyebrowSize = compact ? 8 : 9;
+  const gradientHeight = compact ? 96 : 120;
 
   return (
     <Pressable
@@ -448,47 +448,45 @@ export function DashboardWorkoutCard({
         />
 
         <View className="gap-3">
-          <View className="gap-1">
-            <Text
-              style={{
-                color: hexToRgba(model.color, 0.6),
-                fontFamily: fonts.jetbrainsMono,
-                fontSize: eyebrowSize,
-                letterSpacing: 2.5,
-                textTransform: 'uppercase',
-              }}
-            >
-              {model.eyebrow}
-            </Text>
-            <Text
-              numberOfLines={2}
-              style={{
-                color: model.color,
-                fontFamily: fonts.brand,
-                fontSize: titleSize,
-                fontWeight: '700',
-              }}
-            >
-              {model.title}
-            </Text>
-            <Text
-              numberOfLines={2}
-              style={{
-                color: MUTED,
-                fontFamily: fonts.body,
-                fontSize: compact ? 10 : 11,
-              }}
-            >
-              {model.subtitle}
-            </Text>
-          </View>
+          <View
+            style={{
+              gap: compact ? 8 : 10,
+              justifyContent: 'center',
+              minHeight: gradientHeight,
+              paddingBottom: compact ? 2 : 4,
+            }}
+          >
+            <View style={{ gap: compact ? 2 : 4 }}>
+              <Text
+                numberOfLines={2}
+                style={{
+                  color: model.color,
+                  fontFamily: fonts.brand,
+                  fontSize: titleSize,
+                  fontWeight: '700',
+                }}
+              >
+                {model.title}
+              </Text>
+              <Text
+                numberOfLines={2}
+                style={{
+                  color: MUTED,
+                  fontFamily: fonts.body,
+                  fontSize: compact ? 10 : 11,
+                }}
+              >
+                {model.subtitle}
+              </Text>
+            </View>
 
-          <StatusBadge
-            color={model.color}
-            compact={compact}
-            splitId={model.splitId}
-            status={model.status}
-          />
+            <StatusBadge
+              color={model.color}
+              compact={compact}
+              splitId={model.splitId}
+              status={model.status}
+            />
+          </View>
 
           <View style={{ backgroundColor: BORDER, height: 1 }} />
 

@@ -74,17 +74,6 @@ function UpcomingSessionDetail({
       }}
     >
       <View className="gap-1">
-        <Text
-          style={{
-            color: definition.color,
-            fontFamily: fonts.jetbrainsMono,
-            fontSize: 10,
-            letterSpacing: 1.5,
-            textTransform: 'uppercase',
-          }}
-        >
-          {definition.eyebrow}
-        </Text>
         <AppText variant="display">{getUpcomingSessionLabel(split)}</AppText>
         <AppText variant="muted">
           Scheduled · {format(date, 'EEEE, MMM d, yyyy')}

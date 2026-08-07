@@ -62,8 +62,10 @@ function SplitSelectionCard({ split, onSelect }: SplitSelectionCardProps) {
         borderRadius: 16,
         borderWidth: 1,
         flex: 1,
+        justifyContent: 'center',
+        minHeight: 168,
         paddingHorizontal: 20,
-        paddingVertical: 24,
+        paddingVertical: 20,
         transform: [{ translateY: hovered ? -3 : 0 }],
         ...(Platform.OS === 'web' && hovered
           ? { boxShadow: `0 0 32px ${splitHoverGlow(split)}` }
@@ -73,23 +75,11 @@ function SplitSelectionCard({ split, onSelect }: SplitSelectionCardProps) {
       <Text
         style={{
           color: definition.color,
-          fontFamily: fonts.jetbrainsMono,
-          fontSize: 9,
-          letterSpacing: 2,
-          marginBottom: 12,
-          textTransform: 'uppercase',
-        }}
-      >
-        {definition.eyebrow}
-      </Text>
-
-      <Text
-        style={{
-          color: definition.color,
           fontFamily: fonts.brand,
           fontSize: 16,
           fontWeight: '700',
           marginBottom: 4,
+          textAlign: 'center',
         }}
       >
         {definition.name}

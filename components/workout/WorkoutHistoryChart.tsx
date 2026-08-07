@@ -68,8 +68,6 @@ function SessionDetailModal({
 }) {
   if (!workout) return null;
 
-  const split = inferSplitFromWorkoutName(workout.name);
-  const splitColor = split ? SPLIT_DEFINITIONS[split].color : colors.accent;
   const started = parseISO(workout.started_at);
   const completed = workout.completed_at ? parseISO(workout.completed_at) : null;
 
@@ -95,27 +93,6 @@ function SessionDetailModal({
         >
           <View className="flex-row items-start justify-between" style={{ gap: 12 }}>
             <View style={{ flex: 1, gap: 6 }}>
-              <View className="flex-row items-center" style={{ gap: 8 }}>
-                <View
-                  style={{
-                    backgroundColor: splitColor,
-                    borderRadius: 999,
-                    height: 8,
-                    width: 8,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: splitColor,
-                    fontFamily: fonts.jetbrainsMono,
-                    fontSize: 9,
-                    letterSpacing: 1.5,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {split ? SPLIT_DEFINITIONS[split].eyebrow : 'Session'}
-                </Text>
-              </View>
               <Text
                 style={{
                   color: colors.text,
