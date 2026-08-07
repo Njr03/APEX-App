@@ -49,7 +49,7 @@ export default function ProfileScreen() {
         contentContainerClassName="gap-4 p-5 pb-10"
       >
         <View className="flex-row items-center justify-between">
-          <TabPageHeading title="Profile" />
+          <TabPageHeading title="User profile" />
           <Pressable
             accessibilityLabel="Open settings"
             accessibilityRole="button"

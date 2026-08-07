@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/Input';
 import { OptionPicker } from '@/components/ui/OptionPicker';
 import { QueryError, QueryLoading } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 import { useProfile, useUpdateProfile } from '@/hooks/queries';
 import { isUsernameAvailable } from '@/lib/auth/resolveLoginEmail';
@@ -197,9 +198,7 @@ export default function ProfileSettingsScreen() {
     return (
       <Screen className="px-5 pt-5">
         <BackButton className="mb-4" />
-        <AppText className="text-3xl" variant="display">
-          Settings
-        </AppText>
+        <TabPageHeading title="Settings" />
         <QueryError
           message={getSupabaseErrorMessage(error)}
           onRetry={() => void refetch()}
@@ -221,9 +220,7 @@ export default function ProfileSettingsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <BackButton className="mb-2" />
-        <AppText className="text-3xl" variant="display">
-          Settings
-        </AppText>
+        <TabPageHeading title="Settings" />
 
         <Card className="gap-3">
           <AppText variant="muted">Signed in as</AppText>
@@ -231,7 +228,7 @@ export default function ProfileSettingsScreen() {
         </Card>
 
         <Card className="gap-4">
-          <AppText variant="display">Profile</AppText>
+          <TabPageHeading title="Profile" />
 
           <View className="gap-2">
             <AppText className="text-sm" variant="body">
@@ -291,7 +288,7 @@ export default function ProfileSettingsScreen() {
         </Card>
 
         <Card className="gap-4">
-          <AppText variant="display">Change password</AppText>
+          <TabPageHeading title="Change password" />
           <AppText variant="muted">
             Update your password while signed in.
           </AppText>
@@ -331,9 +328,7 @@ export default function ProfileSettingsScreen() {
         </Card>
 
         <Card className="gap-4 border-accent3/30">
-          <AppText className="text-accent3" variant="display">
-            Delete account
-          </AppText>
+          <TabPageHeading title="Delete account" />
           <AppText variant="muted">
             Permanently removes your account, workouts, and progress. This
             cannot be undone.
