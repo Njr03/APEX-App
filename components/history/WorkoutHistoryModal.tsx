@@ -14,6 +14,7 @@ import { WorkoutCalendar } from '@/components/history/WorkoutCalendar';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { WorkoutSessionDetail } from '@/components/workout/WorkoutSessionDetail';
 import { useProfile, useWorkout, useWorkoutHistory } from '@/hooks/queries';
 import { useThisWeekSplits } from '@/hooks/useThisWeekSplits';
@@ -366,16 +367,7 @@ export function WorkoutHistoryModal({
         >
           <View className="mb-4 flex-row items-start justify-between gap-3">
             <View className="flex-1 gap-1">
-              <Text
-                style={{
-                  color: colors.text,
-                  fontFamily: fonts.brand,
-                  fontSize: 20,
-                  fontWeight: '700',
-                }}
-              >
-                Workout History
-              </Text>
+              <TabPageHeading title="Workout History" />
               <Text style={{ color: MUTED, fontFamily: fonts.body, fontSize: 11 }}>
                 Past sessions and upcoming training days
               </Text>
