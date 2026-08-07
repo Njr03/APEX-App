@@ -1,15 +1,70 @@
 import { addMonths, format, isToday, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import { useState } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Platform, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
-import { colors } from '@/constants/theme';
+import { colors, fonts } from '@/constants/theme';
 import { buildMonthCalendarDays } from '@/lib/progress/stats';
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const COMPLETED_COLOR = colors.accent;
+
+function FlickeringTodayNumber({
+  children,
+  fontSize,
+}: {
+  children: string;
+  fontSize?: number;
+}) {
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.35,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    animation.start();
+    return () => animation.stop();
+  }, [opacity]);
+
+  if (Platform.OS === 'web') {
+    return (
+      <AppText
+        className="today-number-flicker"
+        style={{ color: COMPLETED_COLOR, fontSize }}
+        variant="mono"
+      >
+        {children}
+      </AppText>
+    );
+  }
+
+  return (
+    <Animated.Text
+      style={{
+        color: COMPLETED_COLOR,
+        fontFamily: fonts.mono,
+        fontSize: fontSize ?? 12,
+        opacity,
+      }}
+    >
+      {children}
+    </Animated.Text>
+  );
+}
 
 interface CalendarDayCellProps {
   date: Date;
@@ -40,12 +95,12 @@ function CalendarDayCell({
 }: CalendarDayCellProps) {
   const [hovered, setHovered] = useState(false);
   const isCompletedDay = hasWorkout && inMonth;
-  const showTodayRing = isToday && inMonth;
+  const showTodayHighlight = isToday && inMonth;
   const highlightNumber =
-    (persistSelectedDayStyle && isSelected) ||
-    (hovered && isCompletedDay) ||
-    showTodayRing;
+    (persistSelectedDayStyle && isSelected) || (hovered && isCompletedDay);
   const showSelectedBackground = persistSelectedDayStyle && isSelected;
+  const dayLabel = format(date, 'd');
+  const dayFontSize = embedded ? 10 : undefined;
 
   return (
     <Pressable
@@ -64,26 +119,28 @@ function CalendarDayCell({
         style={{
           backgroundColor: showSelectedBackground
             ? 'rgba(200,255,90,0.12)'
-            : showTodayRing
+            : showTodayHighlight
               ? 'rgba(200,255,90,0.08)'
               : 'transparent',
-          borderColor: showTodayRing ? COMPLETED_COLOR : 'transparent',
-          borderWidth: showTodayRing ? 1.5 : 0,
         }}
       >
-        <AppText
-          style={{
-            color: highlightNumber
-              ? COMPLETED_COLOR
-              : inMonth
-                ? colors.text
-                : 'rgba(240,237,232,0.25)',
-            fontSize: embedded ? 10 : undefined,
-          }}
-          variant="mono"
-        >
-          {format(date, 'd')}
-        </AppText>
+        {showTodayHighlight ? (
+          <FlickeringTodayNumber fontSize={dayFontSize}>{dayLabel}</FlickeringTodayNumber>
+        ) : (
+          <AppText
+            style={{
+              color: highlightNumber
+                ? COMPLETED_COLOR
+                : inMonth
+                  ? colors.text
+                  : 'rgba(240,237,232,0.25)',
+              fontSize: dayFontSize,
+            }}
+            variant="mono"
+          >
+            {dayLabel}
+          </AppText>
+        )}
         <View className="mt-0.5 flex-row items-center justify-center gap-0.5">
           {hasWorkout && inMonth ? (
             <View
