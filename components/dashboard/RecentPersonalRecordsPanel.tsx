@@ -174,10 +174,12 @@ interface RecentPersonalRecordsPanelProps {
   unit?: 'kg' | 'lb';
 }
 
+const RECENT_PRS_HEADING = 'RECENT PRs';
+
 function RecentPRSectionHeader({ onViewAll }: { onViewAll: () => void }) {
   return (
     <View className="flex-row items-center justify-between">
-      <InsightSectionHeading title="Recent Personal Records" />
+      <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
       <Pressable accessibilityRole="button" onPress={onViewAll}>
         <Text
           style={{
@@ -228,7 +230,7 @@ export function RecentPersonalRecordsPanel({
   if (isLoading) {
     return (
       <View className="w-full" style={{ gap: 12 }}>
-        <InsightSectionHeading title="Recent Personal Records" />
+        <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
         <View className="items-center py-6">
           <ActivityIndicator color={colors.accent} size="small" />
         </View>
@@ -239,7 +241,7 @@ export function RecentPersonalRecordsPanel({
   if (isError) {
     return (
       <View className="w-full" style={{ gap: 12 }}>
-        <InsightSectionHeading title="Recent Personal Records" />
+        <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
         <QueryError
           message={getSupabaseErrorMessage(error)}
           onRetry={() => void refetch()}

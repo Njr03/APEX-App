@@ -32,7 +32,7 @@ export function PersonalRecordDetailModal({
           ? `${allRecords.length} recent records`
           : `${record.splitLabel} · ${record.timeAgo}`
       }
-      title={isSummary ? 'Recent Personal Records' : record.exerciseName}
+      title={isSummary ? 'RECENT PRs' : record.exerciseName}
       visible={visible}
     >
       {isSummary ? (

@@ -10,6 +10,21 @@ export const DASHBOARD_SECTION_HEADING_STYLE = {
   textTransform: 'uppercase',
 } as const;
 
-export function InsightSectionHeading({ title }: { title: string }) {
-  return <AppText style={DASHBOARD_SECTION_HEADING_STYLE}>{title}</AppText>;
+export function InsightSectionHeading({
+  title,
+  uppercase = true,
+}: {
+  title: string;
+  uppercase?: boolean;
+}) {
+  return (
+    <AppText
+      style={[
+        DASHBOARD_SECTION_HEADING_STYLE,
+        !uppercase ? { textTransform: 'none' } : null,
+      ]}
+    >
+      {title}
+    </AppText>
+  );
 }
