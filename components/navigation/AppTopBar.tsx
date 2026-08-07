@@ -138,46 +138,50 @@ export function AppTopBar() {
             >
               APX
             </Text>
-            {welcomeName ? (
-              <Text numberOfLines={1} style={TOPBAR_SUBTITLE_TEXT_STYLE}>
-                Welcome {welcomeName}
+
+            <View
+              className="flex-row items-center justify-between"
+              style={{ gap: 12 }}
+            >
+              <Text
+                className="min-w-0 shrink"
+                numberOfLines={1}
+                style={[TOPBAR_SUBTITLE_TEXT_STYLE, { flex: 1 }]}
+              >
+                {welcomeName ? `Welcome ${welcomeName}` : PAGE_TITLES[activePage]}
               </Text>
-            ) : (
-              <Text numberOfLines={1} style={TOPBAR_SUBTITLE_TEXT_STYLE}>
-                {PAGE_TITLES[activePage]}
-              </Text>
-            )}
+
+              <View className="shrink-0 flex-row items-center gap-2">
+                <Pressable
+                  accessibilityHint="Opens workout history calendar"
+                  accessibilityLabel={`Today is ${format(new Date(), 'EEEE, MMMM d')}. Open workout history.`}
+                  accessibilityRole="button"
+                  className="rounded-md px-1 py-0.5 active:opacity-70"
+                  onPress={() => setHistoryVisible(true)}
+                >
+                  <Text style={TOPBAR_DATE_TEXT_STYLE}>{todayLabel}</Text>
+                </Pressable>
+
+                {showTopBarCta ? (
+                  <>
+                    <View
+                      style={{
+                        backgroundColor: TOPBAR_BORDER,
+                        height: 18,
+                        marginHorizontal: 4,
+                        width: 1,
+                      }}
+                    />
+
+                    <TopBarCta
+                      label={cta.label}
+                      onPress={() => router.push(cta.href)}
+                    />
+                  </>
+                ) : null}
+              </View>
+            </View>
           </View>
-        </View>
-
-        <View className="shrink-0 flex-row items-center gap-2">
-          <Pressable
-            accessibilityHint="Opens workout history calendar"
-            accessibilityLabel={`Today is ${format(new Date(), 'EEEE, MMMM d')}. Open workout history.`}
-            accessibilityRole="button"
-            className="rounded-md px-1 py-0.5 active:opacity-70"
-            onPress={() => setHistoryVisible(true)}
-          >
-            <Text style={TOPBAR_DATE_TEXT_STYLE}>{todayLabel}</Text>
-          </Pressable>
-
-          {showTopBarCta ? (
-            <>
-              <View
-                style={{
-                  backgroundColor: TOPBAR_BORDER,
-                  height: 18,
-                  marginHorizontal: 4,
-                  width: 1,
-                }}
-              />
-
-              <TopBarCta
-                label={cta.label}
-                onPress={() => router.push(cta.href)}
-              />
-            </>
-          ) : null}
         </View>
       </View>
 
