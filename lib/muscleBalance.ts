@@ -5,8 +5,15 @@ import { calculateWorkoutVolume } from '@/lib/workout/volume';
 
 export const MUSCLE_BALANCE_WEEKS = 4;
 export const RADAR_AXIS_COUNT = 5;
-export const RADAR_SIZE = 200;
-export const RADAR_CENTER = 100;
+/** Inner chart diameter (grid + data polygon). */
+export const RADAR_CHART_SIZE = 200;
+/** Extra SVG padding so axis labels (e.g. SHOULDERS, BACK) are not clipped. */
+export const RADAR_LABEL_INSET = 34;
+export const RADAR_VIEW_SIZE = RADAR_CHART_SIZE + RADAR_LABEL_INSET * 2;
+export const RADAR_VIEW_ORIGIN = -RADAR_LABEL_INSET;
+/** Rendered SVG dimensions — matches expanded viewBox. */
+export const RADAR_SIZE = RADAR_VIEW_SIZE;
+export const RADAR_CENTER = RADAR_CHART_SIZE / 2;
 export const RADAR_MAX_RADIUS = 66;
 export const RADAR_LABEL_RADIUS = RADAR_MAX_RADIUS * 1.32;
 

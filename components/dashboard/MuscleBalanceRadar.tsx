@@ -14,6 +14,8 @@ import {
   RADAR_LABEL_RADIUS,
   RADAR_MAX_RADIUS,
   RADAR_SIZE,
+  RADAR_VIEW_ORIGIN,
+  RADAR_VIEW_SIZE,
   radarDataPolygonPoints,
   radarLabelAnchor,
   radarPolygonPoints,
@@ -39,7 +41,11 @@ function RadarChart({ points }: { points: MuscleBalancePoint[] }) {
   );
 
   return (
-    <Svg height={RADAR_SIZE} viewBox={`0 0 ${RADAR_SIZE} ${RADAR_SIZE}`} width={RADAR_SIZE}>
+    <Svg
+      height={RADAR_SIZE}
+      viewBox={`${RADAR_VIEW_ORIGIN} ${RADAR_VIEW_ORIGIN} ${RADAR_VIEW_SIZE} ${RADAR_VIEW_SIZE}`}
+      width={RADAR_SIZE}
+    >
       {[0.25, 0.5, 0.75, 1].map((scale) => (
         <Polygon
           key={scale}
@@ -134,7 +140,7 @@ function ImbalancePanel({
 }) {
   return (
     <View
-      className={compact ? 'w-full' : 'min-w-[148px] flex-1'}
+      className={compact ? 'w-full' : 'min-w-[156px] flex-1'}
       style={{ alignSelf: compact ? 'stretch' : undefined, gap: 10 }}
     >
       {points.map((point) => {
@@ -143,12 +149,15 @@ function ImbalancePanel({
 
         return (
           <View key={point.key} style={{ gap: 4 }}>
-            <View className="flex-row items-center justify-between">
+            <View style={{ alignItems: 'center', flexDirection: 'row', gap: 8 }}>
               <Text
                 style={{
                   color: textColor,
+                  flexGrow: 1,
+                  flexShrink: 1,
                   fontFamily: fonts.jetbrainsMono,
                   fontSize: 9,
+                  minWidth: 0,
                 }}
               >
                 {point.label}
@@ -156,6 +165,7 @@ function ImbalancePanel({
               <Text
                 style={{
                   color: textColor,
+                  flexShrink: 0,
                   fontFamily: fonts.jetbrainsMono,
                   fontSize: 10,
                 }}
