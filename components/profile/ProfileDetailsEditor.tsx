@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { ZodError } from 'zod';
 
@@ -23,6 +23,8 @@ import {
   type UpdateProfileInput,
 } from '@/lib/validations/training';
 import type { Profile } from '@/lib/supabase';
+
+const PROFILE_MESSAGE_DURATION_MS = 5000;
 
 function buildProfilePatch(
   profile: Profile,
@@ -72,6 +74,7 @@ export function ProfileDetailsEditor({
   userId,
 }: ProfileDetailsEditorProps) {
   const updateProfile = useUpdateProfile();
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -87,13 +90,41 @@ export function ProfileDetailsEditor({
     setUnitPreference(resolveUnitPreference(profile.unit_preference));
   }, [profile]);
 
+  useEffect(() => {
+    return () => {
+      if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const clearProfileMessage = () => {
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+      messageTimeoutRef.current = null;
+    }
+    setProfileMessage(null);
+  };
+
+  const showTemporaryProfileMessage = (message: string) => {
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+
+    setProfileMessage(message);
+    messageTimeoutRef.current = setTimeout(() => {
+      setProfileMessage(null);
+      messageTimeoutRef.current = null;
+    }, PROFILE_MESSAGE_DURATION_MS);
+  };
+
   const profileDirty =
     displayName.trim() !== (profile.display_name ?? '') ||
     normalizeUsername(username) !== normalizeUsername(profile.username) ||
     unitPreference !== profile.unit_preference;
 
   const handleSaveProfile = async () => {
-    setProfileMessage(null);
+    clearProfileMessage();
     setProfileError(null);
 
     try {
@@ -110,7 +141,7 @@ export function ProfileDetailsEditor({
       }
 
       if (Object.keys(patch).length === 0) {
-        setProfileMessage('No changes to save.');
+        showTemporaryProfileMessage('No changes to save.');
         return;
       }
 
@@ -124,7 +155,7 @@ export function ProfileDetailsEditor({
 
       updateProfileSchema.parse(patch);
       await updateProfile.mutateAsync(patch);
-      setProfileMessage(
+      showTemporaryProfileMessage(
         patch.username
           ? 'Profile updated. You can now sign in with your username and password.'
           : 'Profile updated.',
