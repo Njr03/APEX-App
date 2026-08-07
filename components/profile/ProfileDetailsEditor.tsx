@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, View } from 'react-native';
 import { ZodError } from 'zod';
 
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
@@ -24,7 +24,44 @@ import {
 } from '@/lib/validations/training';
 import type { Profile } from '@/lib/supabase';
 
-const PROFILE_MESSAGE_DURATION_MS = 5000;
+const PROFILE_MESSAGE_VISIBLE_MS = 5000;
+const PROFILE_MESSAGE_FADE_MS = 400;
+
+function ProfileStatusMessage({
+  message,
+  onHidden,
+}: {
+  message: string;
+  onHidden: () => void;
+}) {
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    opacity.setValue(1);
+
+    const fadeTimeout = setTimeout(() => {
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: PROFILE_MESSAGE_FADE_MS,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          onHidden();
+        }
+      });
+    }, PROFILE_MESSAGE_VISIBLE_MS);
+
+    return () => clearTimeout(fadeTimeout);
+  }, [message, onHidden, opacity]);
+
+  return (
+    <Animated.View style={{ opacity }}>
+      <AppText className="text-accent2" variant="body">
+        {message}
+      </AppText>
+    </Animated.View>
+  );
+}
 
 function buildProfilePatch(
   profile: Profile,
@@ -74,7 +111,6 @@ export function ProfileDetailsEditor({
   userId,
 }: ProfileDetailsEditorProps) {
   const updateProfile = useUpdateProfile();
-  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -90,32 +126,16 @@ export function ProfileDetailsEditor({
     setUnitPreference(resolveUnitPreference(profile.unit_preference));
   }, [profile]);
 
-  useEffect(() => {
-    return () => {
-      if (messageTimeoutRef.current) {
-        clearTimeout(messageTimeoutRef.current);
-      }
-    };
+  const hideProfileMessage = useCallback(() => {
+    setProfileMessage(null);
   }, []);
 
   const clearProfileMessage = () => {
-    if (messageTimeoutRef.current) {
-      clearTimeout(messageTimeoutRef.current);
-      messageTimeoutRef.current = null;
-    }
     setProfileMessage(null);
   };
 
   const showTemporaryProfileMessage = (message: string) => {
-    if (messageTimeoutRef.current) {
-      clearTimeout(messageTimeoutRef.current);
-    }
-
     setProfileMessage(message);
-    messageTimeoutRef.current = setTimeout(() => {
-      setProfileMessage(null);
-      messageTimeoutRef.current = null;
-    }, PROFILE_MESSAGE_DURATION_MS);
   };
 
   const profileDirty =
@@ -214,9 +234,11 @@ export function ProfileDetailsEditor({
 
       {profileError ? <AuthErrorBanner message={profileError} /> : null}
       {profileMessage ? (
-        <AppText className="text-accent2" variant="body">
-          {profileMessage}
-        </AppText>
+        <ProfileStatusMessage
+          key={profileMessage}
+          message={profileMessage}
+          onHidden={hideProfileMessage}
+        />
       ) : null}
 
       <Button
