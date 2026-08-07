@@ -9,7 +9,8 @@ Run these in order in the Supabase SQL editor (or via `supabase db push`).
 | 3 | `migrations/003_rls.sql` | Row Level Security on all tables |
 | 4 | `migrations/004_hardening.sql` | Exercise RLS tighten + `delete_user_account()` RPC |
 | 5 | `migrations/005_usernames.sql` | Usernames + login lookup helpers |
-| 6 | `seed/exercises.sql` | ~40 seeded strength exercises + extended library |
+| 6 | `migrations/009_account_auth_fixes.sql` | Fix account deletion RPC + username availability |
+| 7 | `seed/exercises.sql` | ~40 seeded strength exercises + extended library |
 
 ## RLS summary
 

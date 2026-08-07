@@ -5,10 +5,10 @@ import { useState } from 'react';
 
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
 import { PwaInstallCard } from '@/components/pwa/PwaInstallCard';
+import { ProfileDetailsEditor } from '@/components/profile/ProfileDetailsEditor';
 import { AppText } from '@/components/ui/AppText';
 import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
@@ -50,6 +50,7 @@ export default function ProfileScreen() {
         ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
+        keyboardShouldPersistTaps="handled"
       >
         <View className="flex-row items-center justify-between">
           <TabPageHeading title="User profile" />
@@ -80,14 +81,7 @@ export default function ProfileScreen() {
         ) : null}
 
         {profile ? (
-          <Card className="gap-4">
-            <View>
-              <AppText variant="muted">Display name</AppText>
-              <AppText className="mt-1" variant="display">
-                {profile.display_name ?? 'Athlete'}
-              </AppText>
-            </View>
-          </Card>
+          <ProfileDetailsEditor profile={profile} userId={user?.id} />
         ) : null}
 
         {!isLoading && !isError && !profile ? (

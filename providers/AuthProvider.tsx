@@ -122,7 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updatePassword = useCallback(async (password: string) => {
-    const { error } = await supabase.auth.updateUser({ password });
+    const trimmed = password.trim();
+    const { error } = await supabase.auth.updateUser({ password: trimmed });
     if (error) throw error;
   }, []);
 

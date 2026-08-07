@@ -43,18 +43,8 @@ export const resetPasswordSchema = z
 
 export const changePasswordSchema = resetPasswordSchema;
 
-export const deleteAccountSchema = z
-  .object({
-    confirmation: z.string().trim(),
-  })
-  .refine((data) => data.confirmation === 'DELETE', {
-    message: 'Type DELETE to confirm',
-    path: ['confirmation'],
-  });
-
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type SignupFormValues = z.infer<typeof signupSchema>;
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
-export type DeleteAccountFormValues = z.infer<typeof deleteAccountSchema>;

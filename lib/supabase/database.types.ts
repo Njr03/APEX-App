@@ -395,7 +395,7 @@ export type Database = {
         Returns: undefined;
       };
       is_username_available: {
-        Args: { username_input: string };
+        Args: { username_input: string; exclude_user_id?: string | null };
         Returns: boolean;
       };
       resolve_login_email: {

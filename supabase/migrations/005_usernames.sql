@@ -12,7 +12,7 @@ set username = lower(
       (select email from auth.users where id = profiles.id),
       '@',
       1
-    ),
+    ) ),
     '[^a-zA-Z0-9_]',
     '',
     'g'

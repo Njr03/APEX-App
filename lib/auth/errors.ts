@@ -2,7 +2,23 @@
  * Maps Supabase Auth errors to user-friendly messages.
  */
 export function getAuthErrorMessage(error: unknown): string {
-  if (!error || typeof error !== 'object' || !('message' in error)) {
+  if (!error || typeof error !== 'object') {
+    return 'Something went wrong. Please try again.';
+  }
+
+  if ('code' in error) {
+    const code = String((error as { code: string }).code);
+
+    if (code === '23505') {
+      return 'That username is already taken. Choose another one.';
+    }
+
+    if (code === 'PGRST202') {
+      return 'Database setup incomplete. In Supabase SQL Editor, run apex/supabase/migrations/005_usernames.sql and 009_account_auth_fixes.sql, then try again.';
+    }
+  }
+
+  if (!('message' in error)) {
     return 'Something went wrong. Please try again.';
   }
 
@@ -32,7 +48,29 @@ export function getAuthErrorMessage(error: unknown): string {
     message.includes('PGRST202') ||
     message.includes('Could not find the function')
   ) {
-    return 'Database setup incomplete. In Supabase SQL Editor, run apex/supabase/migrations/005_usernames.sql, then try again.';
+    return 'Database setup incomplete. In Supabase SQL Editor, run apex/supabase/migrations/005_usernames.sql and 009_account_auth_fixes.sql, then try again.';
+  }
+
+  if (
+    message.includes('Not authenticated') ||
+    (message.includes('permission denied') && message.includes('auth'))
+  ) {
+    return 'Could not delete your account. Sign out, sign back in, and try again. If it persists, run apex/supabase/migrations/009_account_auth_fixes.sql in Supabase.';
+  }
+
+  if (
+    message.includes('New password should be different') ||
+    message.includes('same as the old password')
+  ) {
+    return 'Choose a password that is different from your current one.';
+  }
+
+  if (
+    message.includes('Reauthentication') ||
+    message.includes('reauthenticate') ||
+    message.includes('AAL2')
+  ) {
+    return 'For security, sign out and sign back in, then try updating your password again.';
   }
 
   if (
@@ -57,7 +95,7 @@ export function getAuthErrorMessage(error: unknown): string {
   }
 
   if (message.includes('Invalid login credentials')) {
-    return 'Incorrect email or password.';
+    return 'Incorrect username, email, or password.';
   }
 
   if (
