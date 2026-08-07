@@ -7,27 +7,9 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { colors } from '@/constants/theme';
 import { buildMonthCalendarDays } from '@/lib/progress/stats';
-import {
-  SPLIT_DEFINITIONS,
-  type TrainingSplit,
-} from '@/lib/training/splits';
 
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const COMPLETED_COLOR = colors.accent;
-
-function TodayDot({ size }: { size: number }) {
-  return (
-    <View
-      className={Platform.OS === 'web' ? 'today-dot-flicker' : undefined}
-      style={{
-        backgroundColor: COMPLETED_COLOR,
-        borderRadius: 999,
-        height: size,
-        width: size,
-      }}
-    />
-  );
-}
 
 interface CalendarDayCellProps {
   date: Date;
@@ -39,7 +21,6 @@ interface CalendarDayCellProps {
   inMonth: boolean;
   isSelected: boolean;
   isToday: boolean;
-  upcomingColor: string | null;
   persistSelectedDayStyle?: boolean;
   onSelectDate: (date: Date) => void;
 }
@@ -54,14 +35,16 @@ function CalendarDayCell({
   inMonth,
   isSelected,
   isToday,
-  upcomingColor,
   persistSelectedDayStyle = true,
   onSelectDate,
 }: CalendarDayCellProps) {
   const [hovered, setHovered] = useState(false);
   const isCompletedDay = hasWorkout && inMonth;
+  const showTodayRing = isToday && inMonth;
   const highlightNumber =
-    (persistSelectedDayStyle && isSelected) || (hovered && isCompletedDay);
+    (persistSelectedDayStyle && isSelected) ||
+    (hovered && isCompletedDay) ||
+    showTodayRing;
   const showSelectedBackground = persistSelectedDayStyle && isSelected;
 
   return (
@@ -81,7 +64,11 @@ function CalendarDayCell({
         style={{
           backgroundColor: showSelectedBackground
             ? 'rgba(200,255,90,0.12)'
-            : 'transparent',
+            : showTodayRing
+              ? 'rgba(200,255,90,0.08)'
+              : 'transparent',
+          borderColor: showTodayRing ? COMPLETED_COLOR : 'transparent',
+          borderWidth: showTodayRing ? 1.5 : 0,
         }}
       >
         <AppText
@@ -107,21 +94,9 @@ function CalendarDayCell({
                 width: dotSize,
               }}
             />
-          ) : isToday && inMonth ? (
-            <TodayDot size={dotSize} />
-          ) : upcomingColor && inMonth ? (
-            <View
-              style={{
-                backgroundColor: upcomingColor,
-                borderRadius: 999,
-                height: dotSize,
-                width: dotSize,
-              }}
-            />
-          ) : null}
-          {!hasWorkout && !isToday && !upcomingColor && inMonth ? (
+          ) : (
             <View style={{ height: dotSize, width: dotSize }} />
-          ) : null}
+          )}
         </View>
       </View>
     </Pressable>
@@ -132,7 +107,6 @@ interface WorkoutCalendarProps {
   month: Date;
   onMonthChange: (month: Date) => void;
   trainingDays: Set<string>;
-  upcomingDaysBySplit?: Map<string, TrainingSplit>;
   selectedDate: Date | null;
   onSelectDate: (date: Date) => void;
   embedded?: boolean;
@@ -143,7 +117,6 @@ export function WorkoutCalendar({
   month,
   onMonthChange,
   trainingDays,
-  upcomingDaysBySplit = new Map<string, TrainingSplit>(),
   selectedDate,
   onSelectDate,
   embedded = false,
@@ -197,10 +170,6 @@ export function WorkoutCalendar({
       <View className="flex-row flex-wrap">
         {days.map(({ date, inMonth, hasWorkout }) => {
           const dateKey = format(date, 'yyyy-MM-dd');
-          const upcomingSplit = upcomingDaysBySplit.get(dateKey);
-          const upcomingColor = upcomingSplit
-            ? SPLIT_DEFINITIONS[upcomingSplit].color
-            : null;
           const isSelected =
             selectedDate != null &&
             format(selectedDate, 'yyyy-MM-dd') === dateKey;
@@ -219,7 +188,6 @@ export function WorkoutCalendar({
               isToday={isToday(date)}
               onSelectDate={onSelectDate}
               persistSelectedDayStyle={persistSelectedDayStyle}
-              upcomingColor={upcomingColor}
             />
           );
         })}

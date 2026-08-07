@@ -337,7 +337,7 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
   );
 
   const cards = weekSplits?.cards ?? [];
-  const { trainingDays, upcomingDaysBySplit } = useMemo(
+  const { trainingDays } = useMemo(
     () => buildCalendarDayMarkers(month, workouts ?? [], cards),
     [cards, month, workouts],
   );
@@ -455,7 +455,6 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
             persistSelectedDayStyle={false}
             selectedDate={selectedDate}
             trainingDays={trainingDays}
-            upcomingDaysBySplit={upcomingDaysBySplit}
           />
         </View>
       </View>

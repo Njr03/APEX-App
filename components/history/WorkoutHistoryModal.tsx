@@ -329,7 +329,7 @@ export function WorkoutHistoryModal({
     }
   }, [visible]);
 
-  const { trainingDays, upcomingDaysBySplit } = useMemo(
+  const { trainingDays } = useMemo(
     () => buildCalendarDayMarkers(month, workouts ?? [], cards),
     [cards, month, workouts],
   );
@@ -416,7 +416,6 @@ export function WorkoutHistoryModal({
                       }}
                       selectedDate={selectedDate}
                       trainingDays={trainingDays}
-                      upcomingDaysBySplit={upcomingDaysBySplit}
                     />
 
                     <AppText variant="display">
