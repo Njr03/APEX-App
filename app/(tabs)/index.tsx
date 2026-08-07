@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
 
 import { RecentPersonalRecordsPanel } from '@/components/dashboard/RecentPersonalRecordsPanel';
 import { SplitCardsRow } from '@/components/dashboard/ThisWeekSection';
@@ -8,6 +8,7 @@ import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
 import { useAutoSeedDemoData } from '@/hooks/useAutoSeedDemoData';
+import { usePullToRefreshDashboard } from '@/hooks/usePullToRefreshDashboard';
 import { useRefreshDashboardOnFocus } from '@/hooks/useRefreshDashboardOnFocus';
 import { useTabScrollViewToTop } from '@/hooks/useTabScrollToTop';
 import { colors } from '@/constants/theme';
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   } = useProfile();
 
   const unit = resolveUnitPreference(profile?.unit_preference);
+  const { onRefresh, refreshing } = usePullToRefreshDashboard();
 
   useAutoSeedDemoData();
   useRefreshDashboardOnFocus();
@@ -35,6 +37,14 @@ export default function HomeScreen() {
         ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
+        refreshControl={
+          <RefreshControl
+            colors={[colors.accent]}
+            onRefresh={onRefresh}
+            refreshing={refreshing}
+            tintColor={colors.accent}
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         <SplitCardsRow unit={unit} />
