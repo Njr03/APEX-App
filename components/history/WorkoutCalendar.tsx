@@ -1,4 +1,4 @@
-import { addMonths, format, subMonths } from 'date-fns';
+import { addMonths, format, isToday, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
@@ -15,6 +15,20 @@ import {
 const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const COMPLETED_COLOR = colors.accent;
 
+function TodayDot({ size }: { size: number }) {
+  return (
+    <View
+      className={Platform.OS === 'web' ? 'today-dot-flicker' : undefined}
+      style={{
+        backgroundColor: COMPLETED_COLOR,
+        borderRadius: 999,
+        height: size,
+        width: size,
+      }}
+    />
+  );
+}
+
 interface CalendarDayCellProps {
   date: Date;
   dayCellClass: string;
@@ -24,6 +38,7 @@ interface CalendarDayCellProps {
   hasWorkout: boolean;
   inMonth: boolean;
   isSelected: boolean;
+  isToday: boolean;
   upcomingColor: string | null;
   persistSelectedDayStyle?: boolean;
   onSelectDate: (date: Date) => void;
@@ -38,6 +53,7 @@ function CalendarDayCell({
   hasWorkout,
   inMonth,
   isSelected,
+  isToday,
   upcomingColor,
   persistSelectedDayStyle = true,
   onSelectDate,
@@ -91,8 +107,9 @@ function CalendarDayCell({
                 width: dotSize,
               }}
             />
-          ) : null}
-          {upcomingColor && inMonth && !hasWorkout ? (
+          ) : isToday && inMonth ? (
+            <TodayDot size={dotSize} />
+          ) : upcomingColor && inMonth ? (
             <View
               style={{
                 backgroundColor: upcomingColor,
@@ -102,7 +119,7 @@ function CalendarDayCell({
               }}
             />
           ) : null}
-          {!hasWorkout && !upcomingColor && inMonth ? (
+          {!hasWorkout && !isToday && !upcomingColor && inMonth ? (
             <View style={{ height: dotSize, width: dotSize }} />
           ) : null}
         </View>
@@ -199,6 +216,7 @@ export function WorkoutCalendar({
               hasWorkout={hasWorkout}
               inMonth={inMonth}
               isSelected={isSelected}
+              isToday={isToday(date)}
               onSelectDate={onSelectDate}
               persistSelectedDayStyle={persistSelectedDayStyle}
               upcomingColor={upcomingColor}

@@ -87,7 +87,12 @@ export function ExerciseProgressSection({ unit }: ExerciseProgressSectionProps) 
 
       <ExerciseProgressChartModal
         exercise={selectedExercise}
-        onClose={() => setChartVisible(false)}
+        onClose={({ hadLoggedWorkouts }) => {
+          setChartVisible(false);
+          if (!hadLoggedWorkouts) {
+            setSelectedExercise(null);
+          }
+        }}
         unit={unit}
         visible={chartVisible}
       />

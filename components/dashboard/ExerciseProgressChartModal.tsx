@@ -29,7 +29,7 @@ interface ExerciseProgressChartModalProps {
   exercise: Exercise | null;
   unit: 'kg' | 'lb';
   visible: boolean;
-  onClose: () => void;
+  onClose: (result: { hadLoggedWorkouts: boolean }) => void;
 }
 
 const GOLD = '#f5c842';
@@ -126,7 +126,7 @@ export function ExerciseProgressChartModal({
 
   const handleClose = () => {
     setSelectedPoint(null);
-    onClose();
+    onClose({ hadLoggedWorkouts: !isLoading && !isError && points.length > 0 });
   };
 
   return (

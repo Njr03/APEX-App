@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
 
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
@@ -152,16 +152,6 @@ export function MuscleBalanceRadar(_props: { compact?: boolean }) {
       <View className="items-center">
         <RadarChart points={data.points} />
       </View>
-
-      <Text
-        style={{
-          color: colors.muted,
-          fontFamily: fonts.body,
-          fontSize: 11,
-        }}
-      >
-        Last 4 weeks · volume coverage vs monthly target
-      </Text>
     </View>
   );
 }
