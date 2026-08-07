@@ -12,12 +12,14 @@ import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
+import { useTabScrollViewToTop } from '@/hooks/useTabScrollToTop';
 import { colors } from '@/constants/theme';
 import { getAuthErrorMessage } from '@/lib/auth/errors';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import { useAuth } from '@/providers/AuthProvider';
 
 export default function ProfileScreen() {
+  const scrollRef = useTabScrollViewToTop('profile');
   const { user, signOut } = useAuth();
   const {
     data: profile,
@@ -45,6 +47,7 @@ export default function ProfileScreen() {
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
       >

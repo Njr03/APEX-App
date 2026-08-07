@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Screen } from '@/components/ui/Screen';
 import { useDeleteExercise, useExercises } from '@/hooks/queries';
+import { useTabFlatListScrollToTop } from '@/hooks/useTabScrollToTop';
 import {
   EQUIPMENT_TYPES,
   MUSCLE_GROUPS,
@@ -173,6 +174,7 @@ function ExerciseListHeader({
 }
 
 export default function ExercisesTabScreen() {
+  const scrollRef = useTabFlatListScrollToTop<Exercise>('exercises');
   const [search, setSearch] = useState('');
   const [muscleGroup, setMuscleGroup] = useState<MuscleGroup | null>(null);
   const [equipment, setEquipment] = useState<EquipmentType | null>(null);
@@ -246,6 +248,7 @@ export default function ExercisesTabScreen() {
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <FlatList
+        ref={scrollRef}
         className="flex-1 px-5 pt-5"
         contentContainerClassName="gap-2 pb-10"
         data={!isLoading && !isError ? (exercises ?? []) : []}

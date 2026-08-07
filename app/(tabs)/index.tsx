@@ -9,11 +9,13 @@ import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
 import { useAutoSeedDemoData } from '@/hooks/useAutoSeedDemoData';
 import { useRefreshDashboardOnFocus } from '@/hooks/useRefreshDashboardOnFocus';
+import { useTabScrollViewToTop } from '@/hooks/useTabScrollToTop';
 import { colors } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 export default function HomeScreen() {
+  const scrollRef = useTabScrollViewToTop('index');
   const {
     data: profile,
     isLoading: isProfileLoading,
@@ -30,6 +32,7 @@ export default function HomeScreen() {
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
         showsVerticalScrollIndicator={false}

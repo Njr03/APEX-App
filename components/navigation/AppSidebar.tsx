@@ -1,14 +1,10 @@
-import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NAV_ITEMS, PROFILE_NAV } from '@/components/navigation/navItems';
 import { SIDEBAR_WIDTH } from '@/components/navigation/shellConstants';
-import {
-  useNavigationStore,
-  type AppPage,
-} from '@/stores/navigationStore';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 
 const NAV_ICON_SIZE = 20;
 const NAV_BUTTON_SIZE = 44;
@@ -125,13 +121,7 @@ function SidebarProfileButton({
 
 export function AppSidebar() {
   const insets = useSafeAreaInsets();
-  const activePage = useNavigationStore((state) => state.activePage);
-  const setActivePage = useNavigationStore((state) => state.setActivePage);
-
-  const navigateTo = (page: AppPage, href: Href) => {
-    setActivePage(page);
-    router.push(href);
-  };
+  const { activePage, navigateToTab } = useTabNavigation();
 
   return (
     <View
@@ -151,7 +141,7 @@ export function AppSidebar() {
               active={activePage === item.route}
               icon={item.icon}
               label={item.label}
-              onPress={() => navigateTo(item.route, item.href)}
+              onPress={() => navigateToTab(item.route, item.href)}
             />
           ))}
         </View>
@@ -159,7 +149,7 @@ export function AppSidebar() {
 
       <SidebarProfileButton
         active={activePage === PROFILE_NAV.route}
-        onPress={() => navigateTo(PROFILE_NAV.route, PROFILE_NAV.href)}
+        onPress={() => navigateToTab(PROFILE_NAV.route, PROFILE_NAV.href)}
       />
     </View>
   );

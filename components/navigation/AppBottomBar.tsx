@@ -1,4 +1,3 @@
-import { router, type Href } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,10 +8,8 @@ import {
 } from '@/components/navigation/shellConstants';
 import { NAV_ITEMS, PROFILE_NAV } from '@/components/navigation/navItems';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
-import {
-  useNavigationStore,
-  type AppPage,
-} from '@/stores/navigationStore';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
+import { type AppPage } from '@/stores/navigationStore';
 import { fonts } from '@/constants/theme';
 
 const BOTTOM_NAV_LABELS: Record<AppPage, string> = {
@@ -85,16 +82,10 @@ function BottomNavButton({
 export function AppBottomBar() {
   const insets = useSafeAreaInsets();
   const { isCompact } = useLayoutBreakpoint();
-  const activePage = useNavigationStore((state) => state.activePage);
-  const setActivePage = useNavigationStore((state) => state.setActivePage);
+  const { activePage, navigateToTab } = useTabNavigation();
 
   const labelFor = (page: AppPage, fallback: string) =>
     isCompact ? BOTTOM_NAV_LABELS[page] : fallback;
-
-  const navigateTo = (page: AppPage, href: Href) => {
-    setActivePage(page);
-    router.push(href);
-  };
 
   return (
     <View
@@ -111,13 +102,13 @@ export function AppBottomBar() {
           active={activePage === item.route}
           icon={item.icon}
           label={labelFor(item.route, item.label)}
-          onPress={() => navigateTo(item.route, item.href)}
+          onPress={() => navigateToTab(item.route, item.href)}
         />
       ))}
       <BottomNavButton
         active={activePage === PROFILE_NAV.route}
         label={labelFor(PROFILE_NAV.route, PROFILE_NAV.label)}
-        onPress={() => navigateTo(PROFILE_NAV.route, PROFILE_NAV.href)}
+        onPress={() => navigateToTab(PROFILE_NAV.route, PROFILE_NAV.href)}
         profile
       />
     </View>
