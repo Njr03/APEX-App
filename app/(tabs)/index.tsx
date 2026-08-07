@@ -1,9 +1,10 @@
-import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { RecentPersonalRecordsPanel } from '@/components/dashboard/RecentPersonalRecordsPanel';
 import { SplitCardsRow } from '@/components/dashboard/ThisWeekSection';
 import { StatTilesRow } from '@/components/dashboard/StatTilesRow';
 import { TrainingInsightsSection } from '@/components/dashboard/TrainingInsightsSection';
+import { PullToRefreshScrollView } from '@/components/ui/PullToRefreshScrollView';
 import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
@@ -33,18 +34,12 @@ export default function HomeScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <ScrollView
+      <PullToRefreshScrollView
         ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
-        refreshControl={
-          <RefreshControl
-            colors={[colors.accent]}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            tintColor={colors.accent}
-          />
-        }
+        onRefresh={onRefresh}
+        refreshing={refreshing}
         showsVerticalScrollIndicator={false}
       >
         <SplitCardsRow unit={unit} />
@@ -65,7 +60,7 @@ export default function HomeScreen() {
             onRetry={() => void refetchProfile()}
           />
         ) : null}
-      </ScrollView>
+      </PullToRefreshScrollView>
     </Screen>
   );
 }

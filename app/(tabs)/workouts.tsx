@@ -1,9 +1,7 @@
-import { RefreshControl, ScrollView } from 'react-native';
-
+import { PullToRefreshScrollView } from '@/components/ui/PullToRefreshScrollView';
 import { Screen } from '@/components/ui/Screen';
 import { SavedWorkoutCardsRow } from '@/components/workout/SavedWorkoutCardsRow';
 import { WorkoutHistoryChart } from '@/components/workout/WorkoutHistoryChart';
-import { colors } from '@/constants/theme';
 import { useProfile } from '@/hooks/queries';
 import { usePullToRefreshDashboard } from '@/hooks/usePullToRefreshDashboard';
 import { useRefreshDashboardOnFocus } from '@/hooks/useRefreshDashboardOnFocus';
@@ -20,24 +18,18 @@ export default function WorkoutsScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <ScrollView
+      <PullToRefreshScrollView
         ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-5 p-5 pb-10"
-        refreshControl={
-          <RefreshControl
-            colors={[colors.accent]}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            tintColor={colors.accent}
-          />
-        }
+        onRefresh={onRefresh}
+        refreshing={refreshing}
         showsVerticalScrollIndicator={false}
       >
         <SavedWorkoutCardsRow unit={unit} />
 
         <WorkoutHistoryChart unit={unit} />
-      </ScrollView>
+      </PullToRefreshScrollView>
     </Screen>
   );
 }

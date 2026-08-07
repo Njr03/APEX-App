@@ -10,16 +10,21 @@ export function usePullToRefreshDashboard() {
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
-    if (!user) return;
+    if (!user || refreshing) return;
 
     setRefreshing(true);
+    const startedAt = Date.now();
 
     try {
       await invalidateDashboardMetrics(queryClient, user.id);
     } finally {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < 450) {
+        await new Promise((resolve) => setTimeout(resolve, 450 - elapsed));
+      }
       setRefreshing(false);
     }
-  }, [queryClient, user]);
+  }, [queryClient, refreshing, user]);
 
   return { onRefresh, refreshing };
 }
