@@ -2,7 +2,6 @@ import { type Href } from 'expo-router';
 import {
   Dumbbell,
   LayoutGrid,
-  LineChart,
   ListChecks,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -36,12 +35,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: '/exercises',
     label: 'Exercises',
     icon: Dumbbell,
-  },
-  {
-    route: 'progress',
-    href: '/progress',
-    label: 'Progress',
-    icon: LineChart,
   },
 ];
 

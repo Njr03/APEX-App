@@ -19,7 +19,6 @@ const BOTTOM_NAV_LABELS: Record<AppPage, string> = {
   index: 'Home',
   workouts: 'Workouts',
   exercises: 'Lifts',
-  progress: 'Stats',
   profile: 'Profile',
 };
 

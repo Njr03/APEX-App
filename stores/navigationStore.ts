@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AppPage = 'index' | 'workouts' | 'exercises' | 'progress' | 'profile';
+export type AppPage = 'index' | 'workouts' | 'exercises' | 'profile';
 
 interface NavigationState {
   activePage: AppPage;
@@ -16,7 +16,6 @@ export const PAGE_TITLES: Record<AppPage, string> = {
   index: 'Dashboard',
   workouts: 'Workouts',
   exercises: 'Exercises',
-  progress: 'Progress',
   profile: 'Profile',
 };
 
@@ -24,7 +23,6 @@ export function segmentToAppPage(segment?: string): AppPage {
   if (
     segment === 'workouts' ||
     segment === 'exercises' ||
-    segment === 'progress' ||
     segment === 'profile'
   ) {
     return segment;
