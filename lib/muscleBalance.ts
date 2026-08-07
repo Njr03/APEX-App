@@ -5,17 +5,14 @@ import { calculateWorkoutVolume } from '@/lib/workout/volume';
 
 export const MUSCLE_BALANCE_WEEKS = 4;
 export const RADAR_AXIS_COUNT = 5;
-/** Inner chart diameter (grid + data polygon). */
+/** Inner chart coordinate space (grid + data polygon). */
 export const RADAR_CHART_SIZE = 200;
-/** Extra SVG padding so axis labels (e.g. SHOULDERS, BACK) are not clipped. */
-export const RADAR_LABEL_INSET = 34;
-export const RADAR_VIEW_SIZE = RADAR_CHART_SIZE + RADAR_LABEL_INSET * 2;
-export const RADAR_VIEW_ORIGIN = -RADAR_LABEL_INSET;
-/** Rendered SVG dimensions — matches expanded viewBox. */
-export const RADAR_SIZE = RADAR_VIEW_SIZE;
 export const RADAR_CENTER = RADAR_CHART_SIZE / 2;
-export const RADAR_MAX_RADIUS = 66;
-export const RADAR_LABEL_RADIUS = RADAR_MAX_RADIUS * 1.32;
+export const RADAR_MAX_RADIUS = 74;
+export const RADAR_LABEL_RADIUS = RADAR_MAX_RADIUS * 1.12;
+export const RADAR_LABEL_VALUE_GAP = 10;
+export const RADAR_VIEW_PADDING = 4;
+const RADAR_LABEL_CHAR_WIDTH = 5.1;
 
 /** Radar + panel muscle groups (core excluded — tracked separately later). */
 export const RADAR_MUSCLE_GROUPS = [
@@ -104,6 +101,56 @@ export function radarLabelAnchor(x: number, cx = RADAR_CENTER): 'start' | 'middl
   if (x > cx + 4) return 'start';
   if (x < cx - 4) return 'end';
   return 'middle';
+}
+
+export function estimateRadarViewBox(
+  labels: readonly string[] = RADAR_MUSCLE_GROUPS.map((group) => group.label),
+): { minX: number; minY: number; width: number; height: number } {
+  let minX = RADAR_CENTER - RADAR_MAX_RADIUS;
+  let maxX = RADAR_CENTER + RADAR_MAX_RADIUS;
+  let minY = RADAR_CENTER - RADAR_MAX_RADIUS;
+  let maxY = RADAR_CENTER + RADAR_MAX_RADIUS;
+
+  for (let index = 0; index < labels.length; index += 1) {
+    const label = labels[index]!;
+    const { x, y } = polarToCartesian(
+      RADAR_CENTER,
+      RADAR_CENTER,
+      RADAR_LABEL_RADIUS,
+      index,
+    );
+    const anchor = radarLabelAnchor(x);
+    const rowWidth = Math.max(label.length, 4) * RADAR_LABEL_CHAR_WIDTH;
+
+    let left = x;
+    let right = x;
+
+    if (anchor === 'middle') {
+      left -= rowWidth / 2;
+      right += rowWidth / 2;
+    } else if (anchor === 'start') {
+      right += rowWidth;
+    } else {
+      left -= rowWidth;
+    }
+
+    const top = y - 9;
+    const bottom = y + RADAR_LABEL_VALUE_GAP + 10;
+
+    minX = Math.min(minX, left);
+    maxX = Math.max(maxX, right);
+    minY = Math.min(minY, top);
+    maxY = Math.max(maxY, bottom);
+  }
+
+  const pad = RADAR_VIEW_PADDING;
+
+  return {
+    minX: minX - pad,
+    minY: minY - pad,
+    width: maxX - minX + pad * 2,
+    height: maxY - minY + pad * 2,
+  };
 }
 
 export function computeMuscleBalance(

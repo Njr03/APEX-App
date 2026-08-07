@@ -8,13 +8,12 @@ import { useMuscleBalance } from '@/hooks/useMuscleBalance';
 import {
   getMuscleDotColor,
   getMuscleTextColor,
+  estimateRadarViewBox,
   polarToCartesian,
   RADAR_CENTER,
   RADAR_LABEL_RADIUS,
+  RADAR_LABEL_VALUE_GAP,
   RADAR_MAX_RADIUS,
-  RADAR_SIZE,
-  RADAR_VIEW_ORIGIN,
-  RADAR_VIEW_SIZE,
   radarDataPolygonPoints,
   radarLabelAnchor,
   radarPolygonPoints,
@@ -29,6 +28,7 @@ const DOT_STROKE = '#07070f';
 
 function RadarChart({ points }: { points: MuscleBalancePoint[] }) {
   const values = points.map((point) => point.value);
+  const viewBox = estimateRadarViewBox(points.map((point) => point.label));
   const dataPoints = values.map((value, index) =>
     polarToCartesian(
       RADAR_CENTER,
@@ -40,9 +40,9 @@ function RadarChart({ points }: { points: MuscleBalancePoint[] }) {
 
   return (
     <Svg
-      height={RADAR_SIZE}
-      viewBox={`${RADAR_VIEW_ORIGIN} ${RADAR_VIEW_ORIGIN} ${RADAR_VIEW_SIZE} ${RADAR_VIEW_SIZE}`}
-      width={RADAR_SIZE}
+      height={viewBox.height}
+      viewBox={`${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`}
+      width={viewBox.width}
     >
       {[0.25, 0.5, 0.75, 1].map((scale) => (
         <Polygon
@@ -119,7 +119,7 @@ function RadarChart({ points }: { points: MuscleBalancePoint[] }) {
             fontWeight="500"
             textAnchor={anchor}
             x={labelPos.x}
-            y={labelPos.y + 11}
+            y={labelPos.y + RADAR_LABEL_VALUE_GAP}
           >
             {point.value}%
           </SvgText>,
