@@ -7,6 +7,7 @@ export const DASHBOARD_SECTION_HEADING_STYLE = {
   fontFamily: fonts.jetbrainsMono,
   fontSize: 11,
   letterSpacing: 0.3,
+  textTransform: 'uppercase',
 } as const;
 
 export function InsightSectionHeading({ title }: { title: string }) {
