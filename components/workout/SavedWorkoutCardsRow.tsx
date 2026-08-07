@@ -7,6 +7,10 @@ import {
   View,
   type LayoutChangeEvent,
 } from 'react-native';
+import DraggableFlatList, {
+  ScaleDecorator,
+  type RenderItemParams,
+} from 'react-native-draggable-flatlist';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
@@ -14,7 +18,6 @@ import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHead
 import { AppText } from '@/components/ui/AppText';
 import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
 import { QueryError } from '@/components/ui/QueryState';
-import { SwipeableCardRow } from '@/components/ui/SwipeableCardRow';
 import {
   useDeleteRoutine,
   useRoutineSummaries,
@@ -26,6 +29,10 @@ import { colors, fonts } from '@/constants/theme';
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
 import { buildRoutineCardModel } from '@/lib/dashboard/routineCardDisplay';
 import {
+  applySavedWorkoutOrderToDashboardCards,
+  sortRoutinesByDashboardOrder,
+} from '@/lib/dashboard/savedWorkoutCardOrder';
+import {
   DASHBOARD_WORKOUT_CARD_RADIUS,
   dashboardPressStyle,
   dashboardTileWebClassName,
@@ -35,11 +42,19 @@ import { dedupeSavedWorkoutsForSession } from '@/lib/routines/sessionWorkouts';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import { router, useFocusEffect } from 'expo-router';
+import { useDashboardCardsStore } from '@/stores/dashboardCardsStore';
+import type { HorizontalScrollTarget } from '@/lib/ui/horizontalScroll';
 
 const CARD_BG = '#0d0d1b';
 const BORDER = 'rgba(255,255,255,0.06)';
 const MUTED = 'rgba(240,237,232,0.5)';
 const CARD_GAP = 10;
+
+interface SavedWorkoutListItem {
+  key: string;
+  routineId: string;
+  workout: RoutineSummary;
+}
 
 interface SavedWorkoutCardsRowProps {
   heading?: string;
@@ -198,6 +213,14 @@ export function SavedWorkoutCardsRow({
   const { data: workouts } = useWorkoutHistory();
   const deleteRoutine = useDeleteRoutine();
   const { startFromRoutineId, isStarting } = useStartWorkoutSession();
+  const configuredCards = useDashboardCardsStore((state) => state.cards);
+  const dashboardHydrated = useDashboardCardsStore((state) => state.hydrated);
+  const hydrateDashboardCards = useDashboardCardsStore((state) => state.hydrate);
+  const setDashboardCards = useDashboardCardsStore((state) => state.setCards);
+
+  useEffect(() => {
+    void hydrateDashboardCards();
+  }, [hydrateDashboardCards]);
 
   useFocusEffect(
     useCallback(() => {
@@ -210,14 +233,33 @@ export function SavedWorkoutCardsRow({
     [savedWorkouts],
   );
 
+  const orderedWorkouts = useMemo(
+    () =>
+      dashboardHydrated
+        ? sortRoutinesByDashboardOrder(sessionWorkouts, configuredCards)
+        : sessionWorkouts,
+    [configuredCards, dashboardHydrated, sessionWorkouts],
+  );
+
+  const listItems = useMemo(
+    (): SavedWorkoutListItem[] =>
+      orderedWorkouts.map((workout) => ({
+        key: workout.id,
+        routineId: workout.id,
+        workout,
+      })),
+    [orderedWorkouts],
+  );
+
   const layoutWidth = rowWidth > 0 ? rowWidth : viewportWidth;
   const cardWidth = Math.min(280, Math.max(240, layoutWidth - 48));
   const addCardWidth = cardWidth / 2;
   const cardStep = cardWidth + CARD_GAP;
-  const itemCount = sessionWorkouts.length + 1;
+  const itemCount = listItems.length + 1;
   const visibleCardCount =
     rowWidth > 0 ? Math.max(1, Math.floor((rowWidth + CARD_GAP) / cardStep)) : 1;
   const maxScrollIndex = Math.max(0, itemCount - visibleCardCount);
+  const scrollTargetRef = useRef<HorizontalScrollTarget>(null);
 
   const {
     handleScroll,
@@ -225,9 +267,16 @@ export function SavedWorkoutCardsRow({
     handleSliderChange,
     handleSliderEnd,
     scrollOffset,
-    scrollRef,
     snapOffsets,
-  } = useCardRowScroller({ cardStep, maxScrollIndex });
+  } = useCardRowScroller({
+    cardStep,
+    maxScrollIndex,
+    scrollRef: scrollTargetRef,
+  });
+
+  const assignListRef = useCallback((node: HorizontalScrollTarget | null) => {
+    scrollTargetRef.current = node;
+  }, []);
 
   const handleDelete = async (routineId: string) => {
     setDeletingRoutineId(routineId);
@@ -248,6 +297,70 @@ export function SavedWorkoutCardsRow({
       setStartError(getSupabaseErrorMessage(err));
     }
   };
+
+  const handleDragEnd = useCallback(
+    ({ data }: { data: SavedWorkoutListItem[] }) => {
+      const orderedRoutineIds = data.map((item) => item.routineId);
+
+      void setDashboardCards(
+        applySavedWorkoutOrderToDashboardCards(configuredCards, orderedRoutineIds),
+      );
+    },
+    [configuredCards, setDashboardCards],
+  );
+
+  const renderItem = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<SavedWorkoutListItem>) => (
+      <ScaleDecorator>
+        <Pressable
+          accessibilityHint="Press and hold to reorder"
+          delayLongPress={250}
+          disabled={isActive}
+          onLongPress={drag}
+          style={{
+            alignSelf: 'stretch',
+            marginRight: CARD_GAP,
+            opacity: isActive ? 0.92 : 1,
+            width: cardWidth,
+          }}
+        >
+          <SavedWorkoutCard
+            cardWidth={cardWidth}
+            isDeleting={deletingRoutineId === item.workout.id}
+            isStarting={isStarting}
+            onDelete={() => void handleDelete(item.workout.id)}
+            onEdit={() => router.push(`/routines/${item.workout.id}/edit`)}
+            onStart={() => void handleStart(item.workout.id)}
+            unit={unit}
+            workout={item.workout}
+            workouts={workouts}
+          />
+        </Pressable>
+      </ScaleDecorator>
+    ),
+    [
+      cardWidth,
+      deletingRoutineId,
+      isStarting,
+      unit,
+      workouts,
+    ],
+  );
+
+  const listFooter = useMemo(
+    () => (
+      <View
+        style={{
+          alignSelf: 'stretch',
+          marginLeft: listItems.length > 0 ? 0 : undefined,
+          width: addCardWidth,
+        }}
+      >
+        <AddWorkoutCard />
+      </View>
+    ),
+    [addCardWidth, listItems.length],
+  );
 
   return (
     <View className="gap-3">
@@ -276,41 +389,32 @@ export function SavedWorkoutCardsRow({
             setRowWidth(event.nativeEvent.layout.width);
           }}
         >
-          <SwipeableCardRow
-            containerStyle={{ paddingBottom: 4, paddingTop: 4 }}
-            contentContainerStyle={{ paddingRight: 4 }}
+          <DraggableFlatList
+            ref={assignListRef}
+            horizontal
+            activationDistance={12}
+            containerStyle={{ flexGrow: 0 }}
+            contentContainerStyle={{
+              alignItems: 'stretch',
+              paddingBottom: 4,
+              paddingRight: 4,
+              paddingTop: 4,
+            }}
+            data={listItems}
+            decelerationRate="fast"
+            keyExtractor={(item) => item.key}
+            ListFooterComponent={listFooter}
+            nestedScrollEnabled
+            onDragEnd={handleDragEnd}
+            onMomentumScrollEnd={handleScrollEnd}
             onScroll={handleScroll}
-            onScrollEnd={handleScrollEnd}
-            scrollRef={scrollRef}
-            snapOffsets={snapOffsets}
-          >
-            {sessionWorkouts.map((workout) => (
-              <View
-                key={workout.id}
-                style={{
-                  alignSelf: 'stretch',
-                  flexShrink: 0,
-                  marginRight: CARD_GAP,
-                  width: cardWidth,
-                }}
-              >
-                <SavedWorkoutCard
-                  cardWidth={cardWidth}
-                  isDeleting={deletingRoutineId === workout.id}
-                  isStarting={isStarting}
-                  onDelete={() => void handleDelete(workout.id)}
-                  onEdit={() => router.push(`/routines/${workout.id}/edit`)}
-                  onStart={() => void handleStart(workout.id)}
-                  unit={unit}
-                  workout={workout}
-                  workouts={workouts}
-                />
-              </View>
-            ))}
-            <View style={{ alignSelf: 'stretch', flexShrink: 0, width: addCardWidth }}>
-              <AddWorkoutCard />
-            </View>
-          </SwipeableCardRow>
+            onScrollEndDrag={handleScrollEnd}
+            renderItem={renderItem}
+            scrollEventThrottle={16}
+            showsHorizontalScrollIndicator={false}
+            snapToAlignment="start"
+            snapToOffsets={snapOffsets.length > 0 ? snapOffsets : undefined}
+          />
 
           <CardScrollSlider
             max={maxScrollIndex}

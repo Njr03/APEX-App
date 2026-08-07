@@ -1,15 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent, ScrollView } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
-import { scrollHorizontalTo } from '@/lib/ui/horizontalScroll';
+import {
+  scrollHorizontalTo,
+  type HorizontalScrollTarget,
+} from '@/lib/ui/horizontalScroll';
 
 interface UseCardRowScrollerOptions {
   cardStep: number;
   maxScrollIndex: number;
+  scrollRef?: RefObject<HorizontalScrollTarget | null>;
 }
 
-export function useCardRowScroller({ cardStep, maxScrollIndex }: UseCardRowScrollerOptions) {
-  const scrollRef = useRef<ScrollView>(null);
+export function useCardRowScroller({
+  cardStep,
+  maxScrollIndex,
+  scrollRef: externalScrollRef,
+}: UseCardRowScrollerOptions) {
+  const internalScrollRef = useRef<HorizontalScrollTarget>(null);
+  const scrollRef = externalScrollRef ?? internalScrollRef;
   const [scrollOffset, setScrollOffset] = useState(0);
   const isSliderScrolling = useRef(false);
 

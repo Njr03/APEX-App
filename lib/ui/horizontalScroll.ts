@@ -1,9 +1,14 @@
-import { Platform, type ScrollView } from 'react-native';
+import { Platform } from 'react-native';
 import type { RefObject } from 'react';
 
-type ScrollViewRef = RefObject<ScrollView | null>;
+export type HorizontalScrollTarget = {
+  scrollTo?: (options: { x: number; y: number; animated?: boolean }) => void;
+  scrollToOffset?: (options: { offset: number; animated?: boolean }) => void;
+};
 
-function getScrollElement(scrollRef: ScrollViewRef): HTMLElement | null {
+type HorizontalScrollRef = RefObject<HorizontalScrollTarget | null>;
+
+function getScrollElement(scrollRef: HorizontalScrollRef): HTMLElement | null {
   if (Platform.OS !== 'web') return null;
 
   const scrollView = scrollRef.current as unknown as {
@@ -23,11 +28,18 @@ function getScrollElement(scrollRef: ScrollViewRef): HTMLElement | null {
 }
 
 export function scrollHorizontalTo(
-  scrollRef: ScrollViewRef,
+  scrollRef: HorizontalScrollRef,
   x: number,
   animated: boolean,
 ) {
-  scrollRef.current?.scrollTo({ x, y: 0, animated });
+  const target = scrollRef.current;
+  if (!target) return;
+
+  if (typeof target.scrollToOffset === 'function') {
+    target.scrollToOffset({ offset: x, animated });
+  } else {
+    target.scrollTo?.({ x, y: 0, animated });
+  }
 
   if (Platform.OS !== 'web') return;
 

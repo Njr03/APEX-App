@@ -2,6 +2,8 @@ import type { ReactNode, RefObject } from 'react';
 import { Platform, ScrollView, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
+import type { HorizontalScrollTarget } from '@/lib/ui/horizontalScroll';
+
 interface SwipeableCardRowProps {
   children: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
@@ -9,7 +11,7 @@ interface SwipeableCardRowProps {
   onLayout?: (event: LayoutChangeEvent) => void;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   onScrollEnd: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
-  scrollRef: RefObject<ScrollView | null>;
+  scrollRef: RefObject<HorizontalScrollTarget | null>;
   snapOffsets: number[];
 }
 
@@ -26,7 +28,7 @@ export function SwipeableCardRow({
   return (
     <View onLayout={onLayout} style={[{ width: '100%' }, containerStyle]}>
       <ScrollView
-        ref={scrollRef}
+        ref={scrollRef as RefObject<ScrollView | null>}
         horizontal
         nestedScrollEnabled
         className={Platform.OS === 'web' ? 'card-scroll-row' : undefined}
