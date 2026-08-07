@@ -14,6 +14,7 @@ interface ExercisePickerModalProps {
   onClose: () => void;
   onSelect: (exercise: Exercise) => void;
   excludeExerciseIds?: string[];
+  title?: string;
 }
 
 export function ExercisePickerModal({
@@ -21,6 +22,7 @@ export function ExercisePickerModal({
   onClose,
   onSelect,
   excludeExerciseIds = [],
+  title = 'Add Exercise',
 }: ExercisePickerModalProps) {
   const [search, setSearch] = useState('');
   const { data: exercises, isLoading, isError, error } = useExercises({
@@ -38,7 +40,7 @@ export function ExercisePickerModal({
         <View className="max-h-[85%] rounded-t-2xl border border-border bg-bg px-5 pb-8 pt-4">
           <View className="mb-4 flex-row items-center justify-between">
             <AppText className="text-xl" variant="display">
-              Add Exercise
+              {title}
             </AppText>
             <Pressable
               accessibilityLabel="Close exercise picker"

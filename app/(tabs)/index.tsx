@@ -38,7 +38,7 @@ export default function HomeScreen() {
 
         <StatTilesRow unit={unit} />
 
-        <TrainingInsightsSection />
+        <TrainingInsightsSection unit={unit} />
 
         <View style={{ marginTop: 4 }}>
           <RecentPersonalRecordsPanel unit={unit} />

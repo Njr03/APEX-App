@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { ExerciseProgressSection } from '@/components/dashboard/ExerciseProgressSection';
 import { MuscleBalanceDetailModal } from '@/components/dashboard/MuscleBalanceDetailModal';
 import { MuscleBalanceRadar } from '@/components/dashboard/MuscleBalanceRadar';
 import { WeeklyConsistencyDetailModal } from '@/components/dashboard/WeeklyConsistencyDetailModal';
@@ -49,7 +50,7 @@ function InsightCard({
   );
 }
 
-export function TrainingInsightsSection() {
+export function TrainingInsightsSection({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
   const { isCompact } = useLayoutBreakpoint();
   const { data: consistencyData } = useWeeklyConsistency();
   const { data: muscleData } = useMuscleBalance();
@@ -80,6 +81,7 @@ export function TrainingInsightsSection() {
           <InsightCard compact={isCompact} onPress={() => setMuscleVisible(true)}>
             <MuscleBalanceRadar compact={isCompact} />
           </InsightCard>
+          <ExerciseProgressSection unit={unit} />
         </View>
       </View>
 
