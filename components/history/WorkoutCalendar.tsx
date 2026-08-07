@@ -101,6 +101,12 @@ function CalendarDayCell({
   const showSelectedBackground = persistSelectedDayStyle && isSelected;
   const dayLabel = format(date, 'd');
   const dayFontSize = embedded ? 10 : undefined;
+  const numberHighlightSize = embedded ? 22 : 28;
+  const numberHighlightBackground = showSelectedBackground
+    ? 'rgba(200,255,90,0.12)'
+    : showTodayHighlight
+      ? 'rgba(200,255,90,0.08)'
+      : 'transparent';
 
   return (
     <Pressable
@@ -114,34 +120,38 @@ function CalendarDayCell({
       onPress={() => onSelectDate(date)}
       style={Platform.OS === 'web' && isCompletedDay ? { cursor: 'pointer' } : undefined}
     >
-      <View
-        className={`${dayCellClass} items-center justify-center rounded-full`}
-        style={{
-          backgroundColor: showSelectedBackground
-            ? 'rgba(200,255,90,0.12)'
-            : showTodayHighlight
-              ? 'rgba(200,255,90,0.08)'
-              : 'transparent',
-        }}
-      >
-        {showTodayHighlight ? (
-          <FlickeringTodayNumber fontSize={dayFontSize}>{dayLabel}</FlickeringTodayNumber>
-        ) : (
-          <AppText
-            style={{
-              color: highlightNumber
-                ? COMPLETED_COLOR
-                : inMonth
-                  ? colors.text
-                  : 'rgba(240,237,232,0.25)',
-              fontSize: dayFontSize,
-            }}
-            variant="mono"
-          >
-            {dayLabel}
-          </AppText>
-        )}
-        <View className="mt-0.5 flex-row items-center justify-center gap-0.5">
+      <View className={`${dayCellClass} items-center justify-start`}>
+        <View
+          className="items-center justify-center rounded-full"
+          style={{
+            backgroundColor: numberHighlightBackground,
+            height: numberHighlightSize,
+            width: numberHighlightSize,
+          }}
+        >
+          {showTodayHighlight ? (
+            <FlickeringTodayNumber fontSize={dayFontSize}>{dayLabel}</FlickeringTodayNumber>
+          ) : (
+            <AppText
+              style={{
+                color: highlightNumber
+                  ? COMPLETED_COLOR
+                  : inMonth
+                    ? colors.text
+                    : 'rgba(240,237,232,0.25)',
+                fontSize: dayFontSize,
+              }}
+              variant="mono"
+            >
+              {dayLabel}
+            </AppText>
+          )}
+        </View>
+
+        <View
+          className="flex-row items-center justify-center"
+          style={{ height: dotSize, marginTop: embedded ? 1 : 2 }}
+        >
           {hasWorkout && inMonth ? (
             <View
               style={{
@@ -151,9 +161,7 @@ function CalendarDayCell({
                 width: dotSize,
               }}
             />
-          ) : (
-            <View style={{ height: dotSize, width: dotSize }} />
-          )}
+          ) : null}
         </View>
       </View>
     </Pressable>
