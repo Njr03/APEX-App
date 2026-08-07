@@ -1,10 +1,9 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { format } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { LevelDetailModal } from '@/components/dashboard/LevelDetailModal';
 import { WorkoutHistoryModal } from '@/components/history/WorkoutHistoryModal';
 import {
   TOPBAR_BG,
@@ -13,8 +12,6 @@ import {
   TOPBAR_HEIGHT_WITH_WELCOME,
 } from '@/components/navigation/shellConstants';
 import { useActiveWorkout, useProfile } from '@/hooks/queries';
-import { useAuth } from '@/providers/AuthProvider';
-import { calculateLevel } from '@/lib/xp';
 import {
   PAGE_TITLES,
   useNavigationStore,
@@ -37,13 +34,6 @@ export const TOPBAR_TITLE_TEXT_STYLE = {
   fontSize: 15,
   fontWeight: '700' as const,
 };
-
-export const TOPBAR_WELCOME_TEXT_STYLE = {
-  color: colors.accent,
-  fontFamily: fonts.jetbrainsMono,
-  fontSize: 11,
-  letterSpacing: 0.3,
-} as const;
 
 export const TOPBAR_SUBTITLE_TEXT_STYLE = {
   color: colors.text,
@@ -96,11 +86,9 @@ function TopBarCta({
 export function AppTopBar() {
   const insets = useSafeAreaInsets();
   const activePage = useNavigationStore((state) => state.activePage);
-  const { user } = useAuth();
   const { data: profile } = useProfile();
   const { data: activeWorkout } = useActiveWorkout();
   const [historyVisible, setHistoryVisible] = useState(false);
-  const [levelVisible, setLevelVisible] = useState(false);
 
   const welcomeName =
     activePage === 'index'
@@ -116,8 +104,6 @@ export function AppTopBar() {
     activePage !== 'exercises' &&
     activePage !== 'profile';
   const todayLabel = format(new Date(), 'EEE · MMM d').toUpperCase();
-  const level = profile ? calculateLevel(profile.total_xp ?? 0) : null;
-  const levelLabel = user && level != null ? `Level ${level}` : null;
   const barHeight = TOPBAR_HEIGHT_WITH_WELCOME;
 
   return (
@@ -165,32 +151,15 @@ export function AppTopBar() {
         </View>
 
         <View className="shrink-0 flex-row items-center gap-2">
-          <View className="items-end" style={{ gap: 2 }}>
-            <Pressable
-              accessibilityHint="Opens workout history calendar"
-              accessibilityLabel={`Today is ${format(new Date(), 'EEEE, MMMM d')}. Open workout history.`}
-              accessibilityRole="button"
-              className="rounded-md px-1 py-0.5 active:opacity-70"
-              onPress={() => setHistoryVisible(true)}
-            >
-              <Text style={TOPBAR_DATE_TEXT_STYLE}>{todayLabel}</Text>
-            </Pressable>
-
-            {levelLabel ? (
-              <Pressable
-                accessibilityHint="Opens level progress summary"
-                accessibilityLabel={`${levelLabel}. Open level details.`}
-                accessibilityRole="button"
-                className="rounded-md px-1 py-0.5 active:opacity-70"
-                onPress={() => setLevelVisible(true)}
-                style={Platform.OS === 'web' ? { cursor: 'pointer' } : undefined}
-              >
-                <Text numberOfLines={1} style={TOPBAR_WELCOME_TEXT_STYLE}>
-                  {levelLabel}
-                </Text>
-              </Pressable>
-            ) : null}
-          </View>
+          <Pressable
+            accessibilityHint="Opens workout history calendar"
+            accessibilityLabel={`Today is ${format(new Date(), 'EEEE, MMMM d')}. Open workout history.`}
+            accessibilityRole="button"
+            className="rounded-md px-1 py-0.5 active:opacity-70"
+            onPress={() => setHistoryVisible(true)}
+          >
+            <Text style={TOPBAR_DATE_TEXT_STYLE}>{todayLabel}</Text>
+          </Pressable>
 
           {showTopBarCta ? (
             <>
@@ -215,11 +184,6 @@ export function AppTopBar() {
       <WorkoutHistoryModal
         onClose={() => setHistoryVisible(false)}
         visible={historyVisible}
-      />
-
-      <LevelDetailModal
-        onClose={() => setLevelVisible(false)}
-        visible={levelVisible}
       />
     </View>
   );

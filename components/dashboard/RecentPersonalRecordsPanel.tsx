@@ -174,6 +174,25 @@ interface RecentPersonalRecordsPanelProps {
   unit?: 'kg' | 'lb';
 }
 
+function RecentPRSectionHeader({ onViewAll }: { onViewAll: () => void }) {
+  return (
+    <View className="flex-row items-center justify-between">
+      <InsightSectionHeading title="Recent Personal Records" />
+      <Pressable accessibilityRole="button" onPress={onViewAll}>
+        <Text
+          style={{
+            color: colors.accent,
+            fontFamily: fonts.body,
+            fontSize: 12,
+          }}
+        >
+          View all
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export function RecentPersonalRecordsPanel({
   unit = 'kg',
 }: RecentPersonalRecordsPanelProps) {
@@ -232,25 +251,13 @@ export function RecentPersonalRecordsPanel({
   return (
     <>
       <View className="w-full" style={{ gap: 12, position: 'relative', zIndex: 1 }}>
-        <InsightSectionHeading title="Recent Personal Records" />
+        <RecentPRSectionHeader onViewAll={openAll} />
 
         {!recentRecords.length ? (
           <PREmptyCard onPress={openAll} />
         ) : (
           <PRList onRecordPress={openRecord} records={recentRecords} />
         )}
-
-        <Pressable accessibilityRole="button" onPress={openAll}>
-          <Text
-            style={{
-              color: colors.accent,
-              fontFamily: fonts.body,
-              fontSize: 12,
-            }}
-          >
-            View all
-          </Text>
-        </Pressable>
       </View>
 
       <AllPersonalRecordsModal
