@@ -4,12 +4,10 @@ import { RecentPersonalRecordsPanel } from '@/components/dashboard/RecentPersona
 import { SplitCardsRow } from '@/components/dashboard/ThisWeekSection';
 import { StatTilesRow } from '@/components/dashboard/StatTilesRow';
 import { TrainingInsightsSection } from '@/components/dashboard/TrainingInsightsSection';
-import { PullToRefreshScrollView } from '@/components/ui/PullToRefreshScrollView';
 import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { useProfile } from '@/hooks/queries';
 import { useAutoSeedDemoData } from '@/hooks/useAutoSeedDemoData';
-import { usePullToRefreshDashboard } from '@/hooks/usePullToRefreshDashboard';
 import { useRefreshDashboardOnFocus } from '@/hooks/useRefreshDashboardOnFocus';
 import { useTabScrollViewToTop } from '@/hooks/useTabScrollToTop';
 import { colors } from '@/constants/theme';
@@ -27,19 +25,16 @@ export default function HomeScreen() {
   } = useProfile();
 
   const unit = resolveUnitPreference(profile?.unit_preference);
-  const { onRefresh, refreshing } = usePullToRefreshDashboard();
 
   useAutoSeedDemoData();
   useRefreshDashboardOnFocus();
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <PullToRefreshScrollView
+      <ScrollView
         ref={scrollRef}
         className="flex-1"
         contentContainerClassName="gap-4 p-5 pb-10"
-        onRefresh={onRefresh}
-        refreshing={refreshing}
         showsVerticalScrollIndicator={false}
       >
         <SplitCardsRow unit={unit} />
@@ -60,7 +55,7 @@ export default function HomeScreen() {
             onRetry={() => void refetchProfile()}
           />
         ) : null}
-      </PullToRefreshScrollView>
+      </ScrollView>
     </Screen>
   );
 }
