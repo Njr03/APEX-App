@@ -6,7 +6,6 @@ import { QueryError } from '@/components/ui/QueryState';
 import { colors, fonts } from '@/constants/theme';
 import { useMuscleBalance } from '@/hooks/useMuscleBalance';
 import {
-  getMuscleBarFillColor,
   getMuscleDotColor,
   getMuscleTextColor,
   polarToCartesian,
@@ -21,7 +20,6 @@ import {
   radarPolygonPoints,
   type MuscleBalancePoint,
 } from '@/lib/muscleBalance';
-import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 const GRID_STROKE = 'rgba(255,255,255,0.06)';
@@ -131,75 +129,7 @@ function RadarChart({ points }: { points: MuscleBalancePoint[] }) {
   );
 }
 
-function ImbalancePanel({
-  points,
-  compact = false,
-}: {
-  points: MuscleBalancePoint[];
-  compact?: boolean;
-}) {
-  return (
-    <View
-      className={compact ? 'w-full' : 'min-w-[156px] flex-1'}
-      style={{ alignSelf: compact ? 'stretch' : undefined, gap: 10 }}
-    >
-      {points.map((point) => {
-        const textColor = getMuscleTextColor(point.value, colors.muted);
-        const barFill = getMuscleBarFillColor(point.value, 'rgba(240,237,232,0.25)');
-
-        return (
-          <View key={point.key} style={{ gap: 4 }}>
-            <View style={{ alignItems: 'center', flexDirection: 'row', gap: 8 }}>
-              <Text
-                style={{
-                  color: textColor,
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  fontFamily: fonts.jetbrainsMono,
-                  fontSize: 9,
-                  minWidth: 0,
-                }}
-              >
-                {point.label}
-              </Text>
-              <Text
-                style={{
-                  color: textColor,
-                  flexShrink: 0,
-                  fontFamily: fonts.jetbrainsMono,
-                  fontSize: 10,
-                }}
-              >
-                {point.value}%
-              </Text>
-            </View>
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.06)',
-                borderRadius: 2,
-                height: 3,
-                overflow: 'hidden',
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: barFill,
-                  borderRadius: 2,
-                  height: 3,
-                  width: `${point.value}%`,
-                }}
-              />
-            </View>
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-export function MuscleBalanceRadar({ compact = false }: { compact?: boolean }) {
-  const { isCompact: layoutCompact } = useLayoutBreakpoint();
-  const stacked = compact || layoutCompact;
+export function MuscleBalanceRadar(_props: { compact?: boolean }) {
   const { data, isLoading, isError, error, refetch } = useMuscleBalance();
 
   if (isLoading) {
@@ -219,12 +149,8 @@ export function MuscleBalanceRadar({ compact = false }: { compact?: boolean }) {
     <View style={{ gap: 12 }}>
       <InsightSectionHeading title="Muscle Balance" />
 
-      <View
-        className={stacked ? 'flex-col items-center' : 'flex-row items-start'}
-        style={{ gap: stacked ? 14 : 16 }}
-      >
+      <View className="items-center">
         <RadarChart points={data.points} />
-        <ImbalancePanel compact={stacked} points={data.points} />
       </View>
 
       <Text
