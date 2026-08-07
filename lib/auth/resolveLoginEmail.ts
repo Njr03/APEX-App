@@ -32,9 +32,30 @@ export async function isUsernameAvailable(
   username: string,
   excludeUserId?: string,
 ): Promise<boolean> {
+  const username_input = normalizeUsername(username);
+
+  if (excludeUserId) {
+    const extended = await supabase.rpc('is_username_available', {
+      username_input,
+      exclude_user_id: excludeUserId,
+    });
+
+    if (!extended.error) {
+      return Boolean(extended.data);
+    }
+
+    const needsFallback =
+      extended.error.code === 'PGRST202' ||
+      extended.error.message?.includes('Could not find the function') ||
+      extended.error.message?.includes('schema cache');
+
+    if (!needsFallback) {
+      throw extended.error;
+    }
+  }
+
   const result = await supabase.rpc('is_username_available', {
-    username_input: normalizeUsername(username),
-    exclude_user_id: excludeUserId ?? null,
+    username_input,
   });
 
   return Boolean(throwIfSupabaseError(result));
