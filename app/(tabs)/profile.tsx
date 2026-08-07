@@ -1,6 +1,4 @@
-import { router } from 'expo-router';
-import { Settings } from 'lucide-react-native';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { useState } from 'react';
 
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
@@ -52,17 +50,7 @@ export default function ProfileScreen() {
         contentContainerClassName="gap-4 p-5 pb-10"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-row items-center justify-between">
-          <TabPageHeading title="User profile" />
-          <Pressable
-            accessibilityLabel="Open settings"
-            accessibilityRole="button"
-            className="rounded-full bg-accent p-2 active:opacity-80"
-            onPress={() => router.push('/profile/settings')}
-          >
-            <Settings color={colors.bg} size={20} />
-          </Pressable>
-        </View>
+        <TabPageHeading title="User profile" />
 
         <View className="rounded-lg border border-border bg-surface px-4 py-3">
           <AppText variant="muted">Signed in as</AppText>

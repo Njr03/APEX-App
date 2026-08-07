@@ -10,6 +10,8 @@ interface OptionPickerProps<T extends string> {
   onChange: (value: T) => void;
   formatLabel?: (value: T) => string;
   error?: string;
+  /** Match FilterChips section labels (e.g. Muscle group on Lifts tab). */
+  sectionLabel?: boolean;
 }
 
 export function OptionPicker<T extends string>({
@@ -19,10 +21,14 @@ export function OptionPicker<T extends string>({
   onChange,
   formatLabel = (v) => v.replace(/_/g, ' '),
   error,
+  sectionLabel = false,
 }: OptionPickerProps<T>) {
   return (
     <View className="gap-2">
-      <AppText className="text-sm" variant="body">
+      <AppText
+        className={sectionLabel ? 'text-xs uppercase tracking-wide' : 'text-sm'}
+        variant={sectionLabel ? 'muted' : 'body'}
+      >
         {label}
       </AppText>
       <View className="flex-row flex-wrap gap-2">

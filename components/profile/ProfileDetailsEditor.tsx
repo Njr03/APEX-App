@@ -23,6 +23,14 @@ import {
 } from '@/lib/validations/training';
 import type { Profile } from '@/lib/supabase';
 
+function ProfileFieldLabel({ children }: { children: string }) {
+  return (
+    <AppText className="text-xs uppercase tracking-wide" variant="muted">
+      {children}
+    </AppText>
+  );
+}
+
 function buildProfilePatch(
   profile: Profile,
   displayName: string,
@@ -141,9 +149,7 @@ export function ProfileDetailsEditor({
   return (
     <View className="gap-4">
       <View className="gap-2">
-        <AppText className="text-sm" variant="body">
-          Display name
-        </AppText>
+        <ProfileFieldLabel>Display name</ProfileFieldLabel>
         <Input
           accessibilityLabel="Display name"
           autoCapitalize="words"
@@ -156,9 +162,7 @@ export function ProfileDetailsEditor({
       </View>
 
       <View className="gap-2">
-        <AppText className="text-sm" variant="body">
-          Username
-        </AppText>
+        <ProfileFieldLabel>Username</ProfileFieldLabel>
         <Input
           accessibilityLabel="Username"
           autoCapitalize="none"
@@ -180,6 +184,7 @@ export function ProfileDetailsEditor({
         label="Weight units"
         onChange={setUnitPreference}
         options={['lb', 'kg'] as const}
+        sectionLabel
         value={unitPreference}
       />
 

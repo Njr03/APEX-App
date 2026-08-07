@@ -107,7 +107,6 @@ function RootNavigator() {
           <Stack.Screen name="history/index" />
           <Stack.Screen name="history/[id]" />
           <Stack.Screen name="splits/[split]" />
-          <Stack.Screen name="profile/settings" />
           <Stack.Screen name="reset-password" />
         </Stack.Protected>
 
