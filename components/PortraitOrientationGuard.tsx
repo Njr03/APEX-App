@@ -10,7 +10,10 @@ function isPhoneSized(width: number, height: number) {
 }
 
 function isLandscape(width: number, height: number) {
-  return width > height;
+  if (width <= height) return false;
+
+  // Mobile keyboards shrink visual height and can falsely read as landscape.
+  return width / height >= 1.55;
 }
 
 /**

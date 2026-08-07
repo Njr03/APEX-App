@@ -26,7 +26,10 @@ export function ExerciseProgressSection({ unit }: ExerciseProgressSectionProps) 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [chartVisible, setChartVisible] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const { pressed, handlers } = useDashboardTilePress(() => setPickerVisible(true));
+  const openPicker = () => setPickerVisible(true);
+  const { pressed, handlers } = useDashboardTilePress(
+    pickerVisible || chartVisible ? undefined : openPicker,
+  );
 
   const handleSelectExercise = (exercise: Exercise) => {
     setSelectedExercise(exercise);
@@ -78,6 +81,7 @@ export function ExerciseProgressSection({ unit }: ExerciseProgressSectionProps) 
         onClose={() => setPickerVisible(false)}
         onSelect={handleSelectExercise}
         title="Select exercise"
+        titleStyle="section"
         visible={pickerVisible}
       />
 
