@@ -1,5 +1,5 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -10,19 +10,17 @@ import {
 } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 import { format, parseISO } from 'date-fns';
-import { X } from 'lucide-react-native';
+import { ChevronLeft, X } from 'lucide-react-native';
 
 import { WorkoutCalendar } from '@/components/history/WorkoutCalendar';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
 import { QueryError } from '@/components/ui/QueryState';
-import { useWorkoutHistory } from '@/hooks/queries';
+import { WorkoutSessionDetail } from '@/components/workout/WorkoutSessionDetail';
+import { useProfile, useWorkout, useWorkoutHistory } from '@/hooks/queries';
 import { useThisWeekSplits } from '@/hooks/useThisWeekSplits';
 import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
 import { colors, fonts } from '@/constants/theme';
-import {
-  inferSplitFromWorkoutName,
-  SPLIT_DEFINITIONS,
-} from '@/lib/training/splits';
+import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { buildCalendarDayMarkers } from '@/lib/training/scheduledSessions';
 import { workoutsOnDate } from '@/lib/progress/stats';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
@@ -66,6 +64,22 @@ function SessionDetailModal({
   visible: boolean;
   onClose: () => void;
 }) {
+  const [showFullBreakdown, setShowFullBreakdown] = useState(false);
+  const { data: profile } = useProfile();
+  const unit = resolveUnitPreference(profile?.unit_preference);
+  const {
+    data: fullWorkout,
+    isLoading,
+    isError,
+    error,
+  } = useWorkout(showFullBreakdown && workout ? workout.id : undefined);
+
+  useEffect(() => {
+    if (!visible) {
+      setShowFullBreakdown(false);
+    }
+  }, [visible]);
+
   if (!workout) return null;
 
   const started = parseISO(workout.started_at);
@@ -86,72 +100,122 @@ function SessionDetailModal({
             borderRadius: 16,
             borderWidth: 1,
             gap: 14,
-            maxWidth: 360,
+            maxHeight: showFullBreakdown ? '88%' : undefined,
+            maxWidth: showFullBreakdown ? 480 : 360,
             padding: 18,
             width: '100%',
           }}
         >
-          <View className="flex-row items-start justify-between" style={{ gap: 12 }}>
-            <View style={{ flex: 1, gap: 6 }}>
-              <Text
+          {showFullBreakdown ? (
+            <ScrollView
+              contentContainerStyle={{ gap: 16, paddingBottom: 8 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <View className="flex-row items-start justify-between" style={{ gap: 12 }}>
+                <Pressable
+                  accessibilityLabel="Back to session summary"
+                  accessibilityRole="button"
+                  className="flex-row items-center gap-1 active:opacity-70"
+                  onPress={() => setShowFullBreakdown(false)}
+                >
+                  <ChevronLeft color={colors.accent} size={18} />
+                  <Text
+                    style={{
+                      color: colors.accent,
+                      fontFamily: fonts.body,
+                      fontSize: 14,
+                    }}
+                  >
+                    Back
+                  </Text>
+                </Pressable>
+                <Pressable accessibilityLabel="Close" onPress={onClose}>
+                  <X color={MUTED} size={18} />
+                </Pressable>
+              </View>
+
+              {isLoading ? (
+                <ActivityIndicator color={colors.accent} />
+              ) : null}
+
+              {isError || !fullWorkout ? (
+                <QueryError message={getSupabaseErrorMessage(error)} />
+              ) : (
+                <View
+                  style={{
+                    backgroundColor: 'rgba(200,255,90,0.04)',
+                    borderColor: 'rgba(200,255,90,0.2)',
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    padding: 12,
+                  }}
+                >
+                  <WorkoutSessionDetail embedded unit={unit} workout={fullWorkout} />
+                </View>
+              )}
+            </ScrollView>
+          ) : (
+            <>
+              <View className="flex-row items-start justify-between" style={{ gap: 12 }}>
+                <View style={{ flex: 1, gap: 6 }}>
+                  <Text
+                    style={{
+                      color: colors.text,
+                      fontFamily: fonts.brand,
+                      fontSize: 18,
+                      fontWeight: '700',
+                    }}
+                  >
+                    {workout.name}
+                  </Text>
+                </View>
+                <Pressable accessibilityLabel="Close" onPress={onClose}>
+                  <X color={MUTED} size={18} />
+                </Pressable>
+              </View>
+
+              <View style={{ backgroundColor: CARD_BORDER, height: 1 }} />
+
+              <View style={{ gap: 10 }}>
+                <DetailRow label="Date" value={format(started, 'EEEE · MMM d, yyyy')} />
+                <DetailRow label="Start" value={format(started, 'h:mm a')} />
+                <DetailRow
+                  label="Complete"
+                  value={completed ? format(completed, 'h:mm a') : '—'}
+                />
+                <DetailRow
+                  label="Duration"
+                  value={
+                    workout.duration_seconds != null
+                      ? formatElapsedDuration(workout.duration_seconds)
+                      : '—'
+                  }
+                />
+              </View>
+
+              <Pressable
+                onPress={() => setShowFullBreakdown(true)}
                 style={{
-                  color: colors.text,
-                  fontFamily: fonts.brand,
-                  fontSize: 18,
-                  fontWeight: '700',
+                  alignItems: 'center',
+                  backgroundColor: colors.accent,
+                  borderRadius: 10,
+                  marginTop: 4,
+                  paddingVertical: 12,
                 }}
               >
-                {workout.name}
-              </Text>
-            </View>
-            <Pressable accessibilityLabel="Close" onPress={onClose}>
-              <X color={MUTED} size={18} />
-            </Pressable>
-          </View>
-
-          <View style={{ backgroundColor: CARD_BORDER, height: 1 }} />
-
-          <View style={{ gap: 10 }}>
-            <DetailRow label="Date" value={format(started, 'EEEE · MMM d, yyyy')} />
-            <DetailRow label="Start" value={format(started, 'h:mm a')} />
-            <DetailRow
-              label="Complete"
-              value={completed ? format(completed, 'h:mm a') : '—'}
-            />
-            <DetailRow
-              label="Duration"
-              value={
-                workout.duration_seconds != null
-                  ? formatElapsedDuration(workout.duration_seconds)
-                  : '—'
-              }
-            />
-          </View>
-
-          <Pressable
-            onPress={() => {
-              onClose();
-              router.push(`/history/${workout.id}`);
-            }}
-            style={{
-              alignItems: 'center',
-              backgroundColor: colors.accent,
-              borderRadius: 10,
-              marginTop: 4,
-              paddingVertical: 12,
-            }}
-          >
-            <Text
-              style={{
-                color: colors.bg,
-                fontFamily: fonts.brand,
-                fontSize: 13,
-                fontWeight: '700',
-              }}
-            >
-              View Full Session
-            </Text>
-          </Pressable>
+                <Text
+                  style={{
+                    color: colors.bg,
+                    fontFamily: fonts.brand,
+                    fontSize: 13,
+                    fontWeight: '700',
+                  }}
+                >
+                  View Full Session
+                </Text>
+              </Pressable>
+            </>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
