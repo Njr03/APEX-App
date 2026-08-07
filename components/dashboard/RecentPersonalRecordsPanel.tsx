@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native';
+import { Trophy } from 'lucide-react-native';
 
 import { AllPersonalRecordsModal } from '@/components/dashboard/AllPersonalRecordsModal';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
@@ -18,8 +19,6 @@ import type { DashboardRecentPR } from '@/lib/dashboard/recentPRs';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 
 const GOLD = '#f5c842';
-const ICON_BG = 'rgba(245,200,66,0.10)';
-const ICON_BORDER = 'rgba(245,200,66,0.20)';
 const MUTED = 'rgba(240,237,232,0.5)';
 
 function PRCard({
@@ -38,37 +37,21 @@ function PRCard({
       className={dashboardTileWebClassName()}
       {...handlers}
       style={{
-        alignItems: 'center',
         alignSelf: 'stretch',
         backgroundColor: DASHBOARD_TILE_BG,
         borderWidth: 1,
         cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
         flexDirection: 'row',
-        gap: 12,
+        gap: 10,
         minWidth: 0,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
         width: '100%',
         ...dashboardCardFrameStyle(10),
         ...dashboardPressStyle(pressed),
       }}
     >
-      <View
-        style={{
-          alignItems: 'center',
-          backgroundColor: ICON_BG,
-          borderColor: ICON_BORDER,
-          borderRadius: 8,
-          borderWidth: 1,
-          height: 34,
-          justifyContent: 'center',
-          width: 34,
-        }}
-      >
-        <Text style={{ fontSize: 16, lineHeight: 18 }}>🏆</Text>
-      </View>
-
-      <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
+      <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
         <Text
           numberOfLines={1}
           style={{
@@ -80,26 +63,16 @@ function PRCard({
           {record.exerciseName}
         </Text>
 
-        <View className="flex-row items-center" style={{ gap: 6 }}>
-          <View
-            style={{
-              backgroundColor: record.splitColor,
-              borderRadius: 999,
-              height: 8,
-              width: 8,
-            }}
-          />
-          <Text
-            numberOfLines={1}
-            style={{
-              color: MUTED,
-              fontFamily: fonts.jetbrainsMono,
-              fontSize: 10,
-            }}
-          >
-            {record.splitLabel} · {record.timeAgo}
-          </Text>
-        </View>
+        <Text
+          numberOfLines={1}
+          style={{
+            color: MUTED,
+            fontFamily: fonts.jetbrainsMono,
+            fontSize: 10,
+          }}
+        >
+          {record.timeAgo}
+        </Text>
       </View>
 
       <Text
@@ -176,21 +149,26 @@ interface RecentPersonalRecordsPanelProps {
 
 const RECENT_PRS_HEADING = 'RECENT PRs';
 
-function RecentPRSectionHeader({ onViewAll }: { onViewAll: () => void }) {
+function RecentPRHeading({ onViewAll }: { onViewAll?: () => void }) {
   return (
     <View className="flex-row items-center justify-between">
-      <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
-      <Pressable accessibilityRole="button" onPress={onViewAll}>
-        <Text
-          style={{
-            color: colors.accent,
-            fontFamily: fonts.body,
-            fontSize: 12,
-          }}
-        >
-          View all
-        </Text>
-      </Pressable>
+      <View className="flex-row items-center" style={{ gap: 6 }}>
+        <Trophy color={GOLD} size={12} strokeWidth={2.5} />
+        <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
+      </View>
+      {onViewAll ? (
+        <Pressable accessibilityRole="button" onPress={onViewAll}>
+          <Text
+            style={{
+              color: colors.accent,
+              fontFamily: fonts.body,
+              fontSize: 12,
+            }}
+          >
+            View all
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -230,7 +208,7 @@ export function RecentPersonalRecordsPanel({
   if (isLoading) {
     return (
       <View className="w-full" style={{ gap: 12 }}>
-        <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
+        <RecentPRHeading />
         <View className="items-center py-6">
           <ActivityIndicator color={colors.accent} size="small" />
         </View>
@@ -241,7 +219,7 @@ export function RecentPersonalRecordsPanel({
   if (isError) {
     return (
       <View className="w-full" style={{ gap: 12 }}>
-        <InsightSectionHeading title={RECENT_PRS_HEADING} uppercase={false} />
+        <RecentPRHeading />
         <QueryError
           message={getSupabaseErrorMessage(error)}
           onRetry={() => void refetch()}
@@ -253,7 +231,7 @@ export function RecentPersonalRecordsPanel({
   return (
     <>
       <View className="w-full" style={{ gap: 12, position: 'relative', zIndex: 1 }}>
-        <RecentPRSectionHeader onViewAll={openAll} />
+        <RecentPRHeading onViewAll={openAll} />
 
         {!recentRecords.length ? (
           <PREmptyCard onPress={openAll} />
