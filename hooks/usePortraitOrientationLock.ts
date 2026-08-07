@@ -3,23 +3,30 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 async function lockPortraitOrientation() {
-  try {
-    await ScreenOrientation.lockAsync(
-      ScreenOrientation.OrientationLock.PORTRAIT_UP,
-    );
-  } catch {
-    // Some mobile browsers block orientation lock outside installed PWAs.
+  if (Platform.OS !== 'web') {
+    try {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      );
+    } catch {
+      // Ignore unsupported lock attempts.
+    }
+    return;
   }
 
-  if (Platform.OS === 'web' && typeof screen !== 'undefined') {
-    const orientation = screen.orientation as {
-      lock?: (orientation: string) => Promise<void>;
-    };
+  if (typeof screen === 'undefined') return;
 
+  const orientation = screen.orientation as {
+    lock?: (orientation: string) => Promise<void>;
+  };
+
+  try {
+    await orientation.lock?.('portrait-primary');
+  } catch {
     try {
       await orientation.lock?.('portrait');
     } catch {
-      // Ignore unsupported or permission-denied lock attempts.
+      // Some mobile browsers block orientation lock outside installed PWAs.
     }
   }
 }
@@ -28,24 +35,30 @@ export function usePortraitOrientationLock() {
   useEffect(() => {
     void lockPortraitOrientation();
 
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const retryLock = () => {
+    if (Platform.OS !== 'web') {
+      const subscription = ScreenOrientation.addOrientationChangeListener(() => {
         void lockPortraitOrientation();
-      };
-
-      window.addEventListener('orientationchange', retryLock);
-      document.addEventListener('visibilitychange', retryLock);
+      });
 
       return () => {
-        window.removeEventListener('orientationchange', retryLock);
-        document.removeEventListener('visibilitychange', retryLock);
+        subscription.remove();
       };
     }
 
+    if (typeof window === 'undefined') return;
+
+    const retryLock = () => {
+      void lockPortraitOrientation();
+    };
+
+    window.addEventListener('orientationchange', retryLock);
+    window.addEventListener('resize', retryLock);
+    document.addEventListener('visibilitychange', retryLock);
+
     return () => {
-      if (Platform.OS !== 'web') {
-        void ScreenOrientation.unlockAsync();
-      }
+      window.removeEventListener('orientationchange', retryLock);
+      window.removeEventListener('resize', retryLock);
+      document.removeEventListener('visibilitychange', retryLock);
     };
   }, []);
 }

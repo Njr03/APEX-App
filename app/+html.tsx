@@ -59,7 +59,7 @@ body {
   background-color: ${APP_BG};
 }
 
-@media screen and (orientation: landscape) and (max-height: 500px) {
+@media screen and (orientation: landscape) and (max-height: 520px) {
   html {
     height: 100%;
     overflow: hidden;
@@ -80,7 +80,9 @@ body {
 const portraitOrientationLock = `
 function lockPortraitOrientation() {
   if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('portrait').catch(function () {});
+    screen.orientation.lock('portrait-primary').catch(function () {
+      screen.orientation.lock('portrait').catch(function () {});
+    });
   }
 }
 

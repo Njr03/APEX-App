@@ -42,6 +42,24 @@
   transition: box-shadow 0.15s ease;
 }
 
+.portrait-orientation-lock {
+  background-color: #0a0a0f;
+  inset: 0;
+  overflow: hidden;
+  position: fixed;
+}
+
+.portrait-orientation-lock__content {
+  height: 100vw;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  transform: rotate(90deg) translateY(-100%);
+  transform-origin: top left;
+  width: 100vh;
+}
+
 .dashboard-tile {
   border-color: rgba(255, 255, 255, 0.06) !important;
   -webkit-tap-highlight-color: transparent;
