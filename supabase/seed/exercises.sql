@@ -182,7 +182,37 @@ from (
     ('Russian Twist', 'core', 'bodyweight', 'isolation',
      $t$Seated lean back, rotate torso side to side, keep chest lifted.$t$),
     ('Weighted Sit-up', 'core', 'other', 'isolation',
-     $t$Sit-up holding weight at chest, curl up using abs, lower with control.$t$)
+     $t$Sit-up holding weight at chest, curl up using abs, lower with control.$t$),
+
+    -- Back (grip variations)
+    ('Double Grip Lat Pulldown', 'back', 'cable', 'compound',
+     $t$Grip the bar with both hands shoulder-width or wider, pull to upper chest, control the return.$t$),
+    ('Single Grip Lat Pulldown', 'back', 'cable', 'compound',
+     $t$Use one handle, pull elbow down to side of ribs, keep torso stable, switch arms each set.$t$),
+    ('Double Grip Seated Row', 'back', 'cable', 'compound',
+     $t$Both hands on the row handle, pull to lower ribs, squeeze shoulder blades, return with control.$t$),
+    ('Single Grip Seated Row', 'back', 'cable', 'compound',
+     $t$One-hand row to hip, keep chest up and avoid rotating torso, switch sides each set.$t$),
+
+    -- Shoulders
+    ('Dumbbell Shrug', 'shoulders', 'dumbbell', 'isolation',
+     $t$Hold dumbbells at sides, shrug shoulders straight up toward ears, pause, lower slowly.$t$),
+
+    -- Chest & arms (dips + reverse preacher)
+    ('Chest Dip', 'chest', 'bodyweight', 'compound',
+     $t$On parallel bars, lean torso forward, lower until upper arms are parallel, press up emphasizing chest.$t$),
+    ('Tricep Dip', 'arms', 'bodyweight', 'compound',
+     $t$On parallel bars, stay upright with elbows close, lower until 90° at elbows, press to lockout.$t$),
+    ('Reverse Preacher Curl', 'arms', 'barbell', 'isolation',
+     $t$Overhand grip on preacher pad, curl without swinging, full extension at bottom for brachialis and forearms.$t$),
+
+    -- Legs
+    ('Glute Press', 'legs', 'machine', 'compound',
+     $t$Foot plate on glute press or hip-thrust machine, drive through heels, squeeze glutes at lockout.$t$),
+    ('Machine Hamstring Curl', 'legs', 'machine', 'isolation',
+     $t$On leg curl machine, curl heels toward glutes, pause at peak contraction, lower with control.$t$),
+    ('Goblet Squat', 'legs', 'dumbbell', 'compound',
+     $t$Hold a dumbbell or kettlebell at chest (or clasp hands at chest for bodyweight), squat to depth, drive up through mid-foot.$t$)
 ) as v(name, muscle_group, equipment, exercise_type, instructions)
 where not exists (
   select 1 from public.exercises e where e.name = v.name
