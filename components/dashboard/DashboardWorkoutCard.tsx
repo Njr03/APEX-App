@@ -430,29 +430,30 @@ export function DashboardWorkoutCard({
           flex: 1,
           margin: 1,
           overflow: 'hidden',
-          padding,
         }}
       >
-        <LinearGradient
-          colors={[hexToRgba(model.color, 0.1), 'transparent']}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={{
-            borderRadius: DASHBOARD_WORKOUT_CARD_RADIUS,
-            height: compact ? 96 : 120,
-            left: 0,
-            position: 'absolute',
-            top: 0,
-            width: '100%',
-          }}
-        />
+        <View style={{ height: gradientHeight, position: 'relative' }}>
+          <LinearGradient
+            colors={[hexToRgba(model.color, 0.1), 'transparent']}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={{
+              borderTopLeftRadius: DASHBOARD_WORKOUT_CARD_RADIUS - 2,
+              borderTopRightRadius: DASHBOARD_WORKOUT_CARD_RADIUS - 2,
+              bottom: 0,
+              left: 0,
+              position: 'absolute',
+              right: 0,
+              top: 0,
+            }}
+          />
 
-        <View>
           <View
             style={{
+              flex: 1,
               gap: compact ? 6 : 8,
               justifyContent: 'center',
-              minHeight: gradientHeight,
+              paddingHorizontal: padding,
             }}
           >
             <View style={{ gap: compact ? 2 : 4 }}>
@@ -486,10 +487,19 @@ export function DashboardWorkoutCard({
               status={model.status}
             />
           </View>
+        </View>
 
+        <View
+          style={{
+            gap: compact ? 8 : 10,
+            paddingBottom: padding,
+            paddingHorizontal: padding,
+            paddingTop: compact ? 8 : 10,
+          }}
+        >
           <View style={{ backgroundColor: BORDER, height: 1 }} />
 
-          <View className="gap-2" style={{ marginTop: compact ? 8 : 10 }}>
+          <View className="gap-2">
             <CardStats compact={compact} model={model} unit={unit} />
           </View>
 
