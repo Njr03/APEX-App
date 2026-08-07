@@ -12,6 +12,7 @@ import 'react-native-reanimated';
 import { useAppFonts } from '@/hooks/useAppFonts';
 import { AuthNavigationHandler } from '@/components/auth/AuthNavigationHandler';
 import { PortraitOrientationGuard } from '@/components/PortraitOrientationGuard';
+import { WebBrowserChrome } from '@/components/WebBrowserChrome';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { colors } from '@/constants/theme';
@@ -39,6 +40,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <WebBrowserChrome />
       <PortraitOrientationGuard>
         <QueryProvider>
           <AuthProvider>

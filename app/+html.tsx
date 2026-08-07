@@ -21,10 +21,11 @@ export default function Root({ children }: { children: ReactNode }) {
           content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
         <meta name="theme-color" content={THEME_COLOR} />
+        <meta name="color-scheme" content="dark" />
         <meta name="application-name" content="APEX" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content="APEX" />
         <meta
           name="description"
@@ -55,8 +56,25 @@ export default function Root({ children }: { children: ReactNode }) {
 }
 
 const responsiveBackground = `
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background-color: ${APP_BG};
+}
+
 body {
   background-color: ${APP_BG};
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+#root,
+body > div {
+  background-color: ${APP_BG};
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
 }
 
 @media screen and (orientation: landscape) and (max-height: 520px) {
