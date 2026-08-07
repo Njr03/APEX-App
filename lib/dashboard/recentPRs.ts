@@ -1,8 +1,9 @@
 import { differenceInDays, parseISO } from 'date-fns';
 
-import type { RecordType } from '@/lib/constants/training';
-import { estimateOneRepMax } from '@/lib/personalRecords';
+import { MUSCLE_GROUPS, type MuscleGroup, type RecordType } from '@/lib/constants/training';
+import { estimateOneRepMax, formatRecordTypeLabel } from '@/lib/personalRecords';
 import type { PersonalRecord } from '@/lib/supabase';
+import { formatMuscleGroupLabel } from '@/lib/training/targetMuscles';
 import {
   inferSplitFromWorkoutName,
   SPLIT_DEFINITIONS,
@@ -17,7 +18,7 @@ export interface RecentPRWorkoutContext {
 }
 
 export interface RecentPRRawRow extends PersonalRecord {
-  exercise: { name: string };
+  exercise: { name: string; muscle_group: string };
   set: {
     weight: number | null;
     reps: number | null;
@@ -45,6 +46,50 @@ export interface DashboardRecentPR {
   sets: number;
   reps: number | null;
   weightKg: number | null;
+}
+
+export interface DashboardPRLine {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+  recordType: RecordType;
+  displayValue: string;
+  achievedAt: string;
+  timeAgo: string;
+  splitLabel: string;
+  splitColor: string;
+}
+
+export interface GroupedExercisePRs {
+  exerciseId: string;
+  exerciseName: string;
+  records: DashboardPRLine[];
+}
+
+export interface GroupedMusclePRs {
+  muscleGroup: MuscleGroup;
+  label: string;
+  exercises: GroupedExercisePRs[];
+}
+
+const RECORD_TYPE_ORDER: RecordType[] = [
+  'max_weight',
+  'est_1rm',
+  'max_reps',
+  'max_volume',
+];
+
+function normalizeMuscleGroup(value: string): MuscleGroup {
+  if ((MUSCLE_GROUPS as readonly string[]).includes(value)) {
+    return value as MuscleGroup;
+  }
+  return 'full_body';
+}
+
+function recordTypeSortIndex(recordType: RecordType): number {
+  const index = RECORD_TYPE_ORDER.indexOf(recordType);
+  return index === -1 ? RECORD_TYPE_ORDER.length : index;
 }
 
 export const DASHBOARD_RECENT_PR_SLOT_COUNT = 4;
@@ -166,6 +211,63 @@ function resolveEst1rmValue(row: RecentPRRawRow): number {
   return row.value;
 }
 
+export function mapPRLine(row: RecentPRRawRow, unit: 'kg' | 'lb'): DashboardPRLine {
+  const workoutName = row.set?.workout_exercise?.workout?.name ?? null;
+  const { label, color } = resolveSplitMeta(workoutName);
+
+  return {
+    id: row.id,
+    exerciseId: row.exercise_id,
+    exerciseName: row.exercise.name,
+    muscleGroup: normalizeMuscleGroup(row.exercise.muscle_group),
+    recordType: row.record_type,
+    displayValue: formatDashboardPRValue(row.record_type, row.value, unit),
+    achievedAt: row.achieved_at,
+    timeAgo: formatPRTimeAgo(row.achieved_at),
+    splitLabel: label,
+    splitColor: color,
+  };
+}
+
+export function groupPRsByMuscleAndExercise(lines: DashboardPRLine[]): GroupedMusclePRs[] {
+  const byMuscle = new Map<MuscleGroup, Map<string, DashboardPRLine[]>>();
+
+  for (const line of lines) {
+    const muscleMap = byMuscle.get(line.muscleGroup) ?? new Map<string, DashboardPRLine[]>();
+    const exerciseLines = muscleMap.get(line.exerciseId) ?? [];
+    exerciseLines.push(line);
+    muscleMap.set(line.exerciseId, exerciseLines);
+    byMuscle.set(line.muscleGroup, muscleMap);
+  }
+
+  return MUSCLE_GROUPS.flatMap((muscleGroup) => {
+    const muscleMap = byMuscle.get(muscleGroup);
+    if (!muscleMap || muscleMap.size === 0) return [];
+
+    const exercises = Array.from(muscleMap.entries())
+      .map(([exerciseId, records]) => ({
+        exerciseId,
+        exerciseName: records[0]?.exerciseName ?? 'Exercise',
+        records: [...records].sort(
+          (a, b) => recordTypeSortIndex(a.recordType) - recordTypeSortIndex(b.recordType),
+        ),
+      }))
+      .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+
+    return [
+      {
+        muscleGroup,
+        label: formatMuscleGroupLabel(muscleGroup),
+        exercises,
+      },
+    ];
+  });
+}
+
+export function formatPRLineSummary(line: DashboardPRLine): string {
+  return `${line.displayValue} · ${formatRecordTypeLabel(line.recordType)} · ${line.timeAgo}`;
+}
+
 export function mapRecentPRRow(
   row: RecentPRRawRow,
   unit: 'kg' | 'lb',
@@ -214,7 +316,7 @@ export function mapRecentPRRow(
 
 export const RECENT_PR_SELECT = `
   *,
-  exercise:exercises!inner ( name ),
+  exercise:exercises!inner ( name, muscle_group ),
   set:sets (
     weight,
     reps,

@@ -4,13 +4,51 @@ import { queryKeys } from '@/hooks/queries/queryKeys';
 import {
   DASHBOARD_RECENT_PR_FETCH_LIMIT,
   dedupeRecentPRsByExercise,
+  groupPRsByMuscleAndExercise,
+  mapPRLine,
   mapRecentPRRow,
   RECENT_PR_SELECT,
+  type GroupedMusclePRs,
   type RecentPRRawRow,
 } from '@/lib/dashboard/recentPRs';
 import { throwIfSupabaseError } from '@/lib/supabase/errors';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
+
+export interface DashboardPRData {
+  recent: Awaited<ReturnType<typeof mapRecentPRRows>>;
+  grouped: GroupedMusclePRs[];
+  totalCount: number;
+}
+
+async function mapRecentPRRows(
+  deduped: RecentPRRawRow[],
+  userId: string,
+  unit: 'kg' | 'lb',
+  setCounts: Map<string, number>,
+) {
+  return Promise.all(
+    deduped.map(async (row) => {
+      const previous = await supabase
+        .from('personal_records')
+        .select('value')
+        .eq('user_id', userId)
+        .eq('exercise_id', row.exercise_id)
+        .eq('record_type', 'est_1rm')
+        .lt('achieved_at', row.achieved_at)
+        .order('value', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const previousEst1rm =
+        previous.error || !previous.data ? null : previous.data.value;
+      const workoutExerciseId = row.set?.workout_exercise_id;
+      const setCount = workoutExerciseId ? (setCounts.get(workoutExerciseId) ?? 0) : 0;
+
+      return mapRecentPRRow(row, unit, previousEst1rm, setCount);
+    }),
+  );
+}
 
 export function useDashboardRecentPRs(unit: 'kg' | 'lb' = 'kg') {
   const { user } = useAuth();
@@ -25,7 +63,7 @@ export function useDashboardRecentPRs(unit: 'kg' | 'lb' = 'kg') {
     enabled: Boolean(user),
     staleTime: 0,
     refetchOnMount: 'always',
-    queryFn: async () => {
+    queryFn: async (): Promise<DashboardPRData> => {
       const result = await supabase
         .from('personal_records')
         .select(RECENT_PR_SELECT)
@@ -34,6 +72,8 @@ export function useDashboardRecentPRs(unit: 'kg' | 'lb' = 'kg') {
         .limit(DASHBOARD_RECENT_PR_FETCH_LIMIT);
 
       const rows = throwIfSupabaseError(result) as RecentPRRawRow[];
+      const allLines = rows.map((row) => mapPRLine(row, unit));
+      const grouped = groupPRsByMuscleAndExercise(allLines);
       const deduped = dedupeRecentPRsByExercise(rows);
 
       const workoutExerciseIds = [
@@ -61,31 +101,13 @@ export function useDashboardRecentPRs(unit: 'kg' | 'lb' = 'kg') {
         }
       }
 
-      const mapped = await Promise.all(
-        deduped.map(async (row) => {
-          const previous = await supabase
-            .from('personal_records')
-            .select('value')
-            .eq('user_id', user!.id)
-            .eq('exercise_id', row.exercise_id)
-            .eq('record_type', 'est_1rm')
-            .lt('achieved_at', row.achieved_at)
-            .order('value', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+      const recent = await mapRecentPRRows(deduped, user!.id, unit, setCounts);
 
-          const previousEst1rm =
-            previous.error || !previous.data ? null : previous.data.value;
-          const workoutExerciseId = row.set?.workout_exercise_id;
-          const setCount = workoutExerciseId
-            ? (setCounts.get(workoutExerciseId) ?? 0)
-            : 0;
-
-          return mapRecentPRRow(row, unit, previousEst1rm, setCount);
-        }),
-      );
-
-      return mapped;
+      return {
+        recent,
+        grouped,
+        totalCount: allLines.length,
+      };
     },
   });
 }

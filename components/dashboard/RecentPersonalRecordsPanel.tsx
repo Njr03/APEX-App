@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native';
 
+import { AllPersonalRecordsModal } from '@/components/dashboard/AllPersonalRecordsModal';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
 import { PersonalRecordDetailModal } from '@/components/dashboard/PersonalRecordDetailModal';
 import { QueryError } from '@/components/ui/QueryState';
@@ -15,6 +16,7 @@ import {
 import { useDashboardRecentPRs } from '@/hooks/useDashboardRecentPRs';
 import type { DashboardRecentPR } from '@/lib/dashboard/recentPRs';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+
 const GOLD = '#f5c842';
 const ICON_BG = 'rgba(245,200,66,0.10)';
 const ICON_BORDER = 'rgba(245,200,66,0.20)';
@@ -179,21 +181,29 @@ export function RecentPersonalRecordsPanel({
   const [selectedRecord, setSelectedRecord] = useState<DashboardRecentPR | null>(
     null,
   );
-  const [modalVisible, setModalVisible] = useState(false);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [allVisible, setAllVisible] = useState(false);
 
-  const openSummary = () => {
-    setSelectedRecord(null);
-    setModalVisible(true);
+  const recentRecords = data?.recent ?? [];
+  const groupedRecords = data?.grouped ?? [];
+  const totalCount = data?.totalCount ?? 0;
+
+  const openAll = () => {
+    setAllVisible(true);
   };
 
   const openRecord = (record: DashboardRecentPR) => {
     setSelectedRecord(record);
-    setModalVisible(true);
+    setDetailVisible(true);
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
+  const closeDetail = () => {
+    setDetailVisible(false);
     setSelectedRecord(null);
+  };
+
+  const closeAll = () => {
+    setAllVisible(false);
   };
 
   if (isLoading) {
@@ -222,22 +232,39 @@ export function RecentPersonalRecordsPanel({
   return (
     <>
       <View className="w-full" style={{ gap: 12, position: 'relative', zIndex: 1 }}>
-        <Pressable accessibilityRole="button" onPress={openSummary}>
-          <InsightSectionHeading title="Recent Personal Records" />
-        </Pressable>
+        <InsightSectionHeading title="Recent Personal Records" />
 
-        {!data?.length ? (
-          <PREmptyCard onPress={openSummary} />
+        {!recentRecords.length ? (
+          <PREmptyCard onPress={openAll} />
         ) : (
-          <PRList onRecordPress={openRecord} records={data} />
+          <PRList onRecordPress={openRecord} records={recentRecords} />
         )}
+
+        <Pressable accessibilityRole="button" onPress={openAll}>
+          <Text
+            style={{
+              color: colors.accent,
+              fontFamily: fonts.body,
+              fontSize: 12,
+            }}
+          >
+            View all
+          </Text>
+        </Pressable>
       </View>
 
+      <AllPersonalRecordsModal
+        grouped={groupedRecords}
+        onClose={closeAll}
+        totalCount={totalCount}
+        visible={allVisible}
+      />
+
       <PersonalRecordDetailModal
-        allRecords={data ?? []}
-        onClose={closeModal}
+        allRecords={recentRecords}
+        onClose={closeDetail}
         record={selectedRecord}
-        visible={modalVisible}
+        visible={detailVisible}
       />
     </>
   );
