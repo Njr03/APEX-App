@@ -18,7 +18,7 @@ import {
 import { AppText } from '@/components/ui/AppText';
 import { BackButton } from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/Button';
-import { FormField } from '@/components/ui/FormField';
+import { FilterSectionLabel } from '@/components/ui/FilterSectionLabel';
 import { Input } from '@/components/ui/Input';
 import { Screen } from '@/components/ui/Screen';
 import {
@@ -82,7 +82,6 @@ export function RoutineBuilder({ routineId }: RoutineBuilderProps) {
     resolver: zodResolver(createRoutineSchema),
     defaultValues: {
       name: '',
-      description: '',
     },
   });
 
@@ -91,7 +90,6 @@ export function RoutineBuilder({ routineId }: RoutineBuilderProps) {
 
     reset({
       name: existingRoutine.name,
-      description: existingRoutine.description ?? '',
     });
     setItems(toBuilderItems(existingRoutine, unit));
   }, [existingRoutine, reset, unit]);
@@ -179,36 +177,32 @@ export function RoutineBuilder({ routineId }: RoutineBuilderProps) {
             </AppText>
           ) : null}
 
-          <FormField
-            autoCapitalize="words"
-            control={control}
-            label="Workout name"
-            name="name"
-            placeholder="Push Day"
-          />
-
           <Controller
             control={control}
-            name="description"
-            render={({ field: { onChange, onBlur, value } }) => (
+            name="name"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
               <View className="gap-2">
-                <AppText className="text-sm" variant="body">
-                  Description (optional)
-                </AppText>
+                <FilterSectionLabel>Workout name</FilterSectionLabel>
                 <Input
-                  multiline
-                  numberOfLines={3}
+                  accessibilityLabel="Workout name"
+                  autoCapitalize="words"
+                  hasError={Boolean(error)}
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  placeholder="Focus, notes, or goals…"
+                  placeholder="Push Day"
                   value={value ?? ''}
                 />
+                {error ? (
+                  <AppText className="text-sm text-accent3" variant="body">
+                    {error.message}
+                  </AppText>
+                ) : null}
               </View>
             )}
           />
 
           <View className="gap-3">
-            <AppText variant="display">Exercises</AppText>
+            <FilterSectionLabel>Exercises</FilterSectionLabel>
             <AppText variant="muted">
               Add exercises from the library to build your workout.
             </AppText>
