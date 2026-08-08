@@ -36,7 +36,18 @@ export function useExercises(filters: ExerciseListFilters = {}) {
       }
 
       if (filters.search?.trim()) {
-        query = query.ilike('name', `%${filters.search.trim()}%`);
+        const term = filters.search.trim();
+        const normalizedGroupTerm = term.toLowerCase().replace(/\s+/g, '_');
+        const searchFilters = [
+          `name.ilike.%${term}%`,
+          `muscle_group.ilike.%${term}%`,
+        ];
+
+        if (normalizedGroupTerm !== term.toLowerCase()) {
+          searchFilters.push(`muscle_group.ilike.%${normalizedGroupTerm}%`);
+        }
+
+        query = query.or(searchFilters.join(','));
       }
 
       const result = await query;

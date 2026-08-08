@@ -10,10 +10,12 @@ import {
 import { Search, X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 
+import { FilterChips } from '@/components/exercises/FilterChips';
 import { AppText } from '@/components/ui/AppText';
 import { Input } from '@/components/ui/Input';
 import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { useExercises } from '@/hooks/queries';
+import { MUSCLE_GROUPS, type MuscleGroup } from '@/lib/constants/training';
 import { colors } from '@/constants/theme';
 import type { Exercise } from '@/lib/supabase';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
@@ -36,16 +38,24 @@ export function ExercisePickerModal({
   titleStyle = 'display',
 }: ExercisePickerModalProps) {
   const [search, setSearch] = useState('');
+  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup | null>(null);
 
   useEffect(() => {
     if (!visible) {
       setSearch('');
+      setMuscleGroup(null);
     }
   }, [visible]);
 
-  const { data: exercises, isLoading, isError, error } = useExercises({
-    search: search.trim() || undefined,
-  });
+  const filters = useMemo(
+    () => ({
+      search: search.trim() || undefined,
+      muscleGroup: muscleGroup ?? undefined,
+    }),
+    [muscleGroup, search],
+  );
+
+  const { data: exercises, isLoading, isError, error } = useExercises(filters);
 
   const filtered = useMemo(() => {
     const excluded = new Set(excludeExerciseIds);
@@ -56,6 +66,7 @@ export function ExercisePickerModal({
     onSelect(exercise);
     onClose();
     setSearch('');
+    setMuscleGroup(null);
   };
 
   return (
@@ -101,7 +112,7 @@ export function ExercisePickerModal({
               className="pl-10"
               onChangeText={setSearch}
               onSubmitEditing={() => {}}
-              placeholder="Search exercises…"
+              placeholder="Search by name or muscle group…"
               returnKeyType="search"
               value={search}
             />
@@ -110,7 +121,16 @@ export function ExercisePickerModal({
             </View>
           </View>
 
-          {isLoading ? <ActivityIndicator color={colors.accent} /> : null}
+          <View className="mb-3">
+            <FilterChips
+              label="Muscle group"
+              onChange={setMuscleGroup}
+              options={MUSCLE_GROUPS}
+              value={muscleGroup}
+            />
+          </View>
+
+          {isLoading ? <ActivityIndicator color={colors.accent} style={{ marginTop: 12 }} /> : null}
 
           {isError ? (
             <AppText className="text-accent3" variant="body">
@@ -119,13 +139,15 @@ export function ExercisePickerModal({
           ) : null}
 
           <FlatList
-            contentContainerClassName="gap-2 pb-4"
+            contentContainerClassName="gap-2 pb-4 pt-3"
             data={filtered}
             keyboardShouldPersistTaps="always"
             keyExtractor={(item) => item.id}
             ListEmptyComponent={
               !isLoading ? (
-                <AppText variant="muted">No exercises match your search.</AppText>
+                <AppText variant="muted">
+                  No exercises match your search or muscle group filter.
+                </AppText>
               ) : null
             }
             nestedScrollEnabled
@@ -172,6 +194,6 @@ const styles = StyleSheet.create({
   },
   list: {
     flexGrow: 0,
-    maxHeight: Platform.OS === 'web' ? 420 : 360,
+    maxHeight: Platform.OS === 'web' ? 360 : 300,
   },
 });
