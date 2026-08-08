@@ -10,7 +10,7 @@ interface ApexLogoProps {
 }
 
 export function ApexLogo({
-  height = 34,
+  height = 44,
   style,
   accessibilityLabel = 'APEX',
 }: ApexLogoProps) {
