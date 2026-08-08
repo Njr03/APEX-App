@@ -1,13 +1,9 @@
 import { parseISO, startOfWeek } from 'date-fns';
 
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
-import { colors } from '@/constants/theme';
-import {
-  inferSplitFromWorkoutName,
-  SPLIT_DEFINITIONS,
-  type TrainingSplit,
-} from '@/lib/training/splits';
+import { resolveWorkoutCardColor } from '@/lib/dashboard/workoutCardColors';
 import type { SplitSessionSnapshot } from '@/lib/training/weekSplits';
+import type { TrainingSplit } from '@/lib/training/splits';
 import type { Workout } from '@/lib/supabase';
 
 export type DashboardWorkoutCardStatus =
@@ -41,14 +37,8 @@ function workoutToSnapshot(workout: Workout): SplitSessionSnapshot {
 }
 
 function findRoutineWorkouts(routine: RoutineSummary, workouts: Workout[]): Workout[] {
-  const split = inferSplitFromWorkoutName(routine.name);
-
   return workouts
-    .filter((workout) => {
-      if (workout.routine_id === routine.id) return true;
-      if (!split) return false;
-      return inferSplitFromWorkoutName(workout.name) === split;
-    })
+    .filter((workout) => workout.routine_id === routine.id)
     .sort(
       (a, b) =>
         parseISO(b.started_at).getTime() - parseISO(a.started_at).getTime(),
@@ -59,8 +49,6 @@ export function buildRoutineCardModel(
   routine: RoutineSummary,
   workouts: Workout[],
 ): DashboardWorkoutCardModel {
-  const split = inferSplitFromWorkoutName(routine.name);
-  const definition = split ? SPLIT_DEFINITIONS[split] : null;
   const routineWorkouts = findRoutineWorkouts(routine, workouts);
   const lastWorkout = routineWorkouts[0] ?? null;
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -76,14 +64,19 @@ export function buildRoutineCardModel(
       })
     : 'Never';
 
+  const color = resolveWorkoutCardColor({
+    name: routine.name,
+    muscleGroups: routine.muscle_groups,
+    preferMuscleGroups: true,
+  });
+
   if (completedThisWeek) {
     return {
-      eyebrow: definition?.eyebrow ?? 'SAVED',
-      title: definition?.name ?? routine.name,
+      eyebrow: 'SAVED',
+      title: routine.name,
       subtitle: routine.target_muscles,
-      color: definition?.color ?? colors.accent,
+      color,
       status: 'completed',
-      splitId: split ?? undefined,
       completedSession: workoutToSnapshot(completedThisWeek),
       lastSession: lastWorkout ? workoutToSnapshot(lastWorkout) : null,
       exerciseCount: routine.exercise_count,
@@ -92,12 +85,11 @@ export function buildRoutineCardModel(
   }
 
   return {
-    eyebrow: definition?.eyebrow ?? 'SAVED',
-    title: definition?.name ?? routine.name,
+    eyebrow: 'SAVED',
+    title: routine.name,
     subtitle: routine.target_muscles,
-    color: definition?.color ?? colors.accent,
+    color,
     status: 'template',
-    splitId: split ?? undefined,
     completedSession: null,
     lastSession: lastWorkout ? workoutToSnapshot(lastWorkout) : null,
     exerciseCount: routine.exercise_count,

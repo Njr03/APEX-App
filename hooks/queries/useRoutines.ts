@@ -101,6 +101,7 @@ export function useCreateRoutine() {
         ...data,
         exercise_count: 0,
         last_used_at: null,
+        muscle_groups: [],
         target_muscles: 'No exercises yet',
       };
 

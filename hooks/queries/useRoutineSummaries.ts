@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { queryKeys } from '@/hooks/queries/queryKeys';
-import { formatTargetMusclesSubtitle } from '@/lib/training/targetMuscles';
+import { formatTargetMusclesSubtitle, collectTargetMuscleGroups } from '@/lib/training/targetMuscles';
+import type { MuscleGroup } from '@/lib/constants/training';
 import { throwIfSupabaseError } from '@/lib/supabase/errors';
 import { supabase, type Routine } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -10,6 +11,7 @@ export interface RoutineSummary extends Routine {
   exercise_count: number;
   last_used_at: string | null;
   target_muscles: string;
+  muscle_groups: MuscleGroup[];
 }
 
 export function routineSummariesQueryKey(userId: string) {
@@ -60,6 +62,7 @@ export function useRoutineSummaries() {
           ...routine,
           exercise_count: exercises.length,
           last_used_at: lastUsed,
+          muscle_groups: collectTargetMuscleGroups(muscleGroups),
           target_muscles: formatTargetMusclesSubtitle(
             muscleGroups,
             exercises.length > 0 ? `${exercises.length} exercises` : 'No exercises yet',

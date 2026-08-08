@@ -1,5 +1,6 @@
 import type { WeekSplitCardData } from '@/hooks/useThisWeekSplits';
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
+import { workoutCardColorForSplit } from '@/lib/dashboard/workoutCardColors';
 
 interface WeekSplitCardProps {
   card: WeekSplitCardData;
@@ -19,7 +20,7 @@ export function WeekSplitCard({
   return (
     <DashboardWorkoutCard
       model={{
-        color: definition.color,
+        color: workoutCardColorForSplit(definition.id),
         completedSession,
         eyebrow: definition.eyebrow,
         lastSession,

@@ -168,10 +168,10 @@ function StatusBadge({
   if (status === 'template') {
     return (
       <View
-        className="self-start rounded-full"
+        className="flex-row items-center gap-1.5 self-start rounded-full"
         style={{
-          backgroundColor: 'rgba(200,255,90,0.08)',
-          borderColor: 'rgba(200,255,90,0.25)',
+          backgroundColor: hexToRgba(color, 0.1),
+          borderColor: color,
           borderWidth: 1,
           paddingHorizontal: compact ? 8 : 10,
           paddingVertical: compact ? 3 : 4,
@@ -179,13 +179,13 @@ function StatusBadge({
       >
         <Text
           style={{
-            color: colors.accent,
+            color,
             fontFamily: fonts.jetbrainsMono,
             fontSize: compact ? 8 : 9,
             letterSpacing: 1.2,
           }}
         >
-          TEMPLATE
+          BEGIN WORKOUT
         </Text>
       </View>
     );
