@@ -12,6 +12,17 @@ import { throwIfSupabaseError } from '@/lib/supabase/errors';
 import { supabase, type Workout } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
 
+export type WorkoutHistoryRow = Workout & {
+  workout_exercises?: Array<{
+    id: string;
+    sets?: Array<{ is_pr?: boolean | null; completed_at?: string | null }> | null;
+  }> | null;
+};
+
+export function workoutHistoryQueryKey(userId: string) {
+  return [...queryKeys.workouts.lists(), 'history', userId] as const;
+}
+
 export interface ProgressStats {
   workouts: Workout[];
   weeklyVolume: WeeklyVolumeBucket[];
@@ -19,22 +30,32 @@ export interface ProgressStats {
   heatmapDays: Array<{ date: string; count: number; volume: number }>;
 }
 
+export async function fetchWorkoutHistory(userId: string): Promise<WorkoutHistoryRow[]> {
+  const result = await supabase
+    .from('workouts')
+    .select(
+      `
+      *,
+      workout_exercises (
+        id,
+        sets ( is_pr, completed_at )
+      )
+    `,
+    )
+    .eq('user_id', userId)
+    .eq('status', 'completed')
+    .order('started_at', { ascending: false });
+
+  return throwIfSupabaseError(result) as WorkoutHistoryRow[];
+}
+
 export function useWorkoutHistory() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: [...queryKeys.workouts.lists(), 'history', user?.id] as const,
+    queryKey: workoutHistoryQueryKey(user?.id ?? 'anonymous'),
     enabled: Boolean(user),
-    queryFn: async (): Promise<Workout[]> => {
-      const result = await supabase
-        .from('workouts')
-        .select('*')
-        .eq('user_id', user!.id)
-        .eq('status', 'completed')
-        .order('started_at', { ascending: false });
-
-      return throwIfSupabaseError(result);
-    },
+    queryFn: async (): Promise<WorkoutHistoryRow[]> => fetchWorkoutHistory(user!.id),
   });
 }
 

@@ -5,6 +5,15 @@ import {
   clearActiveWorkoutCache,
   invalidateDashboardMetrics,
 } from '@/hooks/queries/workoutCache';
+import {
+  fetchWorkoutHistory,
+  workoutHistoryQueryKey,
+} from '@/hooks/queries/useProgressStats';
+import {
+  reorderDashboardByWeekSessions,
+  syncCompletedRoutineToDashboard,
+} from '@/lib/dashboard/savedWorkoutCardOrder';
+import { useDashboardCardsStore } from '@/stores/dashboardCardsStore';
 import { calculateStreakUpdate, calculateLongestStreak } from '@/lib/streak';
 import {
   assertSupabaseOk,
@@ -178,11 +187,35 @@ export function useFinishWorkout() {
         hitRoutineTarget,
       };
     },
-    onSuccess: () => {
+    onSuccess: async (_result, { workout }) => {
       if (user) {
         clearActiveWorkoutCache(queryClient, user.id);
       }
-      void invalidateDashboardMetrics(queryClient, user?.id);
+
+      await invalidateDashboardMetrics(queryClient, user?.id);
+
+      if (!user) return;
+
+      const workouts = await queryClient.fetchQuery({
+        queryKey: workoutHistoryQueryKey(user.id),
+        queryFn: () => fetchWorkoutHistory(user.id),
+      });
+
+      const dashboardStore = useDashboardCardsStore.getState();
+      await dashboardStore.hydrate();
+
+      if (workout.routine_id) {
+        await syncCompletedRoutineToDashboard(workout.routine_id, workouts, {
+          hydrate: dashboardStore.hydrate,
+          getCards: () => useDashboardCardsStore.getState().cards,
+          addCard: dashboardStore.addCard,
+          setCards: dashboardStore.setCards,
+        });
+      } else {
+        await dashboardStore.setCards(
+          reorderDashboardByWeekSessions(dashboardStore.cards, workouts),
+        );
+      }
     },
   });
 }

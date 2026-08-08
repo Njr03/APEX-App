@@ -12,7 +12,6 @@ import {
 } from '@/lib/dashboard/cardStyles';
 import type { DashboardWorkoutCardModel } from '@/lib/dashboard/routineCardDisplay';
 import {
-  formatPrCount,
   formatSplitDay,
   formatSplitDuration,
   formatSplitVolume,
@@ -312,8 +311,8 @@ function CardStats({
           label="PRs hit"
           value={
             completedSession.prCount > 0
-              ? formatPrCount(completedSession.prCount)
-              : '—'
+              ? String(completedSession.prCount)
+              : '0'
           }
           valueColor={colors.gold}
         />

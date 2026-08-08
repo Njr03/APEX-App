@@ -1,8 +1,13 @@
 import { parseISO, startOfWeek } from 'date-fns';
 
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
+import type { WorkoutHistoryRow } from '@/hooks/queries/useProgressStats';
 import { resolveWorkoutCardColor } from '@/lib/dashboard/workoutCardColors';
 import type { SplitSessionSnapshot } from '@/lib/training/weekSplits';
+import {
+  countWorkoutExercises,
+  countWorkoutPrs,
+} from '@/lib/training/weekSplits';
 import type { TrainingSplit } from '@/lib/training/splits';
 import type { Workout } from '@/lib/supabase';
 
@@ -25,18 +30,21 @@ export interface DashboardWorkoutCardModel {
   lastUsedLabel?: string;
 }
 
-function workoutToSnapshot(workout: Workout): SplitSessionSnapshot {
+function workoutToSnapshot(workout: WorkoutHistoryRow): SplitSessionSnapshot {
   return {
     workoutId: workout.id,
     startedAt: workout.started_at,
     totalVolume: workout.total_volume ?? 0,
     durationSeconds: workout.duration_seconds,
-    prCount: 0,
-    exerciseCount: 0,
+    prCount: countWorkoutPrs(workout),
+    exerciseCount: countWorkoutExercises(workout),
   };
 }
 
-function findRoutineWorkouts(routine: RoutineSummary, workouts: Workout[]): Workout[] {
+function findRoutineWorkouts(
+  routine: RoutineSummary,
+  workouts: WorkoutHistoryRow[],
+): WorkoutHistoryRow[] {
   return workouts
     .filter((workout) => workout.routine_id === routine.id)
     .sort(
@@ -47,14 +55,17 @@ function findRoutineWorkouts(routine: RoutineSummary, workouts: Workout[]): Work
 
 export function buildRoutineCardModel(
   routine: RoutineSummary,
-  workouts: Workout[],
+  workouts: WorkoutHistoryRow[] | Workout[],
 ): DashboardWorkoutCardModel {
-  const routineWorkouts = findRoutineWorkouts(routine, workouts);
+  const historyWorkouts = workouts as WorkoutHistoryRow[];
+  const routineWorkouts = findRoutineWorkouts(routine, historyWorkouts);
   const lastWorkout = routineWorkouts[0] ?? null;
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const completedThisWeek =
     routineWorkouts.find(
-      (workout) => parseISO(workout.started_at) >= weekStart,
+      (workout) =>
+        workout.completed_at &&
+        parseISO(workout.completed_at) >= weekStart,
     ) ?? null;
 
   const lastUsedLabel = routine.last_used_at
