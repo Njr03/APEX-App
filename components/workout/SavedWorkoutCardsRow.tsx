@@ -42,6 +42,10 @@ import {
 import { dedupeSavedWorkoutsForSession } from '@/lib/routines/sessionWorkouts';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+import {
+  isRoutineCompletedThisWeek,
+  WEEKLY_COMPLETION_BLOCKED_MESSAGE,
+} from '@/lib/workout/weeklyCompletion';
 import { router, useFocusEffect } from 'expo-router';
 import { useDashboardCardsStore } from '@/stores/dashboardCardsStore';
 import type { HorizontalScrollTarget } from '@/lib/ui/horizontalScroll';
@@ -313,6 +317,11 @@ export function SavedWorkoutCardsRow({
     }
   };
 
+  const confirmWorkoutCompletedThisWeek = useMemo(() => {
+    if (!confirmWorkout || !workouts) return false;
+    return isRoutineCompletedThisWeek(confirmWorkout.id, workouts);
+  }, [confirmWorkout, workouts]);
+
   const handleDragEnd = useCallback(
     ({ data }: { data: SavedWorkoutRowItem[] }) => {
       const orderedRoutineIds = data
@@ -435,12 +444,19 @@ export function SavedWorkoutCardsRow({
       ) : null}
 
       <RoutineCardBreakdownModal
+        blockedMessage={
+          confirmWorkoutCompletedThisWeek ? WEEKLY_COMPLETION_BLOCKED_MESSAGE : null
+        }
         isStarting={isStarting}
         onClose={() => {
           setConfirmWorkout(null);
           setStartError(null);
         }}
-        onStartWorkout={() => void handleConfirmStart()}
+        onStartWorkout={
+          confirmWorkout && !confirmWorkoutCompletedThisWeek
+            ? () => void handleConfirmStart()
+            : undefined
+        }
         routine={confirmWorkout}
         startError={startError}
         unit={unit}

@@ -1,4 +1,4 @@
-import { parseISO, startOfWeek } from 'date-fns';
+import { parseISO } from 'date-fns';
 
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
 import type { WorkoutHistoryRow } from '@/hooks/queries/useProgressStats';
@@ -9,6 +9,7 @@ import {
   countWorkoutPrs,
 } from '@/lib/training/weekSplits';
 import type { TrainingSplit } from '@/lib/training/splits';
+import { getRoutineCompletedThisWeek } from '@/lib/workout/weeklyCompletion';
 import type { Workout } from '@/lib/supabase';
 
 export type DashboardWorkoutCardStatus =
@@ -60,13 +61,7 @@ export function buildRoutineCardModel(
   const historyWorkouts = workouts as WorkoutHistoryRow[];
   const routineWorkouts = findRoutineWorkouts(routine, historyWorkouts);
   const lastWorkout = routineWorkouts[0] ?? null;
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const completedThisWeek =
-    routineWorkouts.find(
-      (workout) =>
-        workout.completed_at &&
-        parseISO(workout.completed_at) >= weekStart,
-    ) ?? null;
+  const completedThisWeek = getRoutineCompletedThisWeek(routine.id, historyWorkouts);
 
   const lastUsedLabel = routine.last_used_at
     ? parseISO(routine.last_used_at).toLocaleDateString('en-US', {

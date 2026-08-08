@@ -5,6 +5,7 @@ import {
   useClearUnfinishedWorkouts,
   useCreateWorkout,
 } from '@/hooks/queries/useWorkouts';
+import { fetchWorkoutHistory } from '@/hooks/queries/useProgressStats';
 import { useCreateSet } from '@/hooks/queries/useSets';
 import { defaultWorkoutName } from '@/hooks/useFinishWorkout';
 import type { SplitWorkoutPlan } from '@/lib/training/splitTemplates';
@@ -14,6 +15,11 @@ import {
   populateWorkoutFromPlan,
   populateWorkoutFromRoutine,
 } from '@/lib/workout/populateWorkoutSession';
+import {
+  isRoutineCompletedThisWeek,
+  isSplitCompletedThisWeek,
+  WEEKLY_COMPLETION_BLOCKED_MESSAGE,
+} from '@/lib/workout/weeklyCompletion';
 import { throwIfSupabaseError } from '@/lib/supabase/errors';
 import {
   supabase,
@@ -74,6 +80,16 @@ export function useStartWorkoutSession() {
 
       const resolvedRoutine =
         routine ?? (routineId ? await fetchRoutineWithExercises(routineId) : null);
+
+      const history = await fetchWorkoutHistory(user.id);
+
+      if (resolvedRoutine && isRoutineCompletedThisWeek(resolvedRoutine.id, history)) {
+        throw new Error(WEEKLY_COMPLETION_BLOCKED_MESSAGE);
+      }
+
+      if (plan && isSplitCompletedThisWeek(plan.split, history)) {
+        throw new Error(WEEKLY_COMPLETION_BLOCKED_MESSAGE);
+      }
 
       const callbacks = {
         addExercise: (input: {

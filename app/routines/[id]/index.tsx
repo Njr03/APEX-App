@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
@@ -7,22 +7,34 @@ import { BackButton } from '@/components/ui/BackButton';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
-import { useDeleteRoutine, useProfile, useRoutine } from '@/hooks/queries';
+import { useDeleteRoutine, useProfile, useRoutine, useWorkoutHistory } from '@/hooks/queries';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
 import { kgToDisplay, volumeLabel } from '@/lib/units';
 import { colors } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+import {
+  isRoutineCompletedThisWeek,
+  WEEKLY_COMPLETION_BLOCKED_MESSAGE,
+} from '@/lib/workout/weeklyCompletion';
 
 export default function RoutineDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: routine, isLoading, isError, error } = useRoutine(id);
   const { data: profile } = useProfile();
+  const { data: workoutHistory } = useWorkoutHistory();
   const deleteRoutine = useDeleteRoutine();
   const { startFromRoutine, isStarting } = useStartWorkoutSession();
   const [startError, setStartError] = useState<string | null>(null);
 
   const unit = resolveUnitPreference(profile?.unit_preference);
+  const completedThisWeek = useMemo(
+    () =>
+      routine && workoutHistory
+        ? isRoutineCompletedThisWeek(routine.id, workoutHistory)
+        : false,
+    [routine, workoutHistory],
+  );
 
   const handleStart = async () => {
     if (!routine) return;
@@ -93,11 +105,14 @@ export default function RoutineDetailScreen() {
         </Card>
 
         <Button
-          disabled={isStarting}
+          disabled={isStarting || completedThisWeek}
           label="Start Workout"
           loading={isStarting}
           onPress={() => void handleStart()}
         />
+        {completedThisWeek ? (
+          <AppText variant="muted">{WEEKLY_COMPLETION_BLOCKED_MESSAGE}</AppText>
+        ) : null}
         {startError ? (
           <AppText className="text-accent3" variant="body">
             {startError}

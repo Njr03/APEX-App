@@ -21,6 +21,7 @@ interface RoutineCardBreakdownModalProps {
   onStartWorkout?: () => void;
   isStarting?: boolean;
   startError?: string | null;
+  blockedMessage?: string | null;
 }
 
 export function RoutineCardBreakdownModal({
@@ -31,6 +32,7 @@ export function RoutineCardBreakdownModal({
   onStartWorkout,
   isStarting = false,
   startError = null,
+  blockedMessage = null,
 }: RoutineCardBreakdownModalProps) {
   const handleClose = wrapDashboardModalClose(onClose);
   const { data: routineDetail, isLoading: isLoadingDetail } = useRoutine(routine?.id);
@@ -169,6 +171,10 @@ export function RoutineCardBreakdownModal({
                   {startError}
                 </AppText>
               ) : null}
+            </View>
+          ) : blockedMessage ? (
+            <View style={{ paddingTop: 16 }}>
+              <AppText variant="muted">{blockedMessage}</AppText>
             </View>
           ) : null}
         </Pressable>

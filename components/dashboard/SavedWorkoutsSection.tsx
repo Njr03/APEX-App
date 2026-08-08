@@ -8,10 +8,14 @@ import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
-import { useRoutineSummaries } from '@/hooks/queries';
+import { useRoutineSummaries, useWorkoutHistory } from '@/hooks/queries';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
 import { colors } from '@/constants/theme';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+import {
+  isRoutineCompletedThisWeek,
+  WEEKLY_COMPLETION_BLOCKED_MESSAGE,
+} from '@/lib/workout/weeklyCompletion';
 
 export function SavedWorkoutsSection() {
   const {
@@ -21,6 +25,7 @@ export function SavedWorkoutsSection() {
     error,
     refetch,
   } = useRoutineSummaries();
+  const { data: workoutHistory } = useWorkoutHistory();
   const { startFromRoutineId, isStarting } = useStartWorkoutSession();
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -114,12 +119,23 @@ export function SavedWorkoutsSection() {
 
               <Button
                 className="mt-3"
-                disabled={isStarting}
+                disabled={
+                  isStarting ||
+                  (workoutHistory
+                    ? isRoutineCompletedThisWeek(workout.id, workoutHistory)
+                    : false)
+                }
                 label="Start Workout"
                 loading={isStarting}
                 onPress={() => void handleStart(workout.id)}
                 variant="secondary"
               />
+              {workoutHistory &&
+              isRoutineCompletedThisWeek(workout.id, workoutHistory) ? (
+                <AppText className="mt-2" variant="muted">
+                  {WEEKLY_COMPLETION_BLOCKED_MESSAGE}
+                </AppText>
+              ) : null}
             </Card>
           ))
         : null}

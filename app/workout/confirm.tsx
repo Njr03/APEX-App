@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
-import { useExercises } from '@/hooks/queries';
+import { useExercises, useWorkoutHistory } from '@/hooks/queries';
 import { colors, fonts } from '@/constants/theme';
 import {
   getSplitTemplate,
@@ -26,6 +26,10 @@ import {
 } from '@/lib/training/splits';
 import { kgToDisplay } from '@/lib/units';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+import {
+  isSplitCompletedThisWeek,
+  WEEKLY_COMPLETION_BLOCKED_MESSAGE,
+} from '@/lib/workout/weeklyCompletion';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
 
 function resolveSplit(split?: string): TrainingSplit {
@@ -71,8 +75,15 @@ export default function WorkoutConfirmScreen() {
   const split = resolveSplit(splitParam);
   const definition = SPLIT_DEFINITIONS[split];
   const { data: exercises, isLoading, isError, error, refetch } = useExercises();
+  const { data: workoutHistory } = useWorkoutHistory();
   const { startFromPlan, isStarting } = useStartWorkoutSession();
   const [startError, setStartError] = useState<string | null>(null);
+
+  const splitCompletedThisWeek = useMemo(
+    () =>
+      workoutHistory ? isSplitCompletedThisWeek(split, workoutHistory) : false,
+    [split, workoutHistory],
+  );
 
   const [planExercises, setPlanExercises] = useState<SplitTemplateExercise[]>(
     () => getSplitTemplate(split).exercises,
@@ -303,11 +314,15 @@ export default function WorkoutConfirmScreen() {
         })}
 
         <Button
-          disabled={missingExercises.length > 0 || isStarting}
+          disabled={missingExercises.length > 0 || isStarting || splitCompletedThisWeek}
           label="Confirm & Begin Workout"
           loading={isStarting}
           onPress={() => void handleConfirm()}
         />
+
+        {splitCompletedThisWeek ? (
+          <AppText variant="muted">{WEEKLY_COMPLETION_BLOCKED_MESSAGE}</AppText>
+        ) : null}
 
         {startError ? (
           <AppText className="text-accent3" variant="body">
