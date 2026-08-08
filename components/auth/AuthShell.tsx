@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { ApexLogo } from '@/components/branding/ApexLogo';
 import { Screen } from '@/components/ui/Screen';
 import { cn } from '@/lib/cn';
 
@@ -17,22 +18,20 @@ interface AuthShellProps {
 }
 
 function ApexLoginHeader({ subtitle }: { subtitle: string }) {
-  const [titleWidth, setTitleWidth] = useState(0);
+  const [logoWidth, setLogoWidth] = useState(0);
 
   return (
     <View className="items-center">
-      <AppText
-        className="text-4xl"
+      <View
         onLayout={(event) => {
-          setTitleWidth(event.nativeEvent.layout.width);
+          setLogoWidth(event.nativeEvent.layout.width);
         }}
-        variant="display"
       >
-        APEX
-      </AppText>
+        <ApexLogo height={52} />
+      </View>
       <View
         className="mt-0.5 flex-row justify-between"
-        style={{ width: titleWidth > 0 ? titleWidth : undefined }}
+        style={{ width: logoWidth > 0 ? logoWidth : undefined }}
       >
         {subtitle.split('').map((letter, index) => (
           <AppText
@@ -76,9 +75,9 @@ export function AuthShell({
             {useStretchedSubtitle ? (
               <ApexLoginHeader subtitle={subtitle} />
             ) : isApexLogin ? (
-              <AppText className="text-center text-4xl" variant="display">
-                {title}
-              </AppText>
+              <View className="items-center">
+                <ApexLogo height={52} />
+              </View>
             ) : (
               <AppText className="text-3xl" variant="display">
                 {title}

@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { format } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ApexLogo } from '@/components/branding/ApexLogo';
 import { WorkoutHistoryModal } from '@/components/history/WorkoutHistoryModal';
 import {
   TOPBAR_BG,
@@ -126,18 +127,7 @@ export function AppTopBar() {
       >
         <View className="min-w-0 flex-1 justify-center">
           <View style={{ gap: 2 }}>
-            <Text
-              accessibilityRole="header"
-              style={{
-                color: colors.accent,
-                fontFamily: fonts.brand,
-                fontSize: 16,
-                fontWeight: '700',
-                letterSpacing: 0.5,
-              }}
-            >
-              APX
-            </Text>
+            <ApexLogo height={22} />
 
             <View
               className="flex-row items-center justify-between"
