@@ -14,6 +14,7 @@ import DraggableFlatList, {
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
+import { RoutineCardBreakdownModal } from '@/components/dashboard/RoutineCardBreakdownModal';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
 import { AppText } from '@/components/ui/AppText';
 import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
@@ -56,6 +57,10 @@ interface SavedWorkoutListItem {
   workout: RoutineSummary;
 }
 
+type SavedWorkoutRowItem =
+  | (SavedWorkoutListItem & { kind: 'workout' })
+  | { kind: 'add'; key: '__add__' };
+
 interface SavedWorkoutCardsRowProps {
   heading?: string;
   unit?: 'kg' | 'lb';
@@ -65,31 +70,26 @@ function SavedWorkoutCard({
   workout,
   workouts,
   isDeleting,
-  isStarting,
   unit,
   onDelete,
   onEdit,
-  onStart,
+  onPress,
   cardWidth,
 }: {
   workout: RoutineSummary;
   workouts: ReturnType<typeof useWorkoutHistory>['data'];
   isDeleting: boolean;
-  isStarting: boolean;
   unit: 'kg' | 'lb';
   onDelete: () => void;
   onEdit: () => void;
-  onStart: () => void;
+  onPress: () => void;
   cardWidth: number;
 }) {
-  const disabled = isStarting;
-
   return (
     <View
       style={{
         alignSelf: 'stretch',
         minWidth: 0,
-        opacity: disabled ? 0.5 : 1,
         width: cardWidth,
       }}
     >
@@ -142,9 +142,7 @@ function SavedWorkoutCard({
           </View>
         }
         model={buildRoutineCardModel(workout, workouts ?? [])}
-        onPress={() => {
-          if (!disabled) onStart();
-        }}
+        onPress={onPress}
         unit={unit}
       />
     </View>
@@ -172,9 +170,9 @@ function AddWorkoutCard() {
         borderWidth: 1,
         cursor: Platform.OS === 'web' ? ('pointer' as const) : undefined,
         flex: 1,
+        height: '100%',
         justifyContent: 'center',
         paddingHorizontal: 8,
-        paddingVertical: 16,
         width: '100%',
         ...dashboardPressStyle(pressed),
       }}
@@ -202,6 +200,7 @@ export function SavedWorkoutCardsRow({
   const { width: viewportWidth } = useLayoutBreakpoint();
   const [rowWidth, setRowWidth] = useState(0);
   const [deletingRoutineId, setDeletingRoutineId] = useState<string | null>(null);
+  const [confirmWorkout, setConfirmWorkout] = useState<RoutineSummary | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
   const {
     data: savedWorkouts,
@@ -251,6 +250,14 @@ export function SavedWorkoutCardsRow({
     [orderedWorkouts],
   );
 
+  const rowItems = useMemo(
+    (): SavedWorkoutRowItem[] => [
+      ...listItems.map((item) => ({ ...item, kind: 'workout' as const })),
+      { kind: 'add', key: '__add__' },
+    ],
+    [listItems],
+  );
+
   const layoutWidth = rowWidth > 0 ? rowWidth : viewportWidth;
   const cardWidth = Math.min(280, Math.max(240, layoutWidth - 48));
   const addCardWidth = cardWidth / 2;
@@ -287,11 +294,19 @@ export function SavedWorkoutCardsRow({
     }
   };
 
-  const handleStart = async (routineId: string) => {
+  const handleOpenConfirm = (workout: RoutineSummary) => {
+    setStartError(null);
+    setConfirmWorkout(workout);
+  };
+
+  const handleConfirmStart = async () => {
+    if (!confirmWorkout) return;
+
     setStartError(null);
 
     try {
-      await startFromRoutineId(routineId);
+      await startFromRoutineId(confirmWorkout.id);
+      setConfirmWorkout(null);
       router.push('/workout/active');
     } catch (err) {
       setStartError(getSupabaseErrorMessage(err));
@@ -299,8 +314,10 @@ export function SavedWorkoutCardsRow({
   };
 
   const handleDragEnd = useCallback(
-    ({ data }: { data: SavedWorkoutListItem[] }) => {
-      const orderedRoutineIds = data.map((item) => item.routineId);
+    ({ data }: { data: SavedWorkoutRowItem[] }) => {
+      const orderedRoutineIds = data
+        .filter((item): item is SavedWorkoutListItem & { kind: 'workout' } => item.kind === 'workout')
+        .map((item) => item.routineId);
 
       void setDashboardCards(
         applySavedWorkoutOrderToDashboardCards(configuredCards, orderedRoutineIds),
@@ -310,56 +327,55 @@ export function SavedWorkoutCardsRow({
   );
 
   const renderItem = useCallback(
-    ({ item, drag, isActive }: RenderItemParams<SavedWorkoutListItem>) => (
-      <ScaleDecorator>
-        <Pressable
-          accessibilityHint="Press and hold to reorder"
-          delayLongPress={250}
-          disabled={isActive}
-          onLongPress={drag}
-          style={{
-            alignSelf: 'stretch',
-            marginRight: CARD_GAP,
-            opacity: isActive ? 0.92 : 1,
-            width: cardWidth,
-          }}
-        >
-          <SavedWorkoutCard
-            cardWidth={cardWidth}
-            isDeleting={deletingRoutineId === item.workout.id}
-            isStarting={isStarting}
-            onDelete={() => void handleDelete(item.workout.id)}
-            onEdit={() => router.push(`/routines/${item.workout.id}/edit`)}
-            onStart={() => void handleStart(item.workout.id)}
-            unit={unit}
-            workout={item.workout}
-            workouts={workouts}
-          />
-        </Pressable>
-      </ScaleDecorator>
-    ),
+    ({ item, drag, isActive }: RenderItemParams<SavedWorkoutRowItem>) => {
+      if (item.kind === 'add') {
+        return (
+          <View
+            style={{
+              alignSelf: 'stretch',
+              width: addCardWidth,
+            }}
+          >
+            <AddWorkoutCard />
+          </View>
+        );
+      }
+
+      return (
+        <ScaleDecorator>
+          <Pressable
+            accessibilityHint="Press and hold to reorder"
+            delayLongPress={250}
+            disabled={isActive}
+            onLongPress={drag}
+            style={{
+              alignSelf: 'stretch',
+              marginRight: CARD_GAP,
+              opacity: isActive ? 0.92 : 1,
+              width: cardWidth,
+            }}
+          >
+            <SavedWorkoutCard
+              cardWidth={cardWidth}
+              isDeleting={deletingRoutineId === item.workout.id}
+              onDelete={() => void handleDelete(item.workout.id)}
+              onEdit={() => router.push(`/routines/${item.workout.id}/edit`)}
+              onPress={() => handleOpenConfirm(item.workout)}
+              unit={unit}
+              workout={item.workout}
+              workouts={workouts}
+            />
+          </Pressable>
+        </ScaleDecorator>
+      );
+    },
     [
+      addCardWidth,
       cardWidth,
       deletingRoutineId,
-      isStarting,
       unit,
       workouts,
     ],
-  );
-
-  const listFooter = useMemo(
-    () => (
-      <View
-        style={{
-          alignSelf: 'stretch',
-          marginLeft: listItems.length > 0 ? 0 : undefined,
-          width: addCardWidth,
-        }}
-      >
-        <AddWorkoutCard />
-      </View>
-    ),
-    [addCardWidth, listItems.length],
   );
 
   return (
@@ -375,12 +391,6 @@ export function SavedWorkoutCardsRow({
           message={getSupabaseErrorMessage(error)}
           onRetry={() => void refetch()}
         />
-      ) : null}
-
-      {startError ? (
-        <AppText className="text-accent3" variant="body">
-          {startError}
-        </AppText>
       ) : null}
 
       {!isLoading && !isError ? (
@@ -400,10 +410,9 @@ export function SavedWorkoutCardsRow({
               paddingRight: 4,
               paddingTop: 4,
             }}
-            data={listItems}
+            data={rowItems}
             decelerationRate="fast"
             keyExtractor={(item) => item.key}
-            ListFooterComponent={listFooter}
             nestedScrollEnabled
             onDragEnd={handleDragEnd}
             onMomentumScrollEnd={handleScrollEnd}
@@ -424,6 +433,19 @@ export function SavedWorkoutCardsRow({
           />
         </View>
       ) : null}
+
+      <RoutineCardBreakdownModal
+        isStarting={isStarting}
+        onClose={() => {
+          setConfirmWorkout(null);
+          setStartError(null);
+        }}
+        onStartWorkout={() => void handleConfirmStart()}
+        routine={confirmWorkout}
+        startError={startError}
+        unit={unit}
+        visible={confirmWorkout != null}
+      />
     </View>
   );
 }

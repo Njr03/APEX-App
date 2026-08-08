@@ -1,6 +1,8 @@
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { X } from 'lucide-react-native';
 
+import { Button } from '@/components/ui/Button';
+import { AppText } from '@/components/ui/AppText';
 import { useRoutine } from '@/hooks/queries';
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
 import { colors, fonts } from '@/constants/theme';
@@ -16,6 +18,9 @@ interface RoutineCardBreakdownModalProps {
   unit: 'kg' | 'lb';
   visible: boolean;
   onClose: () => void;
+  onStartWorkout?: () => void;
+  isStarting?: boolean;
+  startError?: string | null;
 }
 
 export function RoutineCardBreakdownModal({
@@ -23,9 +28,12 @@ export function RoutineCardBreakdownModal({
   unit,
   visible,
   onClose,
+  onStartWorkout,
+  isStarting = false,
+  startError = null,
 }: RoutineCardBreakdownModalProps) {
   const handleClose = wrapDashboardModalClose(onClose);
-  const { data: routineDetail } = useRoutine(routine?.id);
+  const { data: routineDetail, isLoading: isLoadingDetail } = useRoutine(routine?.id);
 
   if (!routine) return null;
 
@@ -102,7 +110,11 @@ export function RoutineCardBreakdownModal({
               Workout breakdown
             </Text>
 
-            {routineDetail?.routine_exercises?.length
+            {isLoadingDetail ? (
+              <ActivityIndicator color={colors.accent} />
+            ) : null}
+
+            {!isLoadingDetail && routineDetail?.routine_exercises?.length
               ? routineDetail.routine_exercises.map((entry) => (
                   <View
                     key={entry.id}
@@ -134,12 +146,31 @@ export function RoutineCardBreakdownModal({
                     </Text>
                   </View>
                 ))
-              : (
-                <Text style={{ color: MUTED, fontFamily: fonts.body, fontSize: 12 }}>
-                  {routine.exercise_count} exercises in this saved workout.
-                </Text>
-              )}
+              : null}
+
+            {!isLoadingDetail && !routineDetail?.routine_exercises?.length ? (
+              <Text style={{ color: MUTED, fontFamily: fonts.body, fontSize: 12 }}>
+                {routine.exercise_count} exercises in this saved workout.
+              </Text>
+            ) : null}
           </ScrollView>
+
+          {onStartWorkout ? (
+            <View style={{ gap: 8, paddingTop: 16 }}>
+              <Button
+                disabled={isStarting || isLoadingDetail}
+                label="Start workout"
+                loading={isStarting}
+                onPress={onStartWorkout}
+                variant="primary"
+              />
+              {startError ? (
+                <AppText className="text-accent3" variant="body">
+                  {startError}
+                </AppText>
+              ) : null}
+            </View>
+          ) : null}
         </Pressable>
       </Pressable>
     </Modal>
