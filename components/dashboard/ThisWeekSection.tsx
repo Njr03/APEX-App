@@ -25,6 +25,7 @@ import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
 import { useLayoutBreakpoint } from '@/hooks/useLayoutBreakpoint';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import { inferSplitFromWorkoutName } from '@/lib/training/splits';
+import { syncDashboardFromWorkoutHistory } from '@/lib/dashboard/savedWorkoutCardOrder';
 import { useDashboardCardsStore } from '@/stores/dashboardCardsStore';
 
 interface ThisWeekSectionProps {
@@ -68,6 +69,21 @@ export function SplitCardsRow({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
   const configuredCards = useDashboardCardsStore((state) => state.cards);
   const hydrated = useDashboardCardsStore((state) => state.hydrated);
   const hydrate = useDashboardCardsStore((state) => state.hydrate);
+  const setDashboardCards = useDashboardCardsStore((state) => state.setCards);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    if (!hydrated || workouts == null) return;
+
+    void syncDashboardFromWorkoutHistory(workouts, {
+      hydrate,
+      getCards: () => useDashboardCardsStore.getState().cards,
+      setCards: setDashboardCards,
+    });
+  }, [hydrated, hydrate, setDashboardCards, workouts]);
 
   const [editVisible, setEditVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
@@ -75,10 +91,6 @@ export function SplitCardsRow({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
     null,
   );
   const [selectedRoutine, setSelectedRoutine] = useState<RoutineSummary | null>(null);
-
-  useEffect(() => {
-    void hydrate();
-  }, [hydrate]);
 
   const splitCardsById = useMemo(
     () => new Map((data?.cards ?? []).map((card) => [card.definition.id, card])),

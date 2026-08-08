@@ -10,8 +10,7 @@ import {
   workoutHistoryQueryKey,
 } from '@/hooks/queries/useProgressStats';
 import {
-  reorderDashboardByWeekSessions,
-  syncCompletedRoutineToDashboard,
+  syncDashboardFromWorkoutHistory,
 } from '@/lib/dashboard/savedWorkoutCardOrder';
 import { useDashboardCardsStore } from '@/stores/dashboardCardsStore';
 import { calculateStreakUpdate, calculateLongestStreak } from '@/lib/streak';
@@ -202,20 +201,11 @@ export function useFinishWorkout() {
       });
 
       const dashboardStore = useDashboardCardsStore.getState();
-      await dashboardStore.hydrate();
-
-      if (workout.routine_id) {
-        await syncCompletedRoutineToDashboard(workout.routine_id, workouts, {
-          hydrate: dashboardStore.hydrate,
-          getCards: () => useDashboardCardsStore.getState().cards,
-          addCard: dashboardStore.addCard,
-          setCards: dashboardStore.setCards,
-        });
-      } else {
-        await dashboardStore.setCards(
-          reorderDashboardByWeekSessions(dashboardStore.cards, workouts),
-        );
-      }
+      await syncDashboardFromWorkoutHistory(workouts, {
+        hydrate: dashboardStore.hydrate,
+        getCards: () => useDashboardCardsStore.getState().cards,
+        setCards: dashboardStore.setCards,
+      });
     },
   });
 }

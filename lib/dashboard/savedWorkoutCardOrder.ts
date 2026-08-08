@@ -1,4 +1,4 @@
-import { parseISO, startOfWeek } from 'date-fns';
+import { parseISO } from 'date-fns';
 
 import type { DashboardCardRef } from '@/lib/dashboard/dashboardCards';
 import { dashboardCardKey } from '@/lib/dashboard/dashboardCards';
@@ -88,19 +88,13 @@ export function applySavedWorkoutOrderToDashboardCards(
   return merged;
 }
 
-function latestWeekCompletionMs(
+function latestCompletionMs(
   card: DashboardCardRef,
   workouts: WorkoutHistoryRow[],
-  weekStart: Date,
 ): number | null {
-  const weekStartMs = weekStart.getTime();
-
   if (card.kind === 'routine') {
     const relevant = workouts.filter(
-      (workout) =>
-        workout.routine_id === card.routineId &&
-        workout.completed_at &&
-        parseISO(workout.completed_at).getTime() >= weekStartMs,
+      (workout) => workout.routine_id === card.routineId && workout.completed_at,
     );
 
     if (relevant.length === 0) return null;
@@ -112,7 +106,6 @@ function latestWeekCompletionMs(
 
   const relevant = workouts.filter((workout) => {
     if (!workout.completed_at) return false;
-    if (parseISO(workout.completed_at).getTime() < weekStartMs) return false;
 
     return (
       resolveWorkoutSplit({
@@ -128,18 +121,43 @@ function latestWeekCompletionMs(
   );
 }
 
-/** Puts this week's completed sessions first, most recent at the front. */
-export function reorderDashboardByWeekSessions(
+/** Adds saved workouts that have at least one completed session. */
+export function ensureCompletedRoutinesOnDashboard(
   cards: DashboardCardRef[],
   workouts: WorkoutHistoryRow[],
 ): DashboardCardRef[] {
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const completedRoutineIds = new Set<string>();
 
+  for (const workout of workouts) {
+    if (workout.routine_id && workout.completed_at) {
+      completedRoutineIds.add(workout.routine_id);
+    }
+  }
+
+  const next = [...cards];
+
+  for (const routineId of completedRoutineIds) {
+    const ref: DashboardCardRef = { kind: 'routine', routineId };
+    const key = dashboardCardKey(ref);
+
+    if (!next.some((card) => dashboardCardKey(card) === key)) {
+      next.push(ref);
+    }
+  }
+
+  return next;
+}
+
+/** Puts completed cards first, ordered by most recent session. */
+export function reorderDashboardByRecentCompletions(
+  cards: DashboardCardRef[],
+  workouts: WorkoutHistoryRow[],
+): DashboardCardRef[] {
   return cards
     .map((card, index) => ({ card, index }))
     .sort((a, b) => {
-      const aTime = latestWeekCompletionMs(a.card, workouts, weekStart);
-      const bTime = latestWeekCompletionMs(b.card, workouts, weekStart);
+      const aTime = latestCompletionMs(a.card, workouts);
+      const bTime = latestCompletionMs(b.card, workouts);
 
       if (aTime != null && bTime != null) return bTime - aTime;
       if (aTime != null) return -1;
@@ -149,26 +167,20 @@ export function reorderDashboardByWeekSessions(
     .map(({ card }) => card);
 }
 
-export async function syncCompletedRoutineToDashboard(
-  routineId: string,
+export async function syncDashboardFromWorkoutHistory(
   workouts: WorkoutHistoryRow[],
   store: {
     hydrate: () => Promise<void>;
     getCards: () => DashboardCardRef[];
-    addCard: (card: DashboardCardRef) => Promise<void>;
     setCards: (cards: DashboardCardRef[]) => Promise<void>;
   },
 ) {
   await store.hydrate();
 
-  const ref: DashboardCardRef = { kind: 'routine', routineId };
-  const refKey = dashboardCardKey(ref);
+  const cards = reorderDashboardByRecentCompletions(
+    ensureCompletedRoutinesOnDashboard(store.getCards(), workouts),
+    workouts,
+  );
 
-  let cards = store.getCards();
-  if (!cards.some((card) => dashboardCardKey(card) === refKey)) {
-    await store.addCard(ref);
-    cards = store.getCards();
-  }
-
-  await store.setCards(reorderDashboardByWeekSessions(cards, workouts));
+  await store.setCards(cards);
 }
