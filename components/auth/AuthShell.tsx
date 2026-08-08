@@ -27,7 +27,7 @@ function ApexLoginHeader({ subtitle }: { subtitle: string }) {
           setLogoWidth(event.nativeEvent.layout.width);
         }}
       >
-        <ApexLogo height={96} />
+        <ApexLogo height={120} />
       </View>
       <View
         className="mt-0.5 flex-row justify-between"
@@ -76,7 +76,7 @@ export function AuthShell({
               <ApexLoginHeader subtitle={subtitle} />
             ) : isApexLogin ? (
               <View className="items-center">
-                <ApexLogo height={96} />
+                <ApexLogo height={120} />
               </View>
             ) : (
               <AppText className="text-3xl" variant="display">

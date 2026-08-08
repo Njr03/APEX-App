@@ -127,7 +127,7 @@ export function AppTopBar() {
       >
         <View className="min-w-0 flex-1 justify-center">
           <View style={{ gap: 2 }}>
-            <ApexLogo height={44} />
+            <ApexLogo height={56} />
 
             <View
               className="flex-row items-center justify-between"
