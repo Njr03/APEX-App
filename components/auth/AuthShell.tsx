@@ -53,7 +53,7 @@ function ApexLoginHeader({ title, subtitle }: { title: string; subtitle: string 
 
   return (
     <View className="items-center">
-      <ApexLogo height={135} />
+      <ApexLogo height={130} />
 
       <View className="mt-2 items-center" style={{ gap: 3 }}>
         <AppText
@@ -88,7 +88,7 @@ export function AuthShell({
   const scrollContentClassName = useStretchedSubtitle
     ? 'grow justify-center px-10 py-8 pb-24'
     : 'grow justify-center px-6 py-10';
-  const headerClassName = useStretchedSubtitle ? 'mb-8' : 'mb-10';
+  const headerClassName = useStretchedSubtitle ? 'mb-6' : 'mb-10';
 
   return (
     <Screen backgroundColor={backgroundColor}>

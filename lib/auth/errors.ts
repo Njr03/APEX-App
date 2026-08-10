@@ -1,6 +1,8 @@
 /**
  * Maps Supabase Auth errors to user-friendly messages.
  */
+export const INVALID_LOGIN_CREDENTIALS_MESSAGE = 'Incorrect credentials.';
+
 export function getAuthErrorMessage(error: unknown): string {
   if (!error || typeof error !== 'object') {
     return 'Something went wrong. Please try again.';
@@ -95,7 +97,7 @@ export function getAuthErrorMessage(error: unknown): string {
   }
 
   if (message.includes('Invalid login credentials')) {
-    return 'Incorrect username, email, or password.';
+    return INVALID_LOGIN_CREDENTIALS_MESSAGE;
   }
 
   if (
