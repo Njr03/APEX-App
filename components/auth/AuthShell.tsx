@@ -147,8 +147,6 @@ export function AuthShell({
         >
           {loginHero ? (
             <View className="w-full items-center" style={{ gap: 20 }}>
-              <ApexLogo height={logoHeight} />
-
               <ApexLoginBranding
                 stretch={subtitleStretch}
                 subtitle={subtitle}
