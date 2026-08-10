@@ -38,8 +38,8 @@ function StretchedLetterRow({
       {text.split('').map((letter, index) => (
         <AppText
           className={cn(
-            tone === 'subtitle' && 'text-sm text-accent',
-            tone === 'title' && 'text-3xl',
+            tone === 'subtitle' && 'text-base text-accent',
+            tone === 'title' && 'text-4xl',
           )}
           key={`${text}-${index}`}
           variant={tone === 'title' ? 'display' : 'muted'}
@@ -65,10 +65,10 @@ function ApexLoginBranding({
   if (!stretch) {
     return (
       <View className="items-center" style={{ gap: 4 }}>
-        <AppText className="text-3xl" variant="display">
+        <AppText className="text-4xl" variant="display">
           {title}
         </AppText>
-        <AppText className="text-sm text-accent" variant="muted">
+        <AppText className="text-base text-accent" variant="muted">
           {subtitle}
         </AppText>
       </View>
