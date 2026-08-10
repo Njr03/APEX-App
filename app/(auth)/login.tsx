@@ -10,7 +10,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { APEX_LOGO_BACKGROUND } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
-import { getAuthErrorMessage } from '@/lib/auth/errors';
+import { getAuthErrorMessage, isInvalidLoginCredentialsError } from '@/lib/auth/errors';
 import {
   loginSchema,
   type LoginFormValues,
@@ -20,6 +20,7 @@ import { useAuth } from '@/providers/AuthProvider';
 export default function LoginScreen() {
   const { signIn } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const { control, handleSubmit, formState: { isSubmitting } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,12 +32,14 @@ export default function LoginScreen() {
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
+    setShowForgotPassword(false);
 
     try {
       await signIn(values.identifier, values.password);
       router.replace('/(tabs)');
     } catch (error) {
       setFormError(getAuthErrorMessage(error));
+      setShowForgotPassword(isInvalidLoginCredentialsError(error));
     }
   });
 
@@ -72,6 +75,12 @@ export default function LoginScreen() {
           secureTextEntry
           textContentType="password"
         />
+
+        {showForgotPassword ? (
+          <Link asChild href="/(auth)/forgot-password">
+            <Button label="Forgot Password" variant="ghost" />
+          </Link>
+        ) : null}
       </View>
 
       <Button
@@ -84,10 +93,6 @@ export default function LoginScreen() {
 
       <Link asChild href="/(auth)/signup">
         <Button className="mt-2" label="Create Account" variant="secondary" />
-      </Link>
-
-      <Link asChild href="/(auth)/forgot-password">
-        <Button className="mt-2" label="Forgot Password" variant="ghost" />
       </Link>
     </AuthShell>
   );

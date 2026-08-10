@@ -108,3 +108,12 @@ export function getAuthErrorMessage(error: unknown): string {
 
   return message;
 }
+
+export function isInvalidLoginCredentialsError(error: unknown): boolean {
+  if (!error || typeof error !== 'object' || !('message' in error)) {
+    return false;
+  }
+
+  const message = String((error as { message: string }).message);
+  return message.includes('Invalid login credentials');
+}
