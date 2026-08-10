@@ -29,11 +29,10 @@ export const TOPBAR_DATE_TEXT_STYLE = {
   letterSpacing: 0.3,
 } as const;
 
-export const TOPBAR_WELCOME_TEXT_STYLE = {
+export const TOPBAR_PAGE_TEXT_STYLE = {
   color: colors.text,
   fontFamily: fonts.brand,
   fontSize: 12,
-  fontWeight: '700' as const,
   letterSpacing: 0.3,
 } as const;
 
@@ -43,13 +42,6 @@ export const TOPBAR_TITLE_TEXT_STYLE = {
   fontSize: 15,
   fontWeight: '700' as const,
 };
-
-export const TOPBAR_SUBTITLE_TEXT_STYLE = {
-  color: colors.text,
-  fontFamily: fonts.jetbrainsMono,
-  fontSize: 11,
-  letterSpacing: 0.3,
-} as const;
 
 function getTopBarCta(
   page: AppPage,
@@ -135,7 +127,7 @@ export function AppTopBar() {
       >
         <View className="min-w-0 flex-1 justify-center">
           <View style={{ gap: 2 }}>
-            <ApexLogo height={50} />
+            <ApexLogo height={58} />
 
             <View
               className="flex-row items-center justify-between"
@@ -144,10 +136,7 @@ export function AppTopBar() {
               <Text
                 className="min-w-0 shrink"
                 numberOfLines={1}
-                style={[
-                  welcomeName ? TOPBAR_WELCOME_TEXT_STYLE : TOPBAR_SUBTITLE_TEXT_STYLE,
-                  { flex: 1 },
-                ]}
+                style={[TOPBAR_PAGE_TEXT_STYLE, { flex: 1 }]}
               >
                 {welcomeName ? `Welcome ${welcomeName}` : PAGE_TITLES[activePage]}
               </Text>
