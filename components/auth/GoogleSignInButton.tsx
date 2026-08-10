@@ -38,7 +38,7 @@ export function GoogleSignInButton({ className }: GoogleSignInButtonProps) {
         onPress={() => void handlePress()}
         variant="secondary"
       />
-      <View className="my-4 flex-row items-center gap-3">
+      <View className="my-3 flex-row items-center gap-3">
         <View className="h-px flex-1 bg-border" />
         <AppText variant="muted">or</AppText>
         <View className="h-px flex-1 bg-border" />

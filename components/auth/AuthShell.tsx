@@ -34,7 +34,10 @@ function StretchedLetterRow({
     >
       {text.split('').map((letter, index) => (
         <AppText
-          className={cn(tone === 'subtitle' && 'text-accent', tone === 'title' && 'text-4xl')}
+          className={cn(
+            tone === 'subtitle' && 'text-xs text-accent',
+            tone === 'title' && 'text-3xl',
+          )}
           key={`${text}-${index}`}
           variant={tone === 'title' ? 'display' : 'muted'}
         >
@@ -50,11 +53,11 @@ function ApexLoginHeader({ title, subtitle }: { title: string; subtitle: string 
 
   return (
     <View className="items-center">
-      <ApexLogo height={152} />
+      <ApexLogo height={135} />
 
-      <View className="mt-4 items-center" style={{ gap: 6 }}>
+      <View className="mt-3 items-center" style={{ gap: 4 }}>
         <AppText
-          className="absolute text-4xl opacity-0"
+          className="absolute text-3xl opacity-0"
           onLayout={(event) => {
             setTitleWidth(event.nativeEvent.layout.width);
           }}
@@ -82,6 +85,10 @@ export function AuthShell({
   const isApexLogin = title === 'APEX';
   const alignClass = subtitleAlign === 'center' ? 'text-center' : 'text-left';
   const useStretchedSubtitle = isApexLogin && subtitleStretch;
+  const scrollContentClassName = useStretchedSubtitle
+    ? 'grow justify-center px-10 py-8 pb-24'
+    : 'grow justify-center px-6 py-10';
+  const headerClassName = useStretchedSubtitle ? 'mb-8' : 'mb-10';
 
   return (
     <Screen backgroundColor={backgroundColor}>
@@ -91,11 +98,11 @@ export function AuthShell({
       >
         <ScrollView
           className="flex-1"
-          contentContainerClassName="grow justify-center px-6 py-10"
+          contentContainerClassName={scrollContentClassName}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="mb-10">
+          <View className={headerClassName}>
             {useStretchedSubtitle ? (
               <ApexLoginHeader subtitle={subtitle} title={title} />
             ) : isApexLogin ? (

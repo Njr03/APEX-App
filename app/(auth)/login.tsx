@@ -53,7 +53,7 @@ export default function LoginScreen() {
 
       {formError ? <AuthErrorBanner message={formError} /> : null}
 
-      <View className="gap-4">
+      <View className="gap-3">
         <FormField
           autoCapitalize="none"
           autoComplete="username"
@@ -75,7 +75,7 @@ export default function LoginScreen() {
       </View>
 
       <Button
-        className="mt-6"
+        className="mt-4"
         disabled={isSubmitting}
         label="Log In"
         loading={isSubmitting}
@@ -83,11 +83,11 @@ export default function LoginScreen() {
       />
 
       <Link asChild href="/(auth)/signup">
-        <Button className="mt-3" label="Create Account" variant="secondary" />
+        <Button className="mt-2" label="Create Account" variant="secondary" />
       </Link>
 
       <Link asChild href="/(auth)/forgot-password">
-        <Button className="mt-3" label="Forgot Password" variant="ghost" />
+        <Button className="mt-2" label="Forgot Password" variant="ghost" />
       </Link>
     </AuthShell>
   );
