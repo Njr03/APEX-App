@@ -7,13 +7,16 @@ import { Screen } from '@/components/ui/Screen';
 import { cn } from '@/lib/cn';
 
 interface AuthShellProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   subtitleAlign?: 'left' | 'center';
   /** `accent` keeps subtitle body size; `accent-display` matches the title size. */
   subtitleTone?: 'muted' | 'accent' | 'accent-display';
   /** Stretch subtitle letters to span the title width (login hero). */
   subtitleStretch?: boolean;
+  /** Login screen: logo only, no APEX/HEALTH title text. */
+  logoOnly?: boolean;
+  logoHeight?: number;
   backgroundColor?: string;
   children: React.ReactNode;
 }
@@ -48,12 +51,20 @@ function StretchedLetterRow({
   );
 }
 
-function ApexLoginHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function ApexLoginHeader({
+  title,
+  subtitle,
+  logoHeight,
+}: {
+  title: string;
+  subtitle: string;
+  logoHeight: number;
+}) {
   const [titleWidth, setTitleWidth] = useState(0);
 
   return (
     <View className="items-center">
-      <ApexLogo height={128} />
+      <ApexLogo height={logoHeight} />
 
       <View className="mt-1 items-center" style={{ gap: 3 }}>
         <AppText
@@ -74,21 +85,25 @@ function ApexLoginHeader({ title, subtitle }: { title: string; subtitle: string 
 }
 
 export function AuthShell({
-  title,
-  subtitle,
+  title = '',
+  subtitle = '',
   subtitleAlign = 'center',
   subtitleTone = 'muted',
   subtitleStretch = false,
+  logoOnly = false,
+  logoHeight = 125,
   backgroundColor,
   children,
 }: AuthShellProps) {
-  const isApexLogin = title === 'APEX';
+  const isApexLogin = title === 'APEX' || logoOnly;
   const alignClass = subtitleAlign === 'center' ? 'text-center' : 'text-left';
-  const useStretchedSubtitle = isApexLogin && subtitleStretch;
-  const scrollContentClassName = useStretchedSubtitle
+  const useStretchedSubtitle = isApexLogin && subtitleStretch && !logoOnly;
+  const scrollContentClassName = logoOnly
     ? 'grow justify-center px-10 py-8 pb-24'
-    : 'grow justify-center px-6 py-10';
-  const headerClassName = useStretchedSubtitle ? 'mb-6' : 'mb-10';
+    : useStretchedSubtitle
+      ? 'grow justify-center px-10 py-8 pb-24'
+      : 'grow justify-center px-6 py-10';
+  const headerClassName = logoOnly ? 'mb-4' : useStretchedSubtitle ? 'mb-6' : 'mb-10';
 
   return (
     <Screen backgroundColor={backgroundColor}>
@@ -103,8 +118,16 @@ export function AuthShell({
           showsVerticalScrollIndicator={false}
         >
           <View className={headerClassName}>
-            {useStretchedSubtitle ? (
-              <ApexLoginHeader subtitle={subtitle} title={title} />
+            {logoOnly ? (
+              <View className="items-center">
+                <ApexLogo height={logoHeight} />
+              </View>
+            ) : useStretchedSubtitle ? (
+              <ApexLoginHeader
+                logoHeight={logoHeight}
+                subtitle={subtitle}
+                title={title}
+              />
             ) : isApexLogin ? (
               <View className="items-center">
                 <ApexLogo height={120} />

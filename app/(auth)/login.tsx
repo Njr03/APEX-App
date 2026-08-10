@@ -53,14 +53,7 @@ export default function LoginScreen() {
   });
 
   return (
-    <AuthShell
-      backgroundColor={APEX_LOGO_BACKGROUND}
-      subtitle="HEALTH"
-      subtitleAlign="center"
-      subtitleStretch
-      subtitleTone="accent"
-      title="APEX"
-    >
+    <AuthShell backgroundColor={APEX_LOGO_BACKGROUND} logoHeight={125} logoOnly>
       <GoogleSignInButton />
 
       {formError ? <AuthErrorBanner message={formError} /> : null}
@@ -72,7 +65,6 @@ export default function LoginScreen() {
           control={control}
           label="Username or email"
           name="identifier"
-          placeholder="username or you@example.com"
           textContentType="username"
         />
         <FormField
@@ -80,7 +72,6 @@ export default function LoginScreen() {
           control={control}
           label="Password"
           name="password"
-          placeholder="••••••••"
           secureTextEntry
           textContentType="password"
         />
