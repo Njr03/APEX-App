@@ -11,7 +11,7 @@ import { OptionPicker } from '@/components/ui/OptionPicker';
 import { useUpdateProfile } from '@/hooks/queries';
 import { isUsernameAvailable } from '@/lib/auth/resolveLoginEmail';
 import { getAuthErrorMessage } from '@/lib/auth/errors';
-import { normalizeUsername, usernameSchema } from '@/lib/auth/username';
+import { normalizeUsername, profileUsernameSchema } from '@/lib/auth/username';
 import {
   DEFAULT_UNIT_PREFERENCE,
   formatUnitPreferenceLabel,
@@ -83,7 +83,7 @@ function buildProfilePatch(
   }
 
   if (normalizedUsername !== currentUsername) {
-    const parsed = usernameSchema.safeParse(normalizedUsername);
+    const parsed = profileUsernameSchema.safeParse(normalizedUsername);
     if (!parsed.success) {
       return {
         patch,
@@ -217,10 +217,6 @@ export function ProfileDetailsEditor({
           textContentType="username"
           value={username}
         />
-        <AppText variant="muted">
-          3–20 characters. Letters, numbers, and underscores only. After saving,
-          use this username on the login screen with your password.
-        </AppText>
       </View>
 
       <OptionPicker

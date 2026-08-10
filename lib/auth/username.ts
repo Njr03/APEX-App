@@ -11,6 +11,13 @@ export const usernameSchema = z
   )
   .transform((value) => value.toLowerCase());
 
+/** Profile edits: only require a non-empty username. */
+export const profileUsernameSchema = z
+  .string()
+  .trim()
+  .min(1, 'Username cannot be empty.')
+  .transform((value) => value.toLowerCase());
+
 export function normalizeUsername(value: string | null | undefined): string {
   return (value ?? '').trim().toLowerCase();
 }

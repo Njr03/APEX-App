@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { usernameSchema } from '@/lib/auth/username';
+import { usernameSchema, profileUsernameSchema } from '@/lib/auth/username';
 import {
   EQUIPMENT_TYPES,
   EXERCISE_TYPES,
@@ -63,7 +63,7 @@ export const updateSetSchema = createSetSchema
 
 export const updateProfileSchema = z.object({
   display_name: z.string().trim().min(1).max(50).optional(),
-  username: usernameSchema.optional(),
+  username: profileUsernameSchema.optional(),
   unit_preference: z.enum(UNIT_PREFERENCES).optional(),
   avatar_url: z.union([z.string().url(), z.null()]).optional(),
 });
