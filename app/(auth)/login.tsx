@@ -56,6 +56,7 @@ export default function LoginScreen() {
     <AuthShell
       backgroundColor={APEX_LOGO_BACKGROUND}
       loginHero
+      logoHeight={125}
       subtitle="HEALTH"
       subtitleStretch
       subtitleTone="accent"

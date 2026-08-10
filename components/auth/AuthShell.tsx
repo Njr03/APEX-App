@@ -129,7 +129,7 @@ export function AuthShell({
     isApexLogin && subtitleStretch && !loginHero;
   const scrollContentClassName =
     loginHero || useStretchedSubtitle
-      ? 'grow px-10 py-8 pb-24'
+      ? 'min-h-full grow justify-center px-10 py-8'
       : 'grow justify-center px-6 py-10';
   const headerClassName = useStretchedSubtitle ? 'mb-6' : 'mb-10';
 
@@ -146,16 +146,16 @@ export function AuthShell({
           showsVerticalScrollIndicator={false}
         >
           {loginHero ? (
-            <View>
-              <View className="items-center" style={{ marginBottom: 32, marginTop: 8 }}>
-                <ApexLoginBranding
-                  stretch={subtitleStretch}
-                  subtitle={subtitle}
-                  title={title}
-                />
-              </View>
+            <View className="w-full items-center" style={{ gap: 20 }}>
+              <ApexLogo height={logoHeight} />
 
-              {children}
+              <ApexLoginBranding
+                stretch={subtitleStretch}
+                subtitle={subtitle}
+                title={title}
+              />
+
+              <View className="w-full">{children}</View>
             </View>
           ) : (
             <>
