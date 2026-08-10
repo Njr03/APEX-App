@@ -6,13 +6,16 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   View,
 } from 'react-native';
+import DraggableFlatList, {
+  ScaleDecorator,
+  type RenderItemParams,
+} from 'react-native-draggable-flatlist';
 
 import { ExercisePickerModal } from '@/components/workout/ExercisePickerModal';
 import {
-  RoutineExerciseList,
+  RoutineExerciseRow,
   type RoutineBuilderItem,
 } from '@/components/routines/RoutineExerciseList';
 import { AppText } from '@/components/ui/AppText';
@@ -144,6 +147,92 @@ export function RoutineBuilder({ routineId }: RoutineBuilderProps) {
     }
   });
 
+  const listHeader = (
+    <View className="gap-4 pb-4">
+      <BackButton className="mb-2" />
+      <AppText className="text-3xl" variant="display">
+        {isEditing ? 'Edit Workout' : 'Create Workout'}
+      </AppText>
+
+      {formError ? (
+        <AppText className="text-accent3" variant="body">
+          {formError}
+        </AppText>
+      ) : null}
+
+      <Controller
+        control={control}
+        name="name"
+        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          <View className="gap-2">
+            <FilterSectionLabel>Workout name</FilterSectionLabel>
+            <Input
+              accessibilityLabel="Workout name"
+              autoCapitalize="words"
+              hasError={Boolean(error)}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              placeholder="Push Day"
+              value={value ?? ''}
+            />
+            {error ? (
+              <AppText className="text-sm text-accent3" variant="body">
+                {error.message}
+              </AppText>
+            ) : null}
+          </View>
+        )}
+      />
+
+      <View className="gap-3">
+        <FilterSectionLabel>Exercises</FilterSectionLabel>
+        <AppText variant="muted">
+          Add exercises from the library to build your workout.
+        </AppText>
+        <Button
+          label="Add Exercise"
+          onPress={() => setPickerVisible(true)}
+          variant="secondary"
+        />
+      </View>
+    </View>
+  );
+
+  const listFooter = (
+    <View className="gap-3 pt-2">
+      <Button
+        label={isEditing ? 'Save Workout' : 'Create Workout'}
+        loading={
+          isSubmitting ||
+          createRoutine.isPending ||
+          updateRoutine.isPending ||
+          upsertExercises.isPending
+        }
+        onPress={onSubmit}
+      />
+    </View>
+  );
+
+  const renderItem = ({
+    item,
+    drag,
+    isActive,
+  }: RenderItemParams<RoutineBuilderItem>) => (
+    <ScaleDecorator>
+      <RoutineExerciseRow
+        allItems={items}
+        drag={drag}
+        isActive={isActive}
+        item={item}
+        onChange={setItems}
+        onRemove={(key) =>
+          setItems((current) => current.filter((entry) => entry.key !== key))
+        }
+        unit={unit}
+      />
+    </ScaleDecorator>
+  );
+
   if (isEditing && isLoading) {
     return (
       <Screen className="px-5 pt-5">
@@ -161,76 +250,21 @@ export function RoutineBuilder({ routineId }: RoutineBuilderProps) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="gap-4 p-5 pb-10"
+        <DraggableFlatList
+          activationDistance={12}
+          containerStyle={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 }}
+          data={items}
+          keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
-        >
-          <BackButton className="mb-2" />
-          <AppText className="text-3xl" variant="display">
-            {isEditing ? 'Edit Workout' : 'Create Workout'}
-          </AppText>
-
-          {formError ? (
-            <AppText className="text-accent3" variant="body">
-              {formError}
-            </AppText>
-          ) : null}
-
-          <Controller
-            control={control}
-            name="name"
-            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-              <View className="gap-2">
-                <FilterSectionLabel>Workout name</FilterSectionLabel>
-                <Input
-                  accessibilityLabel="Workout name"
-                  autoCapitalize="words"
-                  hasError={Boolean(error)}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder="Push Day"
-                  value={value ?? ''}
-                />
-                {error ? (
-                  <AppText className="text-sm text-accent3" variant="body">
-                    {error.message}
-                  </AppText>
-                ) : null}
-              </View>
-            )}
-          />
-
-          <View className="gap-3">
-            <FilterSectionLabel>Exercises</FilterSectionLabel>
-            <AppText variant="muted">
-              Add exercises from the library to build your workout.
-            </AppText>
-            <Button
-              label="Add Exercise"
-              onPress={() => setPickerVisible(true)}
-              variant="secondary"
-            />
-            <RoutineExerciseList
-              items={items}
-              onChange={setItems}
-              onRemove={(key) =>
-                setItems((current) => current.filter((item) => item.key !== key))
-              }
-              unit={unit}
-            />
-            <Button
-              label={isEditing ? 'Save Workout' : 'Create Workout'}
-              loading={
-                isSubmitting ||
-                createRoutine.isPending ||
-                updateRoutine.isPending ||
-                upsertExercises.isPending
-              }
-              onPress={onSubmit}
-            />
-          </View>
-        </ScrollView>
+          keyExtractor={(item) => item.key}
+          ListFooterComponent={listFooter}
+          ListHeaderComponent={listHeader}
+          nestedScrollEnabled
+          onDragEnd={({ data }) => setItems(data)}
+          renderItem={renderItem}
+          scrollEventThrottle={16}
+        />
       </KeyboardAvoidingView>
 
       <ExercisePickerModal

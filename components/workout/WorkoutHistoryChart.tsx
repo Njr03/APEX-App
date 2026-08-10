@@ -8,8 +8,7 @@ import { ChevronLeft, X } from 'lucide-react-native';
 
 import { WorkoutCalendar } from '@/components/history/WorkoutCalendar';
 import { WorkoutHistoryModal } from '@/components/history/WorkoutHistoryModal';
-import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
-import { Button } from '@/components/ui/Button';
+import { InsightSectionHeading, DASHBOARD_SECTION_HEADING_STYLE } from '@/components/dashboard/InsightSectionHeading';
 import { QueryError } from '@/components/ui/QueryState';
 import { WorkoutSessionDetail } from '@/components/workout/WorkoutSessionDetail';
 import { useProfile, useWorkout, useWorkoutHistory } from '@/hooks/queries';
@@ -410,11 +409,13 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
         <View style={{ ...PANEL_STYLE, flex: 1, minHeight: 320, minWidth: 0 }}>
           <View className="flex-row items-center justify-between" style={{ gap: 12 }}>
             <InsightSectionHeading title="Session Timeline" />
-            <Button
-              label="View all"
+            <Pressable
+              accessibilityRole="button"
+              className="active:opacity-70"
               onPress={() => setHistoryModalVisible(true)}
-              variant="ghost"
-            />
+            >
+              <Text style={DASHBOARD_SECTION_HEADING_STYLE}>View all</Text>
+            </Pressable>
           </View>
 
           <View className="flex-row flex-wrap" style={{ gap: 12 }}>

@@ -19,7 +19,7 @@ import {
   useNavigationStore,
   type AppPage,
 } from '@/stores/navigationStore';
-import { colors, fonts, APP_TEXT_TRANSFORM } from '@/constants/theme';
+import { fonts, APP_TEXT_TRANSFORM } from '@/constants/theme';
 
 const MUTED_TEXT = 'rgba(240,237,232,0.5)';
 
@@ -32,18 +32,18 @@ export const TOPBAR_DATE_TEXT_STYLE = {
 } as const;
 
 export const TOPBAR_PAGE_TEXT_STYLE = {
-  color: colors.text,
-  fontFamily: fonts.brand,
+  color: MUTED_TEXT,
+  fontFamily: fonts.body,
   fontSize: 12,
   letterSpacing: 0.3,
   ...APP_TEXT_TRANSFORM,
 } as const;
 
 export const TOPBAR_TITLE_TEXT_STYLE = {
-  color: colors.text,
-  fontFamily: fonts.brand,
-  fontSize: 15,
-  fontWeight: '700' as const,
+  color: MUTED_TEXT,
+  fontFamily: fonts.body,
+  fontSize: 12,
+  letterSpacing: 0.3,
   ...APP_TEXT_TRANSFORM,
 };
 
@@ -131,7 +131,7 @@ export function AppTopBar() {
       >
         <View className="min-w-0 flex-1 justify-center">
           <View style={{ gap: 2 }}>
-            <ApexLogo height={58} />
+            <ApexLogo height={65} />
 
             <View
               className="flex-row items-center justify-between"
