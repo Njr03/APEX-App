@@ -64,11 +64,11 @@ function ApexLoginBranding({
 
   if (!stretch) {
     return (
-      <View className="items-center" style={{ gap: 3 }}>
-        <AppText className="text-3xl" variant="display">
+      <View className="items-center" style={{ gap: 4 }}>
+        <AppText className="text-4xl" variant="display">
           {title}
         </AppText>
-        <AppText className="text-xs text-accent" variant="muted">
+        <AppText className="text-base text-accent" variant="muted">
           {subtitle}
         </AppText>
       </View>
@@ -76,9 +76,9 @@ function ApexLoginBranding({
   }
 
   return (
-    <View className="items-center" style={{ gap: 3 }}>
+    <View className="items-center" style={{ gap: 4 }}>
       <AppText
-        className="absolute text-3xl opacity-0"
+        className="absolute text-4xl opacity-0"
         onLayout={(event) => {
           setTitleWidth(event.nativeEvent.layout.width);
         }}
@@ -146,12 +146,12 @@ export function AuthShell({
           showsVerticalScrollIndicator={false}
         >
           {loginHero ? (
-            <View className="min-h-0 flex-1">
+            <View>
               <View className="items-center">
                 <ApexLogo height={logoHeight} />
               </View>
 
-              <View className="min-h-[88px] flex-1 items-center justify-center">
+              <View className="items-center" style={{ marginBottom: 16, marginTop: 10 }}>
                 <ApexLoginBranding
                   stretch={subtitleStretch}
                   subtitle={subtitle}
