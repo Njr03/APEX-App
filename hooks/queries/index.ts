@@ -6,6 +6,7 @@ export type {
 } from './queryKeys';
 
 export { useProfile, useUpdateProfile } from './useProfile';
+export { useResetAccount } from './useResetAccount';
 export { useUnitPreference } from '../useUnitPreference';
 export {
   useCreateExercise,

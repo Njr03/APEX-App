@@ -10,7 +10,8 @@ Run these in order in the Supabase SQL editor (or via `supabase db push`).
 | 4 | `migrations/004_hardening.sql` | Exercise RLS tighten + `delete_user_account()` RPC |
 | 5 | `migrations/005_usernames.sql` | Usernames + login lookup helpers |
 | 6 | `migrations/009_account_auth_fixes.sql` | Fix account deletion RPC + username availability |
-| 7 | `seed/exercises.sql` | ~40 seeded strength exercises + extended library |
+| 7 | `migrations/010_reset_user_account.sql` | `reset_user_account()` RPC — wipe training data, keep auth |
+| 8 | `seed/exercises.sql` | ~40 seeded strength exercises + extended library |
 
 ## RLS summary
 
@@ -29,6 +30,8 @@ Run these in order in the Supabase SQL editor (or via `supabase db push`).
 All client access uses the **anon key** with RLS — never the service role key in the app.
 
 Account deletion uses the `delete_user_account()` RPC (migration 004), which runs as `security definer` and deletes the caller's `auth.users` row. Profile and training data cascade via foreign keys.
+
+Account reset uses `reset_user_account()` (migration 010) to delete workouts, routines, PRs, body metrics, and custom exercises while keeping the auth account and profile.
 
 ## Regenerate TypeScript types
 

@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { FilterSectionLabel } from '@/components/ui/FilterSectionLabel';
 import { Input } from '@/components/ui/Input';
 import { OptionPicker } from '@/components/ui/OptionPicker';
-import { useUpdateProfile } from '@/hooks/queries';
+import { useUpdateProfile, useResetAccount } from '@/hooks/queries';
+import { confirmDestructiveAction } from '@/lib/confirmAction';
 import { isUsernameAvailable } from '@/lib/auth/resolveLoginEmail';
 import { getAuthErrorMessage } from '@/lib/auth/errors';
 import { normalizeUsername, profileUsernameSchema } from '@/lib/auth/username';
@@ -111,6 +112,7 @@ export function ProfileDetailsEditor({
   userId,
 }: ProfileDetailsEditorProps) {
   const updateProfile = useUpdateProfile();
+  const resetAccount = useResetAccount();
 
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -142,6 +144,28 @@ export function ProfileDetailsEditor({
     displayName.trim() !== (profile.display_name ?? '') ||
     normalizeUsername(username) !== normalizeUsername(profile.username) ||
     unitPreference !== profile.unit_preference;
+
+  const handleResetAccount = () => {
+    clearProfileMessage();
+    setProfileError(null);
+
+    confirmDestructiveAction({
+      title: 'Reset account?',
+      message:
+        'This permanently deletes your workouts, routines, personal records, body metrics, and custom exercises. Your login and profile stay the same.',
+      confirmLabel: 'Reset account',
+      onConfirm: () => {
+        void (async () => {
+          try {
+            await resetAccount.mutateAsync();
+            showTemporaryProfileMessage('Account reset. Your training data has been cleared.');
+          } catch (err) {
+            setProfileError(getAuthErrorMessage(err));
+          }
+        })();
+      },
+    });
+  };
 
   const handleSaveProfile = async () => {
     clearProfileMessage();
@@ -217,6 +241,18 @@ export function ProfileDetailsEditor({
           textContentType="username"
           value={username}
         />
+
+        <View className="gap-1 pt-1">
+          <Button
+            label="Reset account"
+            loading={resetAccount.isPending}
+            onPress={handleResetAccount}
+            variant="danger"
+          />
+          <AppText className="text-center text-xs" variant="muted">
+            Begin journey with new data
+          </AppText>
+        </View>
       </View>
 
       <OptionPicker

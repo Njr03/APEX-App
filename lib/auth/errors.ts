@@ -54,10 +54,18 @@ export function getAuthErrorMessage(error: unknown): string {
   }
 
   if (
+    message.includes('reset_user_account') ||
+    (message.includes('Could not find the function') &&
+      message.includes('reset_user_account'))
+  ) {
+    return 'Could not reset your account. Run apex/supabase/migrations/010_reset_user_account.sql in Supabase, then try again.';
+  }
+
+  if (
     message.includes('Not authenticated') ||
     (message.includes('permission denied') && message.includes('auth'))
   ) {
-    return 'Could not delete your account. Sign out, sign back in, and try again. If it persists, run apex/supabase/migrations/009_account_auth_fixes.sql in Supabase.';
+    return 'Session expired or permission denied. Sign out, sign back in, and try again.';
   }
 
   if (

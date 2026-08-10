@@ -394,6 +394,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: undefined;
       };
+      reset_user_account: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
       is_username_available: {
         Args: { username_input: string; exclude_user_id?: string | null };
         Returns: boolean;
