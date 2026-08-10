@@ -13,9 +13,8 @@ import { DashboardEmptyCardSlot } from '@/components/dashboard/DashboardEmptyCar
 import { DashboardRoutineCard } from '@/components/dashboard/DashboardRoutineCard';
 import { RoutineCardBreakdownModal } from '@/components/dashboard/RoutineCardBreakdownModal';
 import { WeekSplitCard } from '@/components/dashboard/WeekSplitCard';
-import { DASHBOARD_SECTION_HEADING_STYLE } from '@/components/dashboard/InsightSectionHeading';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { WeekSplitCardBreakdownModal } from '@/components/dashboard/WeekSplitCardBreakdownModal';
-import { AppText } from '@/components/ui/AppText';
 import { QueryError } from '@/components/ui/QueryState';
 import { useRoutineSummaries, useWorkoutHistory } from '@/hooks/queries';
 import { useThisWeekSplits, type WeekSplitCardData } from '@/hooks/useThisWeekSplits';
@@ -37,7 +36,7 @@ interface ThisWeekSectionProps {
 export function ThisWeekHeading({ onEdit }: { onEdit?: () => void }) {
   return (
     <View className="flex-row items-center justify-between">
-      <AppText style={DASHBOARD_SECTION_HEADING_STYLE}>This Week</AppText>
+      <TabPageHeading title="This Week" />
       {onEdit ? (
         <Pressable
           accessibilityLabel="Edit dashboard workout cards"

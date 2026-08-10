@@ -67,7 +67,7 @@ export function StatTileDetailModal({
           </DashboardDetailSection>
         );
       }
-      case "This Week's Volume": {
+      case 'Weekly volume': {
         const data = breakdown.volume;
         const delta = formatVolumeDeltaPercent(data.deltaPercent);
         return (
@@ -107,7 +107,7 @@ export function StatTileDetailModal({
           </>
         );
       }
-      case 'Sessions This Year': {
+      case 'Yearly sessions': {
         const data = breakdown.sessions;
         return (
           <DashboardDetailSection title="Year to date">

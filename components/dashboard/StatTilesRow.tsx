@@ -15,8 +15,8 @@ interface StatTilesRowProps {
 const TILE_GAP = 12;
 
 const GRID_ROW_LABELS = [
-  ['Streak', 'Sessions This Year'],
-  ["This Week's Volume", 'Total PRs'],
+  ['Streak', 'Yearly sessions'],
+  ['Weekly volume', 'Total PRs'],
 ] as const;
 
 const rowStyle: ViewStyle = {

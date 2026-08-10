@@ -25,7 +25,15 @@ const MUTED_TEXT = 'rgba(240,237,232,0.5)';
 export const TOPBAR_DATE_TEXT_STYLE = {
   color: MUTED_TEXT,
   fontFamily: fonts.jetbrainsMono,
-  fontSize: 11,
+  fontSize: 12,
+  letterSpacing: 0.3,
+} as const;
+
+export const TOPBAR_WELCOME_TEXT_STYLE = {
+  color: colors.text,
+  fontFamily: fonts.brand,
+  fontSize: 12,
+  fontWeight: '700' as const,
   letterSpacing: 0.3,
 } as const;
 
@@ -136,7 +144,10 @@ export function AppTopBar() {
               <Text
                 className="min-w-0 shrink"
                 numberOfLines={1}
-                style={[TOPBAR_SUBTITLE_TEXT_STYLE, { flex: 1 }]}
+                style={[
+                  welcomeName ? TOPBAR_WELCOME_TEXT_STYLE : TOPBAR_SUBTITLE_TEXT_STYLE,
+                  { flex: 1 },
+                ]}
               >
                 {welcomeName ? `Welcome ${welcomeName}` : PAGE_TITLES[activePage]}
               </Text>

@@ -15,7 +15,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react-native';
 
 import { DashboardWorkoutCard } from '@/components/dashboard/DashboardWorkoutCard';
 import { RoutineCardBreakdownModal } from '@/components/dashboard/RoutineCardBreakdownModal';
-import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
+import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { AppText } from '@/components/ui/AppText';
 import { CardScrollSlider } from '@/components/ui/CardScrollSlider';
 import { QueryError } from '@/components/ui/QueryState';
@@ -389,7 +389,7 @@ export function SavedWorkoutCardsRow({
 
   return (
     <View className="gap-3">
-      <InsightSectionHeading title={heading} />
+      <TabPageHeading title={heading} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} />

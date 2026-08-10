@@ -168,7 +168,7 @@ export function useDashboardStatTiles(unit: 'kg' | 'lb' = 'kg') {
           deltaTone: streakDelta.tone,
         },
         {
-          label: "This Week's Volume",
+          label: 'Weekly volume',
           value: volumeFormatted.value,
           unit: volumeFormatted.unit,
           accentColor: TILE_COLORS.lime,
@@ -176,7 +176,7 @@ export function useDashboardStatTiles(unit: 'kg' | 'lb' = 'kg') {
           deltaTone: volumeDelta.tone,
         },
         {
-          label: 'Sessions This Year',
+          label: 'Yearly sessions',
           value: String(sessionsYtd),
           accentColor: TILE_COLORS.cyan,
           delta: `of ${plannedSessions} planned`,
