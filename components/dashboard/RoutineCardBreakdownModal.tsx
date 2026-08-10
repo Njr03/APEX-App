@@ -20,6 +20,7 @@ interface RoutineCardBreakdownModalProps {
   visible: boolean;
   onClose: () => void;
   onStartWorkout?: () => void;
+  onEditWorkout?: () => void;
   isStarting?: boolean;
   startError?: string | null;
   blockedMessage?: string | null;
@@ -31,6 +32,7 @@ export function RoutineCardBreakdownModal({
   visible,
   onClose,
   onStartWorkout,
+  onEditWorkout,
   isStarting = false,
   startError = null,
   blockedMessage = null,
@@ -158,24 +160,33 @@ export function RoutineCardBreakdownModal({
             ) : null}
           </ScrollView>
 
-          {onStartWorkout ? (
+          {onStartWorkout || onEditWorkout || blockedMessage ? (
             <View style={{ gap: 8, paddingTop: 16 }}>
-              <Button
-                disabled={isStarting || isLoadingDetail}
-                label="Start workout"
-                loading={isStarting}
-                onPress={onStartWorkout}
-                variant="primary"
-              />
+              {onStartWorkout ? (
+                <Button
+                  disabled={isStarting || isLoadingDetail}
+                  label="Start workout"
+                  loading={isStarting}
+                  onPress={onStartWorkout}
+                  variant="primary"
+                />
+              ) : null}
+              {onEditWorkout ? (
+                <Button
+                  disabled={isStarting || isLoadingDetail}
+                  label="Edit"
+                  onPress={onEditWorkout}
+                  variant="secondary"
+                />
+              ) : null}
               {startError ? (
                 <AppText className="text-accent3" variant="body">
                   {startError}
                 </AppText>
               ) : null}
-            </View>
-          ) : blockedMessage ? (
-            <View style={{ paddingTop: 16 }}>
-              <AppText variant="muted">{blockedMessage}</AppText>
+              {!onStartWorkout && blockedMessage ? (
+                <AppText variant="muted">{blockedMessage}</AppText>
+              ) : null}
             </View>
           ) : null}
         </Pressable>

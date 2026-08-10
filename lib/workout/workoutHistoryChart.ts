@@ -1,12 +1,7 @@
 import { format, getHours, getMinutes, parseISO } from 'date-fns';
 
-import {
-  inferSplitFromWorkoutName,
-  SPLIT_DEFINITIONS,
-  type TrainingSplit,
-} from '@/lib/training/splits';
+import { resolveWorkoutCardColor } from '@/lib/dashboard/workoutCardColors';
 import type { Workout } from '@/lib/supabase';
-import { colors } from '@/constants/theme';
 
 export const HISTORY_CHART = {
   dayWidth: 52,
@@ -17,9 +12,14 @@ export const HISTORY_CHART = {
   dotRadius: 6,
 } as const;
 
+export const RECENT_TIMELINE_DAY_LIMIT = 10;
+
+export interface WorkoutHistoryChartOptions {
+  maxRecentDays?: number;
+}
+
 export interface WorkoutHistoryPoint {
   workout: Workout;
-  split: TrainingSplit | null;
   color: string;
   dayIndex: number;
   slotIndex: number;
@@ -37,13 +37,8 @@ export interface WorkoutHistoryChartData {
   chartHeight: number;
 }
 
-function resolveSplitColor(name: string): { split: TrainingSplit | null; color: string } {
-  const split = inferSplitFromWorkoutName(name);
-  if (split) {
-    return { split, color: SPLIT_DEFINITIONS[split].color };
-  }
-
-  return { split: null, color: colors.accent };
+function resolveWorkoutColor(name: string): string {
+  return resolveWorkoutCardColor({ name });
 }
 
 function hourToFraction(hour: number, minute: number): number {
@@ -71,7 +66,11 @@ function chartX(dayIndex: number, slotIndex: number, slotCount: number): number 
   return dayCenter - spread / 2 + slotIndex * step;
 }
 
-export function buildWorkoutHistoryChart(workouts: Workout[]): WorkoutHistoryChartData {
+export function buildWorkoutHistoryChart(
+  workouts: Workout[],
+  options: WorkoutHistoryChartOptions = {},
+): WorkoutHistoryChartData {
+  const maxRecentDays = options.maxRecentDays ?? RECENT_TIMELINE_DAY_LIMIT;
   const sorted = [...workouts].sort(
     (a, b) => parseISO(a.started_at).getTime() - parseISO(b.started_at).getTime(),
   );
@@ -94,7 +93,14 @@ export function buildWorkoutHistoryChart(workouts: Workout[]): WorkoutHistoryCha
     slotsByDay.set(key, bucket);
   }
 
+  const recentDayKeys = dayKeys.slice(-maxRecentDays);
+  const recentDayIndexByKey = new Map(
+    recentDayKeys.map((key, index) => [key, index]),
+  );
+
   for (const [key, bucket] of slotsByDay) {
+    if (!recentDayIndexByKey.has(key)) continue;
+
     bucket.sort(
       (a, b) => parseISO(a.started_at).getTime() - parseISO(b.started_at).getTime(),
     );
@@ -103,17 +109,17 @@ export function buildWorkoutHistoryChart(workouts: Workout[]): WorkoutHistoryCha
 
   const points: WorkoutHistoryPoint[] = [];
 
-  for (const [key, bucket] of slotsByDay) {
-    const dayIndex = dayIndexByKey.get(key)!;
+  for (const key of recentDayKeys) {
+    const bucket = slotsByDay.get(key) ?? [];
+    const dayIndex = recentDayIndexByKey.get(key)!;
 
     bucket.forEach((workout, slotIndex) => {
       const started = parseISO(workout.started_at);
-      const { split, color } = resolveSplitColor(workout.name);
+      const color = resolveWorkoutColor(workout.name);
       const fraction = hourToFraction(getHours(started), getMinutes(started));
 
       points.push({
         workout,
-        split,
         color,
         dayIndex,
         slotIndex,
@@ -126,7 +132,7 @@ export function buildWorkoutHistoryChart(workouts: Workout[]): WorkoutHistoryCha
     });
   }
 
-  const dayLabels = dayKeys.map((key, index) => {
+  const dayLabels = recentDayKeys.map((key, index) => {
     const date = parseISO(`${key}T12:00:00`);
     return {
       index,
@@ -139,7 +145,7 @@ export function buildWorkoutHistoryChart(workouts: Workout[]): WorkoutHistoryCha
     320,
     HISTORY_CHART.padding.left +
       HISTORY_CHART.padding.right +
-      Math.max(dayKeys.length, 1) * HISTORY_CHART.dayWidth,
+      Math.max(recentDayKeys.length, 1) * HISTORY_CHART.dayWidth,
   );
 
   return {

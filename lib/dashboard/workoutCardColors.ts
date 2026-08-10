@@ -15,6 +15,13 @@ export const WORKOUT_CARD_COLORS = {
   other: '#c8ff5a',
 } as const;
 
+export const WORKOUT_CARD_LEGEND = [
+  { label: 'Upper', color: WORKOUT_CARD_COLORS.upper },
+  { label: 'Lower', color: WORKOUT_CARD_COLORS.lower },
+  { label: 'Core', color: WORKOUT_CARD_COLORS.core },
+  { label: 'Other', color: WORKOUT_CARD_COLORS.other },
+] as const;
+
 export type WorkoutCardColorCategory = keyof typeof WORKOUT_CARD_COLORS;
 
 const UPPER_GROUPS: MuscleGroup[] = ['chest', 'back', 'shoulders', 'arms'];

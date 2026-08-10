@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
@@ -7,11 +7,14 @@ import { format, parseISO } from 'date-fns';
 import { ChevronLeft, X } from 'lucide-react-native';
 
 import { WorkoutCalendar } from '@/components/history/WorkoutCalendar';
+import { WorkoutHistoryModal } from '@/components/history/WorkoutHistoryModal';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
+import { Button } from '@/components/ui/Button';
 import { QueryError } from '@/components/ui/QueryState';
 import { WorkoutSessionDetail } from '@/components/workout/WorkoutSessionDetail';
 import { useProfile, useWorkout, useWorkoutHistory } from '@/hooks/queries';
 import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
+import { WORKOUT_CARD_LEGEND } from '@/lib/dashboard/workoutCardColors';
 import { colors, fonts } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { buildCalendarDayMarkers } from '@/lib/training/scheduledSessions';
@@ -40,13 +43,6 @@ const PANEL_STYLE = {
   gap: 12,
   padding: 16,
 } as const;
-
-const LEGEND = [
-  { label: 'Upper A', color: '#ff8c42' },
-  { label: 'Upper B', color: '#38d9f5' },
-  { label: 'Legs', color: '#b06bff' },
-  { label: 'Other', color: colors.accent },
-];
 
 function SessionDetailModal({
   workout,
@@ -355,8 +351,10 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
   const { isCompact } = useLayoutBreakpoint();
   const { data: workouts, isLoading, isError, error, refetch } = useWorkoutHistory();
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => new Date());
+  const timelineScrollRef = useRef<ScrollView>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -368,6 +366,16 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
     () => buildWorkoutHistoryChart(workouts ?? []),
     [workouts],
   );
+
+  useEffect(() => {
+    if (chartData.points.length === 0) return;
+
+    const frame = requestAnimationFrame(() => {
+      timelineScrollRef.current?.scrollToEnd({ animated: false });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [chartData]);
 
   const { trainingDays } = useMemo(
     () => buildCalendarDayMarkers(month, workouts ?? [], []),
@@ -400,10 +408,17 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
         style={{ alignItems: 'stretch', gap: 12 }}
       >
         <View style={{ ...PANEL_STYLE, flex: 1, minHeight: 320, minWidth: 0 }}>
-          <InsightSectionHeading title="Session Timeline" />
+          <View className="flex-row items-center justify-between" style={{ gap: 12 }}>
+            <InsightSectionHeading title="Session Timeline" />
+            <Button
+              label="View all"
+              onPress={() => setHistoryModalVisible(true)}
+              variant="ghost"
+            />
+          </View>
 
           <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-            {LEGEND.map((item) => (
+            {WORKOUT_CARD_LEGEND.map((item) => (
               <View key={item.label} className="flex-row items-center" style={{ gap: 6 }}>
                 <View
                   style={{
@@ -444,7 +459,14 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
           ) : null}
 
           {!isLoading && !isError && chartData.points.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              ref={timelineScrollRef}
+              horizontal
+              onContentSizeChange={() => {
+                timelineScrollRef.current?.scrollToEnd({ animated: false });
+              }}
+              showsHorizontalScrollIndicator={false}
+            >
               <HistoryChartSvg
                 data={chartData}
                 selectedId={selectedWorkout?.id ?? null}
@@ -473,6 +495,11 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
         visible={selectedWorkout != null}
         workout={selectedWorkout}
         onClose={() => setSelectedWorkout(null)}
+      />
+
+      <WorkoutHistoryModal
+        onClose={() => setHistoryModalVisible(false)}
+        visible={historyModalVisible}
       />
     </>
   );

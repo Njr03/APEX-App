@@ -446,6 +446,16 @@ export function SavedWorkoutCardsRow({
           setConfirmWorkout(null);
           setStartError(null);
         }}
+        onEditWorkout={
+          confirmWorkout
+            ? () => {
+                const routineId = confirmWorkout.id;
+                setConfirmWorkout(null);
+                setStartError(null);
+                router.push(`/routines/${routineId}/edit`);
+              }
+            : undefined
+        }
         onStartWorkout={
           confirmWorkout && !confirmWorkoutCompletedThisWeek
             ? () => void handleConfirmStart()
