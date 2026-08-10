@@ -55,7 +55,7 @@ function ApexLoginHeader({ title, subtitle }: { title: string; subtitle: string 
     <View className="items-center">
       <ApexLogo height={135} />
 
-      <View className="mt-3 items-center" style={{ gap: 4 }}>
+      <View className="mt-2 items-center" style={{ gap: 3 }}>
         <AppText
           className="absolute text-3xl opacity-0"
           onLayout={(event) => {
