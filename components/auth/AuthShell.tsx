@@ -14,8 +14,8 @@ interface AuthShellProps {
   subtitleTone?: 'muted' | 'accent' | 'accent-display';
   /** Stretch subtitle letters to span the title width (login hero). */
   subtitleStretch?: boolean;
-  /** Login screen: logo only, no APEX/HEALTH title text. */
-  logoOnly?: boolean;
+  /** Login screen: logo on top, branding centered above form content. */
+  loginHero?: boolean;
   logoHeight?: number;
   backgroundColor?: string;
   children: React.ReactNode;
@@ -51,6 +51,48 @@ function StretchedLetterRow({
   );
 }
 
+function ApexLoginBranding({
+  title,
+  subtitle,
+  stretch = true,
+}: {
+  title: string;
+  subtitle: string;
+  stretch?: boolean;
+}) {
+  const [titleWidth, setTitleWidth] = useState(0);
+
+  if (!stretch) {
+    return (
+      <View className="items-center" style={{ gap: 3 }}>
+        <AppText className="text-3xl" variant="display">
+          {title}
+        </AppText>
+        <AppText className="text-xs text-accent" variant="muted">
+          {subtitle}
+        </AppText>
+      </View>
+    );
+  }
+
+  return (
+    <View className="items-center" style={{ gap: 3 }}>
+      <AppText
+        className="absolute text-3xl opacity-0"
+        onLayout={(event) => {
+          setTitleWidth(event.nativeEvent.layout.width);
+        }}
+        variant="display"
+      >
+        {title}
+      </AppText>
+
+      <StretchedLetterRow text={title} tone="title" width={titleWidth} />
+      <StretchedLetterRow text={subtitle} tone="subtitle" width={titleWidth} />
+    </View>
+  );
+}
+
 function ApexLoginHeader({
   title,
   subtitle,
@@ -60,25 +102,11 @@ function ApexLoginHeader({
   subtitle: string;
   logoHeight: number;
 }) {
-  const [titleWidth, setTitleWidth] = useState(0);
-
   return (
     <View className="items-center">
       <ApexLogo height={logoHeight} />
-
-      <View className="mt-1 items-center" style={{ gap: 3 }}>
-        <AppText
-          className="absolute text-3xl opacity-0"
-          onLayout={(event) => {
-            setTitleWidth(event.nativeEvent.layout.width);
-          }}
-          variant="display"
-        >
-          {title}
-        </AppText>
-
-        <StretchedLetterRow text={title} tone="title" width={titleWidth} />
-        <StretchedLetterRow text={subtitle} tone="subtitle" width={titleWidth} />
+      <View className="mt-1">
+        <ApexLoginBranding subtitle={subtitle} title={title} />
       </View>
     </View>
   );
@@ -90,20 +118,20 @@ export function AuthShell({
   subtitleAlign = 'center',
   subtitleTone = 'muted',
   subtitleStretch = false,
-  logoOnly = false,
+  loginHero = false,
   logoHeight = 125,
   backgroundColor,
   children,
 }: AuthShellProps) {
-  const isApexLogin = title === 'APEX' || logoOnly;
+  const isApexLogin = title === 'APEX' || loginHero;
   const alignClass = subtitleAlign === 'center' ? 'text-center' : 'text-left';
-  const useStretchedSubtitle = isApexLogin && subtitleStretch && !logoOnly;
-  const scrollContentClassName = logoOnly
-    ? 'grow justify-center px-10 py-8 pb-24'
-    : useStretchedSubtitle
-      ? 'grow justify-center px-10 py-8 pb-24'
+  const useStretchedSubtitle =
+    isApexLogin && subtitleStretch && !loginHero;
+  const scrollContentClassName =
+    loginHero || useStretchedSubtitle
+      ? 'grow px-10 py-8 pb-24'
       : 'grow justify-center px-6 py-10';
-  const headerClassName = logoOnly ? 'mb-4' : useStretchedSubtitle ? 'mb-6' : 'mb-10';
+  const headerClassName = useStretchedSubtitle ? 'mb-6' : 'mb-10';
 
   return (
     <Screen backgroundColor={backgroundColor}>
@@ -117,50 +145,66 @@ export function AuthShell({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className={headerClassName}>
-            {logoOnly ? (
+          {loginHero ? (
+            <View className="min-h-0 flex-1">
               <View className="items-center">
                 <ApexLogo height={logoHeight} />
               </View>
-            ) : useStretchedSubtitle ? (
-              <ApexLoginHeader
-                logoHeight={logoHeight}
-                subtitle={subtitle}
-                title={title}
-              />
-            ) : isApexLogin ? (
-              <View className="items-center">
-                <ApexLogo height={120} />
+
+              <View className="min-h-[88px] flex-1 items-center justify-center">
+                <ApexLoginBranding
+                  stretch={subtitleStretch}
+                  subtitle={subtitle}
+                  title={title}
+                />
               </View>
-            ) : (
-              <AppText className="text-3xl" variant="display">
-                {title}
-              </AppText>
-            )}
 
-            {!useStretchedSubtitle && subtitleTone === 'accent-display' ? (
-              <AppText
-                className={cn('mt-2 text-4xl text-accent', alignClass)}
-                variant="display"
-              >
-                {subtitle}
-              </AppText>
-            ) : null}
-
-            {!useStretchedSubtitle && subtitleTone !== 'accent-display' ? (
-              <AppText
-                className={cn(
-                  'mt-2',
-                  alignClass,
-                  subtitleTone === 'accent' && 'text-accent',
+              {children}
+            </View>
+          ) : (
+            <>
+              <View className={headerClassName}>
+                {useStretchedSubtitle ? (
+                  <ApexLoginHeader
+                    logoHeight={logoHeight}
+                    subtitle={subtitle}
+                    title={title}
+                  />
+                ) : isApexLogin ? (
+                  <View className="items-center">
+                    <ApexLogo height={120} />
+                  </View>
+                ) : (
+                  <AppText className="text-3xl" variant="display">
+                    {title}
+                  </AppText>
                 )}
-                variant="muted"
-              >
-                {subtitle}
-              </AppText>
-            ) : null}
-          </View>
-          {children}
+
+                {!useStretchedSubtitle && subtitleTone === 'accent-display' ? (
+                  <AppText
+                    className={cn('mt-2 text-4xl text-accent', alignClass)}
+                    variant="display"
+                  >
+                    {subtitle}
+                  </AppText>
+                ) : null}
+
+                {!useStretchedSubtitle && subtitleTone !== 'accent-display' ? (
+                  <AppText
+                    className={cn(
+                      'mt-2',
+                      alignClass,
+                      subtitleTone === 'accent' && 'text-accent',
+                    )}
+                    variant="muted"
+                  >
+                    {subtitle}
+                  </AppText>
+                ) : null}
+              </View>
+              {children}
+            </>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>

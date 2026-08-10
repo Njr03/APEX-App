@@ -53,7 +53,15 @@ export default function LoginScreen() {
   });
 
   return (
-    <AuthShell backgroundColor={APEX_LOGO_BACKGROUND} logoHeight={125} logoOnly>
+    <AuthShell
+      backgroundColor={APEX_LOGO_BACKGROUND}
+      loginHero
+      logoHeight={125}
+      subtitle="HEALTH"
+      subtitleStretch
+      subtitleTone="accent"
+      title="APEX"
+    >
       <GoogleSignInButton />
 
       {formError ? <AuthErrorBanner message={formError} /> : null}
