@@ -414,7 +414,9 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
               className="active:opacity-70"
               onPress={() => setHistoryModalVisible(true)}
             >
-              <Text style={DASHBOARD_SECTION_HEADING_STYLE}>View all</Text>
+              <Text style={[DASHBOARD_SECTION_HEADING_STYLE, { color: colors.accent }]}>
+                View all
+              </Text>
             </Pressable>
           </View>
 
