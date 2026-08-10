@@ -36,7 +36,7 @@ interface ThisWeekSectionProps {
 export function ThisWeekHeading({ onEdit }: { onEdit?: () => void }) {
   return (
     <View className="flex-row items-center justify-between">
-      <TabPageHeading title="This Week" />
+      <TabPageHeading className="text-xs" title="This Week" />
       {onEdit ? (
         <Pressable
           accessibilityLabel="Edit dashboard workout cards"
