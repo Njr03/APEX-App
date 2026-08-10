@@ -1,5 +1,7 @@
 import { Stack } from 'expo-router';
 
+import { APEX_LOGO_BACKGROUND } from '@/components/branding/ApexLogo';
+
 export default function AuthLayout() {
   return (
     <Stack
@@ -8,7 +10,10 @@ export default function AuthLayout() {
         contentStyle: { backgroundColor: '#0a0a0f' },
       }}
     >
-      <Stack.Screen name="login" />
+      <Stack.Screen
+        name="login"
+        options={{ contentStyle: { backgroundColor: APEX_LOGO_BACKGROUND } }}
+      />
       <Stack.Screen name="signup" />
       <Stack.Screen name="forgot-password" />
       <Stack.Screen name="verify-email" />

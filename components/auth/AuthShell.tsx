@@ -14,6 +14,7 @@ interface AuthShellProps {
   subtitleTone?: 'muted' | 'accent' | 'accent-display';
   /** Stretch subtitle letters to span the title width (login hero). */
   subtitleStretch?: boolean;
+  backgroundColor?: string;
   children: React.ReactNode;
 }
 
@@ -53,6 +54,7 @@ export function AuthShell({
   subtitleAlign = 'center',
   subtitleTone = 'muted',
   subtitleStretch = false,
+  backgroundColor,
   children,
 }: AuthShellProps) {
   const isApexLogin = title === 'APEX';
@@ -60,7 +62,7 @@ export function AuthShell({
   const useStretchedSubtitle = isApexLogin && subtitleStretch;
 
   return (
-    <Screen>
+    <Screen backgroundColor={backgroundColor}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"

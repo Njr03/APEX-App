@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { AuthErrorBanner } from '@/components/auth/AuthErrorBanner';
 import { AuthShell } from '@/components/auth/AuthShell';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { APEX_LOGO_BACKGROUND } from '@/components/branding/ApexLogo';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
 import { getAuthErrorMessage } from '@/lib/auth/errors';
@@ -41,6 +42,7 @@ export default function LoginScreen() {
 
   return (
     <AuthShell
+      backgroundColor={APEX_LOGO_BACKGROUND}
       subtitle="HEALTH"
       subtitleAlign="center"
       subtitleStretch
