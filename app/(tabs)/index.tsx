@@ -5,7 +5,7 @@ import { SplitCardsRow } from '@/components/dashboard/ThisWeekSection';
 import { StatTilesRow } from '@/components/dashboard/StatTilesRow';
 import { TrainingInsightsSection } from '@/components/dashboard/TrainingInsightsSection';
 import { QueryError } from '@/components/ui/QueryState';
-import { Screen } from '@/components/ui/Screen';
+import { TabScreen as Screen } from '@/components/navigation/TabScreen';
 import { useProfile } from '@/hooks/queries';
 import { useAutoSeedDemoData } from '@/hooks/useAutoSeedDemoData';
 import { useRefreshDashboardOnFocus } from '@/hooks/useRefreshDashboardOnFocus';

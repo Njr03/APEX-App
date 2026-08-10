@@ -13,7 +13,7 @@ import { AppText } from '@/components/ui/AppText';
 import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Screen } from '@/components/ui/Screen';
+import { TabScreen as Screen } from '@/components/navigation/TabScreen';
 import { useDeleteExercise, useExercises } from '@/hooks/queries';
 import { useTabFlatListScrollToTop } from '@/hooks/useTabScrollToTop';
 import {

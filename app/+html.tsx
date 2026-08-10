@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 
 import { APPLE_SPLASH_SCREENS } from '@/lib/pwa/appleSplashScreens';
 
-const APP_BG = '#0a0a0f';
-const THEME_COLOR = '#0a0a0f';
+const APP_BG = '#000000';
+const THEME_COLOR = '#000000';
 
 // This file is web-only and used to configure the root HTML for every
 // web page during static rendering.

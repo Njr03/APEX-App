@@ -1,6 +1,6 @@
 import { ScrollView } from 'react-native';
 
-import { Screen } from '@/components/ui/Screen';
+import { TabScreen as Screen } from '@/components/navigation/TabScreen';
 import { SavedWorkoutCardsRow } from '@/components/workout/SavedWorkoutCardsRow';
 import { WorkoutHistoryChart } from '@/components/workout/WorkoutHistoryChart';
 import { useProfile } from '@/hooks/queries';

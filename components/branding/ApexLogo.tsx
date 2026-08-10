@@ -1,9 +1,11 @@
 import { Image, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { APEX_LOGO_BACKGROUND } from '@/constants/theme';
+
 const LOGO_SOURCE = require('@/assets/images/apex-logo.png');
 const LOGO_ASPECT = 764 / 732;
 
-export const APEX_LOGO_BACKGROUND = '#000000';
+export { APEX_LOGO_BACKGROUND };
 
 interface ApexLogoProps {
   height?: number;

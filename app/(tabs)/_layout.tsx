@@ -9,6 +9,7 @@ import {
   segmentToAppPage,
   useNavigationStore,
 } from '@/stores/navigationStore';
+import { APEX_LOGO_BACKGROUND } from '@/constants/theme';
 
 function NavigationSync() {
   const segments = useSegments();
@@ -23,7 +24,7 @@ function NavigationSync() {
 
 export default function TabLayout() {
   return (
-    <View className="flex-1 bg-bg">
+    <View className="flex-1" style={{ backgroundColor: APEX_LOGO_BACKGROUND }}>
       <NavigationSync />
       <AppTopBar />
       <AnimatedPageContent className="min-h-0 flex-1">

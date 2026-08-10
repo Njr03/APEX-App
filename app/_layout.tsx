@@ -81,7 +81,10 @@ function RootNavigator() {
         </Stack.Protected>
 
         <Stack.Protected guard={isAuthenticated}>
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="(tabs)"
+            options={{ contentStyle: { backgroundColor: colors.bg } }}
+          />
           <Stack.Screen
             name="workout/confirm"
             options={{

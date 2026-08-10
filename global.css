@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 html {
-  background-color: #0a0a0f;
+  background-color: #000000;
   color-scheme: dark;
 }
 
 body {
-  background-color: #0a0a0f;
+  background-color: #000000;
 }
 
 @keyframes flame-flicker {
@@ -52,7 +52,7 @@ body {
 }
 
 .portrait-orientation-lock {
-  background-color: #0a0a0f;
+  background-color: #000000;
   inset: 0;
   overflow: hidden;
   position: fixed;

@@ -8,7 +8,7 @@ import { AppText } from '@/components/ui/AppText';
 import { TabPageHeading } from '@/components/ui/TabPageHeading';
 import { Button } from '@/components/ui/Button';
 import { QueryError } from '@/components/ui/QueryState';
-import { Screen } from '@/components/ui/Screen';
+import { TabScreen as Screen } from '@/components/navigation/TabScreen';
 import { useProfile } from '@/hooks/queries';
 import { useTabScrollViewToTop } from '@/hooks/useTabScrollToTop';
 import { colors } from '@/constants/theme';

@@ -7,6 +7,8 @@ interface ScreenProps extends SafeAreaViewProps {
   backgroundColor?: string;
 }
 
+export type { ScreenProps };
+
 export function Screen({
   className,
   backgroundColor,

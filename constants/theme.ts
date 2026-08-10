@@ -1,5 +1,7 @@
+export const APEX_LOGO_BACKGROUND = '#000000';
+
 export const colors = {
-  bg: '#0a0a0f',
+  bg: APEX_LOGO_BACKGROUND,
   surface: '#111118',
   surface2: '#1a1a24',
   border: 'rgba(255,255,255,0.08)',
