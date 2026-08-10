@@ -18,31 +18,53 @@ interface AuthShellProps {
   children: React.ReactNode;
 }
 
-function ApexLoginHeader({ subtitle }: { subtitle: string }) {
-  const [logoWidth, setLogoWidth] = useState(0);
+function StretchedLetterRow({
+  text,
+  tone,
+  width,
+}: {
+  text: string;
+  tone: 'title' | 'subtitle';
+  width: number;
+}) {
+  return (
+    <View
+      className="flex-row justify-between"
+      style={{ width: width > 0 ? width : undefined }}
+    >
+      {text.split('').map((letter, index) => (
+        <AppText
+          className={cn(tone === 'subtitle' && 'text-accent', tone === 'title' && 'text-4xl')}
+          key={`${text}-${index}`}
+          variant={tone === 'title' ? 'display' : 'muted'}
+        >
+          {letter}
+        </AppText>
+      ))}
+    </View>
+  );
+}
+
+function ApexLoginHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  const [titleWidth, setTitleWidth] = useState(0);
 
   return (
     <View className="items-center">
-      <View
-        onLayout={(event) => {
-          setLogoWidth(event.nativeEvent.layout.width);
-        }}
-      >
-        <ApexLogo height={120} />
-      </View>
-      <View
-        className="mt-0.5 flex-row justify-between"
-        style={{ width: logoWidth > 0 ? logoWidth : undefined }}
-      >
-        {subtitle.split('').map((letter, index) => (
-          <AppText
-            className="text-accent"
-            key={`${letter}-${index}`}
-            variant="muted"
-          >
-            {letter}
-          </AppText>
-        ))}
+      <ApexLogo height={152} />
+
+      <View className="mt-4 items-center" style={{ gap: 6 }}>
+        <AppText
+          className="absolute text-4xl opacity-0"
+          onLayout={(event) => {
+            setTitleWidth(event.nativeEvent.layout.width);
+          }}
+          variant="display"
+        >
+          {title}
+        </AppText>
+
+        <StretchedLetterRow text={title} tone="title" width={titleWidth} />
+        <StretchedLetterRow text={subtitle} tone="subtitle" width={titleWidth} />
       </View>
     </View>
   );
@@ -75,7 +97,7 @@ export function AuthShell({
         >
           <View className="mb-10">
             {useStretchedSubtitle ? (
-              <ApexLoginHeader subtitle={subtitle} />
+              <ApexLoginHeader subtitle={subtitle} title={title} />
             ) : isApexLogin ? (
               <View className="items-center">
                 <ApexLogo height={120} />
