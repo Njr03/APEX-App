@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { FilterSectionLabel } from '@/components/ui/FilterSectionLabel';
 import { Input } from '@/components/ui/Input';
 import { OptionPicker } from '@/components/ui/OptionPicker';
-import { useUpdateProfile, useResetAccount } from '@/hooks/queries';
-import { confirmDestructiveAction } from '@/lib/confirmAction';
+import { useUpdateProfile } from '@/hooks/queries';
 import { isUsernameAvailable } from '@/lib/auth/resolveLoginEmail';
 import { getAuthErrorMessage } from '@/lib/auth/errors';
 import { normalizeUsername, profileUsernameSchema } from '@/lib/auth/username';
@@ -112,7 +111,6 @@ export function ProfileDetailsEditor({
   userId,
 }: ProfileDetailsEditorProps) {
   const updateProfile = useUpdateProfile();
-  const resetAccount = useResetAccount();
 
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
