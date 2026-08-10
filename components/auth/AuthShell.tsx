@@ -38,8 +38,8 @@ function StretchedLetterRow({
       {text.split('').map((letter, index) => (
         <AppText
           className={cn(
-            tone === 'subtitle' && 'text-xs text-accent',
-            tone === 'title' && 'text-3xl',
+            tone === 'subtitle' && 'text-base text-accent',
+            tone === 'title' && 'text-4xl',
           )}
           key={`${text}-${index}`}
           variant={tone === 'title' ? 'display' : 'muted'}
