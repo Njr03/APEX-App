@@ -64,31 +64,35 @@ function ApexLoginBranding({
 
   if (!stretch) {
     return (
-      <View className="items-center" style={{ gap: 4 }}>
-        <AppText className="text-4xl" variant="display">
-          {title}
-        </AppText>
-        <AppText className="text-base text-accent" variant="muted">
-          {subtitle}
-        </AppText>
+      <View className="items-center">
+        <View style={{ alignItems: 'flex-start', gap: 2 }}>
+          <AppText className="text-4xl" variant="display">
+            {title}
+          </AppText>
+          <AppText className="text-base text-accent" variant="muted">
+            {subtitle}
+          </AppText>
+        </View>
       </View>
     );
   }
 
   return (
-    <View className="items-center" style={{ gap: 4 }}>
-      <AppText
-        className="absolute text-3xl opacity-0"
-        onLayout={(event) => {
-          setTitleWidth(event.nativeEvent.layout.width);
-        }}
-        variant="display"
-      >
-        {title}
-      </AppText>
+    <View className="items-center">
+      <View style={{ alignItems: 'flex-start', gap: 2 }}>
+        <AppText
+          className="absolute text-4xl opacity-0"
+          onLayout={(event) => {
+            setTitleWidth(event.nativeEvent.layout.width);
+          }}
+          variant="display"
+        >
+          {title}
+        </AppText>
 
-      <StretchedLetterRow text={title} tone="title" width={titleWidth} />
-      <StretchedLetterRow text={subtitle} tone="subtitle" width={titleWidth} />
+        <StretchedLetterRow text={title} tone="title" width={titleWidth} />
+        <StretchedLetterRow text={subtitle} tone="subtitle" width={titleWidth} />
+      </View>
     </View>
   );
 }
@@ -147,11 +151,13 @@ export function AuthShell({
         >
           {loginHero ? (
             <View className="w-full items-center" style={{ gap: 20 }}>
-              <ApexLoginBranding
-                stretch={subtitleStretch}
-                subtitle={subtitle}
-                title={title}
-              />
+              <View style={{ marginBottom: 8, marginTop: -28 }}>
+                <ApexLoginBranding
+                  stretch={subtitleStretch}
+                  subtitle={subtitle}
+                  title={title}
+                />
+              </View>
 
               <View className="w-full">{children}</View>
             </View>
