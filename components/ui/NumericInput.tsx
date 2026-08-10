@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { TextInput, type TextInputProps } from 'react-native';
 
-import { fonts } from '@/constants/theme';
+import { fonts, APP_TEXT_TRANSFORM } from '@/constants/theme';
 import { cn } from '@/lib/cn';
 
 interface NumericInputProps extends Omit<TextInputProps, 'value' | 'onChangeText'> {
@@ -28,7 +28,7 @@ export const NumericInput = forwardRef<TextInput, NumericInputProps>(
             : 'border-border bg-surface2',
           className,
         )}
-        style={[{ fontFamily: fonts.mono, minWidth: 56 }, style]}
+        style={[{ fontFamily: fonts.mono, minWidth: 56 }, APP_TEXT_TRANSFORM, style]}
         {...props}
       />
     );

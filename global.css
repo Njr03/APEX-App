@@ -9,6 +9,7 @@ html {
 
 body {
   background-color: #000000;
+  text-transform: uppercase;
 }
 
 @keyframes flame-flicker {

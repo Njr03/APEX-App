@@ -1,4 +1,5 @@
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 
 import {
   DASHBOARD_TILE_BG,

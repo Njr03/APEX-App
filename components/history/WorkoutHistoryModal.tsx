@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from 'react-native';
 import { format, isSameDay, parseISO } from 'date-fns';
@@ -15,26 +14,16 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
 import { TabPageHeading } from '@/components/ui/TabPageHeading';
+import { Text } from '@/components/ui/Text';
 import { WorkoutSessionDetail } from '@/components/workout/WorkoutSessionDetail';
 import { useProfile, useWorkout, useWorkoutHistory } from '@/hooks/queries';
-import { useThisWeekSplits } from '@/hooks/useThisWeekSplits';
 import { colors, fonts } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
-import { getSplitTemplate } from '@/lib/training/splitTemplates';
-import {
-  SPLIT_DEFINITIONS,
-  type TrainingSplit,
-} from '@/lib/training/splits';
-import {
-  buildCalendarDayMarkers,
-  getSessionsForDate,
-  getUpcomingSessionLabel,
-  type SessionListItem,
-} from '@/lib/training/scheduledSessions';
-import { formatExerciseScheme } from '@/lib/workout/formatSessionVolume';
+import { buildCalendarDayMarkers } from '@/lib/training/scheduledSessions';
 import { kgToDisplay, volumeLabel } from '@/lib/units';
 import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
+import type { Workout } from '@/lib/supabase';
 
 const CARD_BG = '#0d0d1b';
 const CARD_BORDER = 'rgba(255,255,255,0.06)';
@@ -46,80 +35,24 @@ interface WorkoutHistoryModalProps {
   onClose: () => void;
 }
 
-type DetailView =
-  | { kind: 'workout'; workoutId: string }
-  | { kind: 'upcoming'; split: TrainingSplit; date: Date };
-
-function UpcomingSessionDetail({
-  split,
-  date,
-  unit,
-}: {
-  split: TrainingSplit;
-  date: Date;
-  unit: 'kg' | 'lb';
-}) {
-  const definition = SPLIT_DEFINITIONS[split];
-  const template = getSplitTemplate(split);
-
-  return (
-    <View
-      className="gap-4"
-      style={{
-        backgroundColor: definition.todayGlow,
-        borderColor: definition.todayBorder,
-        borderRadius: 12,
-        borderWidth: 1,
-        padding: 12,
-      }}
-    >
-      <View className="gap-1">
-        <AppText variant="display">{getUpcomingSessionLabel(split)}</AppText>
-        <AppText variant="muted">
-          Scheduled · {format(date, 'EEEE, MMM d, yyyy')}
-        </AppText>
-      </View>
-
-      <Card className="gap-2">
-        <AppText variant="muted">{definition.muscles}</AppText>
-      </Card>
-
-      <View className="gap-2">
-        <AppText variant="display">Planned exercises</AppText>
-        {template.exercises.map((exercise) => (
-          <Card key={exercise.exerciseName}>
-            <View className="flex-row items-center justify-between gap-3">
-              <AppText className="flex-1" variant="body">
-                {exercise.exerciseName}
-              </AppText>
-              <AppText variant="mono">
-                {formatExerciseScheme(
-                  exercise.sets,
-                  exercise.reps,
-                  exercise.weightKg,
-                  unit,
-                )}
-              </AppText>
-            </View>
-          </Card>
-        ))}
-      </View>
-    </View>
+function getCompletedWorkoutsForDate(date: Date, workouts: Workout[]): Workout[] {
+  return workouts.filter(
+    (workout) =>
+      workout.status === 'completed' &&
+      isSameDay(parseISO(workout.started_at), date),
   );
 }
 
 function WorkoutHistoryDetailPanel({
-  detail,
+  workoutId,
   unit,
   onBack,
 }: {
-  detail: DetailView;
+  workoutId: string;
   unit: 'kg' | 'lb';
   onBack: () => void;
 }) {
-  const { data: workout, isLoading, isError, error } = useWorkout(
-    detail.kind === 'workout' ? detail.workoutId : undefined,
-  );
+  const { data: workout, isLoading, isError, error } = useWorkout(workoutId);
 
   return (
     <View className="gap-4">
@@ -135,13 +68,7 @@ function WorkoutHistoryDetailPanel({
         </AppText>
       </Pressable>
 
-      {detail.kind === 'upcoming' ? (
-        <UpcomingSessionDetail
-          date={detail.date}
-          split={detail.split}
-          unit={unit}
-        />
-      ) : isLoading ? (
+      {isLoading ? (
         <ActivityIndicator color={colors.accent} />
       ) : isError || !workout ? (
         <QueryError message={getSupabaseErrorMessage(error)} />
@@ -162,107 +89,37 @@ function WorkoutHistoryDetailPanel({
   );
 }
 
-function SessionListItemCard({
-  item,
+function CompletedSessionCard({
+  workout,
   unit,
   onPress,
 }: {
-  item: SessionListItem;
+  workout: Workout;
   unit: 'kg' | 'lb';
   onPress: () => void;
 }) {
-  if (item.type === 'completed') {
-    const workout = item.workout;
-
-    return (
-      <Pressable className="active:opacity-80" onPress={onPress}>
-        <Card
-          className="gap-2"
-          style={{
-            backgroundColor: 'rgba(200,255,90,0.06)',
-            borderColor: 'rgba(200,255,90,0.28)',
-            borderWidth: 1,
-          }}
-        >
-          <View className="flex-row items-center justify-between gap-3">
-            <AppText
-              className="flex-1"
-              style={{ color: COMPLETED_COLOR }}
-              variant="display"
-            >
-              {workout.name}
-            </AppText>
-            <View
-              style={{
-                backgroundColor: 'rgba(200,255,90,0.12)',
-                borderColor: 'rgba(200,255,90,0.35)',
-                borderRadius: 999,
-                borderWidth: 1,
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-              }}
-            >
-              <Text
-                style={{
-                  color: COMPLETED_COLOR,
-                  fontFamily: fonts.jetbrainsMono,
-                  fontSize: 9,
-                  letterSpacing: 1,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Completed
-              </Text>
-            </View>
-          </View>
-          <AppText variant="muted">
-            {format(parseISO(workout.started_at), 'h:mm a')}
-          </AppText>
-          <View className="flex-row gap-4">
-            <View>
-              <AppText variant="muted">Duration</AppText>
-              <AppText style={{ color: COMPLETED_COLOR }} variant="mono">
-                {workout.duration_seconds != null
-                  ? formatElapsedDuration(workout.duration_seconds)
-                  : '—'}
-              </AppText>
-            </View>
-            <View>
-              <AppText variant="muted">Volume</AppText>
-              <AppText style={{ color: COMPLETED_COLOR }} variant="mono">
-                {kgToDisplay(workout.total_volume, unit)} {volumeLabel(unit)}
-              </AppText>
-            </View>
-          </View>
-        </Card>
-      </Pressable>
-    );
-  }
-
-  const definition = SPLIT_DEFINITIONS[item.split];
-
   return (
     <Pressable className="active:opacity-80" onPress={onPress}>
       <Card
         className="gap-2"
         style={{
-          backgroundColor: definition.todayGlow,
-          borderColor: definition.todayBorder,
+          backgroundColor: 'rgba(200,255,90,0.06)',
+          borderColor: 'rgba(200,255,90,0.28)',
           borderWidth: 1,
         }}
       >
         <View className="flex-row items-center justify-between gap-3">
           <AppText
             className="flex-1"
-            style={{ color: definition.color }}
+            style={{ color: COMPLETED_COLOR }}
             variant="display"
           >
-            {getUpcomingSessionLabel(item.split)}
+            {workout.name}
           </AppText>
           <View
             style={{
-              backgroundColor: definition.todayGlow,
-              borderColor: definition.todayBorder,
+              backgroundColor: 'rgba(200,255,90,0.12)',
+              borderColor: 'rgba(200,255,90,0.35)',
               borderRadius: 999,
               borderWidth: 1,
               paddingHorizontal: 8,
@@ -271,20 +128,35 @@ function SessionListItemCard({
           >
             <Text
               style={{
-                color: definition.color,
+                color: COMPLETED_COLOR,
                 fontFamily: fonts.jetbrainsMono,
                 fontSize: 9,
                 letterSpacing: 1,
-                textTransform: 'uppercase',
               }}
             >
-              Upcoming
+              Completed
             </Text>
           </View>
         </View>
-        <AppText style={{ color: definition.color, opacity: 0.75 }} variant="muted">
-          {definition.muscles}
+        <AppText variant="muted">
+          {format(parseISO(workout.started_at), 'h:mm a')}
         </AppText>
+        <View className="flex-row gap-4">
+          <View>
+            <AppText variant="muted">Duration</AppText>
+            <AppText style={{ color: COMPLETED_COLOR }} variant="mono">
+              {workout.duration_seconds != null
+                ? formatElapsedDuration(workout.duration_seconds)
+                : '—'}
+            </AppText>
+          </View>
+          <View>
+            <AppText variant="muted">Volume</AppText>
+            <AppText style={{ color: COMPLETED_COLOR }} variant="mono">
+              {kgToDisplay(workout.total_volume, unit)} {volumeLabel(unit)}
+            </AppText>
+          </View>
+        </View>
       </Card>
     </Pressable>
   );
@@ -302,35 +174,33 @@ export function WorkoutHistoryModal({
     error,
     refetch,
   } = useWorkoutHistory();
-  const { data: weekSplits } = useThisWeekSplits();
 
   const [month, setMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
-  const [detail, setDetail] = useState<DetailView | null>(null);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
 
   const unit = resolveUnitPreference(profile?.unit_preference);
-  const cards = weekSplits?.cards ?? [];
 
   useEffect(() => {
     if (!visible) {
-      setDetail(null);
+      setSelectedWorkoutId(null);
       setSelectedDate(new Date());
       setMonth(new Date());
     }
   }, [visible]);
 
   const { trainingDays } = useMemo(
-    () => buildCalendarDayMarkers(month, workouts ?? [], cards),
-    [cards, month, workouts],
+    () => buildCalendarDayMarkers(month, workouts ?? [], []),
+    [month, workouts],
   );
 
-  const sessions = useMemo(
-    () => getSessionsForDate(selectedDate, workouts ?? [], cards),
-    [cards, selectedDate, workouts],
+  const completedSessions = useMemo(
+    () => getCompletedWorkoutsForDate(selectedDate, workouts ?? []),
+    [selectedDate, workouts],
   );
 
   const handleClose = () => {
-    setDetail(null);
+    setSelectedWorkoutId(null);
     onClose();
   };
 
@@ -355,11 +225,8 @@ export function WorkoutHistoryModal({
           }}
         >
           <View className="mb-4 flex-row items-start justify-between gap-3">
-            <View className="flex-1 gap-1">
+            <View className="flex-1">
               <TabPageHeading title="Workout History" />
-              <Text style={{ color: MUTED, fontFamily: fonts.body, fontSize: 11 }}>
-                Past sessions and upcoming training days
-              </Text>
             </View>
             <Pressable accessibilityLabel="Close" onPress={handleClose}>
               <X color={MUTED} size={18} />
@@ -370,11 +237,11 @@ export function WorkoutHistoryModal({
             contentContainerStyle={{ gap: 16, paddingBottom: 8 }}
             showsVerticalScrollIndicator={false}
           >
-            {detail ? (
+            {selectedWorkoutId ? (
               <WorkoutHistoryDetailPanel
-                detail={detail}
-                onBack={() => setDetail(null)}
+                onBack={() => setSelectedWorkoutId(null)}
                 unit={unit}
+                workoutId={selectedWorkoutId}
               />
             ) : (
               <>
@@ -403,37 +270,20 @@ export function WorkoutHistoryModal({
                       {format(selectedDate, 'MMM d, yyyy')}
                     </AppText>
 
-                    {sessions.length === 0 ? (
+                    {completedSessions.length === 0 ? (
                       <Card>
                         <AppText variant="muted">
-                          No sessions on this day.
+                          No logged sessions on this day.
                         </AppText>
                       </Card>
                     ) : (
                       <View className="gap-2">
-                        {sessions.map((session) => (
-                          <SessionListItemCard
-                            key={
-                              session.type === 'completed'
-                                ? session.workout.id
-                                : `${session.split}-${session.date.toISOString()}`
-                            }
-                            item={session}
-                            onPress={() =>
-                              setDetail(
-                                session.type === 'completed'
-                                  ? {
-                                      kind: 'workout',
-                                      workoutId: session.workout.id,
-                                    }
-                                  : {
-                                      kind: 'upcoming',
-                                      split: session.split,
-                                      date: session.date,
-                                    },
-                              )
-                            }
+                        {completedSessions.map((workout) => (
+                          <CompletedSessionCard
+                            key={workout.id}
+                            onPress={() => setSelectedWorkoutId(workout.id)}
                             unit={unit}
+                            workout={workout}
                           />
                         ))}
                       </View>

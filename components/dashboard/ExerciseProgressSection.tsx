@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 
 import { ExerciseProgressChartModal } from '@/components/dashboard/ExerciseProgressChartModal';
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';

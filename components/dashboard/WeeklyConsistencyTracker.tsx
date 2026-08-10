@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 
 import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHeading';
 import { QueryError } from '@/components/ui/QueryState';

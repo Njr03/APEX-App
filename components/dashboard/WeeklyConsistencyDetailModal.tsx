@@ -12,7 +12,8 @@ import {
 } from '@/lib/training/weeklyConsistency';
 import { SPLIT_DEFINITIONS } from '@/lib/training/splits';
 import { colors, fonts } from '@/constants/theme';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 
 interface WeeklyConsistencyDetailModalProps {
   visible: boolean;

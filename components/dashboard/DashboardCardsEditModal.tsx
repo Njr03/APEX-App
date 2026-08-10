@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { Plus, Trash2, X } from 'lucide-react-native';
 
 import { useDashboardCardOptions } from '@/hooks/useDashboardCardOptions';

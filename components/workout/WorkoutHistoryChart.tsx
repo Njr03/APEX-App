@@ -1,13 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 import { format, parseISO } from 'date-fns';
 import { ChevronLeft, X } from 'lucide-react-native';
@@ -17,7 +11,6 @@ import { InsightSectionHeading } from '@/components/dashboard/InsightSectionHead
 import { QueryError } from '@/components/ui/QueryState';
 import { WorkoutSessionDetail } from '@/components/workout/WorkoutSessionDetail';
 import { useProfile, useWorkout, useWorkoutHistory } from '@/hooks/queries';
-import { useThisWeekSplits } from '@/hooks/useThisWeekSplits';
 import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
 import { colors, fonts } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
@@ -361,7 +354,6 @@ function HistoryChartSvg({
 export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
   const { isCompact } = useLayoutBreakpoint();
   const { data: workouts, isLoading, isError, error, refetch } = useWorkoutHistory();
-  const { data: weekSplits } = useThisWeekSplits();
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [month, setMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => new Date());
@@ -377,10 +369,9 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
     [workouts],
   );
 
-  const cards = weekSplits?.cards ?? [];
   const { trainingDays } = useMemo(
-    () => buildCalendarDayMarkers(month, workouts ?? [], cards),
-    [cards, month, workouts],
+    () => buildCalendarDayMarkers(month, workouts ?? [], []),
+    [month, workouts],
   );
 
   const handleCalendarSelect = (date: Date) => {
@@ -409,18 +400,7 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
         style={{ alignItems: 'stretch', gap: 12 }}
       >
         <View style={{ ...PANEL_STYLE, flex: 1, minHeight: 320, minWidth: 0 }}>
-          <View style={{ gap: 4 }}>
-            <InsightSectionHeading title="Session Timeline" />
-            <Text
-              style={{
-                color: MUTED,
-                fontFamily: fonts.body,
-                fontSize: 11,
-              }}
-            >
-              Each dot is a completed workout.
-            </Text>
-          </View>
+          <InsightSectionHeading title="Session Timeline" />
 
           <View className="flex-row flex-wrap" style={{ gap: 12 }}>
             {LEGEND.map((item) => (
@@ -475,18 +455,7 @@ export function WorkoutHistoryChart({ unit = 'kg' }: { unit?: 'kg' | 'lb' }) {
         </View>
 
         <View style={{ ...PANEL_STYLE, flex: 1, minHeight: 320, minWidth: 0 }}>
-          <View style={{ gap: 4 }}>
-            <InsightSectionHeading title="Workout History" />
-            <Text
-              style={{
-                color: MUTED,
-                fontFamily: fonts.body,
-                fontSize: 11,
-              }}
-            >
-              Past sessions and upcoming training days.
-            </Text>
-          </View>
+          <InsightSectionHeading title="Workout History" />
 
           <WorkoutCalendar
             embedded

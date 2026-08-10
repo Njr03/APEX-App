@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { Check, ChevronDown, Trash2 } from 'lucide-react-native';
 
 import { AppText } from '@/components/ui/AppText';

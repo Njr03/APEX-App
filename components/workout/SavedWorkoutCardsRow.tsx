@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  Text,
-  View,
-  type LayoutChangeEvent,
-} from 'react-native';
+import { ActivityIndicator, Platform, Pressable, View, type LayoutChangeEvent } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import DraggableFlatList, {
   ScaleDecorator,
   type RenderItemParams,

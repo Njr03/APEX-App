@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { TextInput, type TextInputProps } from 'react-native';
 
-import { fonts } from '@/constants/theme';
+import { fonts, APP_TEXT_TRANSFORM } from '@/constants/theme';
 import { cn } from '@/lib/cn';
 
 interface InputProps extends TextInputProps {
@@ -22,7 +22,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         hasError ? 'border-accent3' : 'border-border',
         className,
       )}
-      style={[{ fontFamily: fonts.body }, style]}
+      style={[{ fontFamily: fonts.body }, APP_TEXT_TRANSFORM, style]}
       {...props}
     />
   );

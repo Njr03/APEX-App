@@ -1,6 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { format } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,7 +19,7 @@ import {
   useNavigationStore,
   type AppPage,
 } from '@/stores/navigationStore';
-import { colors, fonts } from '@/constants/theme';
+import { colors, fonts, APP_TEXT_TRANSFORM } from '@/constants/theme';
 
 const MUTED_TEXT = 'rgba(240,237,232,0.5)';
 
@@ -27,6 +28,7 @@ export const TOPBAR_DATE_TEXT_STYLE = {
   fontFamily: fonts.jetbrainsMono,
   fontSize: 12,
   letterSpacing: 0.3,
+  ...APP_TEXT_TRANSFORM,
 } as const;
 
 export const TOPBAR_PAGE_TEXT_STYLE = {
@@ -34,6 +36,7 @@ export const TOPBAR_PAGE_TEXT_STYLE = {
   fontFamily: fonts.brand,
   fontSize: 12,
   letterSpacing: 0.3,
+  ...APP_TEXT_TRANSFORM,
 } as const;
 
 export const TOPBAR_TITLE_TEXT_STYLE = {
@@ -41,6 +44,7 @@ export const TOPBAR_TITLE_TEXT_STYLE = {
   fontFamily: fonts.brand,
   fontSize: 15,
   fontWeight: '700' as const,
+  ...APP_TEXT_TRANSFORM,
 };
 
 function getTopBarCta(

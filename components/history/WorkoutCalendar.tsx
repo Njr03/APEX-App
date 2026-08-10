@@ -59,6 +59,7 @@ function FlickeringTodayNumber({
         fontFamily: fonts.mono,
         fontSize: fontSize ?? 12,
         opacity,
+        textTransform: 'uppercase',
       }}
     >
       {children}

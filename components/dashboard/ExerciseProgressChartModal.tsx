@@ -1,12 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, useWindowDimensions, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { LineChart } from 'react-native-gifted-charts';
 
 import {

@@ -1,4 +1,5 @@
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { X } from 'lucide-react-native';
 
 import { Button } from '@/components/ui/Button';

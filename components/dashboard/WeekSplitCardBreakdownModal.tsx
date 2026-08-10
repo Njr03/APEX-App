@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { format, parseISO } from 'date-fns';
 import { X } from 'lucide-react-native';
 

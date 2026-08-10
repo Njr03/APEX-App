@@ -1,6 +1,6 @@
 import { Text, type TextProps } from 'react-native';
 
-import { fonts } from '@/constants/theme';
+import { APP_TEXT_TRANSFORM, fonts } from '@/constants/theme';
 import { cn } from '@/lib/cn';
 
 type AppTextVariant = 'body' | 'display' | 'mono' | 'muted';
@@ -26,7 +26,7 @@ export function AppText({
   return (
     <Text
       className={cn(variantStyles[variant], className)}
-      style={[{ fontFamily: getFontFamily(variant) }, style]}
+      style={[{ fontFamily: getFontFamily(variant) }, APP_TEXT_TRANSFORM, style]}
       {...props}
     />
   );

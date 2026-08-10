@@ -1,5 +1,9 @@
 export const APEX_LOGO_BACKGROUND = '#000000';
 
+export const APP_TEXT_TRANSFORM = {
+  textTransform: 'uppercase',
+} as const;
+
 export const colors = {
   bg: APEX_LOGO_BACKGROUND,
   surface: '#111118',

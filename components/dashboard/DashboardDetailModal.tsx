@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { X } from 'lucide-react-native';
 
 import { colors, fonts } from '@/constants/theme';

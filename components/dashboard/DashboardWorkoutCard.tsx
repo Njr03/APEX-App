@@ -1,7 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef, type ReactNode } from 'react';
-import { Animated, Platform, Pressable, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { Check } from 'lucide-react-native';
 
 import {
