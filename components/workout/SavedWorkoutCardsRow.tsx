@@ -383,7 +383,7 @@ export function SavedWorkoutCardsRow({
 
   return (
     <View className="gap-3">
-      <TabPageHeading title={heading} />
+      <TabPageHeading className="text-xs" title={heading} />
 
       {isLoading ? (
         <ActivityIndicator color={colors.accent} />
