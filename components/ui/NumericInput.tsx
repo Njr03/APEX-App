@@ -3,6 +3,10 @@ import { TextInput, type TextInputProps } from 'react-native';
 
 import { fonts, APP_TEXT_TRANSFORM } from '@/constants/theme';
 import { cn } from '@/lib/cn';
+import {
+  handleNumericInputBlur,
+  WEB_NUMERIC_INPUT_FONT_SIZE,
+} from '@/lib/ui/viewportZoom';
 
 interface NumericInputProps extends Omit<TextInputProps, 'value' | 'onChangeText'> {
   className?: string;
@@ -13,7 +17,7 @@ interface NumericInputProps extends Omit<TextInputProps, 'value' | 'onChangeText
 
 export const NumericInput = forwardRef<TextInput, NumericInputProps>(
   function NumericInput(
-    { className, completed = false, style, ...props },
+    { className, completed = false, style, onBlur, ...props },
     ref,
   ) {
     return (
@@ -28,7 +32,15 @@ export const NumericInput = forwardRef<TextInput, NumericInputProps>(
             : 'border-border bg-surface2',
           className,
         )}
-        style={[{ fontFamily: fonts.mono, minWidth: 56 }, APP_TEXT_TRANSFORM, style]}
+        onBlur={handleNumericInputBlur(onBlur)}
+        style={[
+          { fontFamily: fonts.mono, minWidth: 56 },
+          WEB_NUMERIC_INPUT_FONT_SIZE != null
+            ? { fontSize: WEB_NUMERIC_INPUT_FONT_SIZE }
+            : null,
+          APP_TEXT_TRANSFORM,
+          style,
+        ]}
         {...props}
       />
     );

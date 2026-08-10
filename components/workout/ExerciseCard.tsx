@@ -11,6 +11,10 @@ import { colors, fonts } from '@/constants/theme';
 import { displayToKg, kgToDisplay } from '@/lib/units';
 import type { Exercise, Set, WorkoutExercise } from '@/lib/supabase';
 import { formatTargetScheme } from '@/lib/workout/formatSessionVolume';
+import {
+  handleNumericInputBlur,
+  WEB_NUMERIC_INPUT_FONT_SIZE,
+} from '@/lib/ui/viewportZoom';
 import { useWorkoutSessionStore } from '@/stores/workoutSessionStore';
 
 const CARD_BG = '#141427';
@@ -111,7 +115,7 @@ function SetRow({
     borderWidth: 1,
     color: colors.text,
     fontFamily: fonts.jetbrainsMono,
-    fontSize: 13,
+    fontSize: WEB_NUMERIC_INPUT_FONT_SIZE ?? 13,
     paddingHorizontal: 8,
     paddingVertical: 6,
     textAlign: 'center' as const,
@@ -141,7 +145,9 @@ function SetRow({
         <TextInput
           editable={!isCompleted}
           keyboardType="decimal-pad"
-          onBlur={() => void persistDraft()}
+          onBlur={handleNumericInputBlur(() => {
+            void persistDraft();
+          })}
           onChangeText={setWeightText}
           placeholder={weightPlaceholder ?? '—'}
           placeholderTextColor="rgba(240,237,232,0.35)"
@@ -154,7 +160,9 @@ function SetRow({
         <TextInput
           editable={!isCompleted}
           keyboardType="number-pad"
-          onBlur={() => void persistDraft()}
+          onBlur={handleNumericInputBlur(() => {
+            void persistDraft();
+          })}
           onChangeText={setRepsText}
           placeholder={repsPlaceholder ?? '—'}
           placeholderTextColor="rgba(240,237,232,0.35)"
