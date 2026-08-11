@@ -1,4 +1,3 @@
-import { BlurView } from 'expo-blur';
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -123,20 +122,13 @@ export function QuoteModal() {
           pointerEvents="none"
           style={[StyleSheet.absoluteFill, { opacity: overlayOpacity }]}
         >
-          {Platform.OS === 'web' ? (
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                styles.webBackdrop,
-                { backgroundColor: BACKDROP },
-              ]}
-            />
-          ) : (
-            <>
-              <BlurView intensity={18} style={StyleSheet.absoluteFill} tint="dark" />
-              <View style={[StyleSheet.absoluteFill, { backgroundColor: BACKDROP }]} />
-            </>
-          )}
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              Platform.OS === 'web' ? styles.webBackdrop : null,
+              { backgroundColor: BACKDROP },
+            ]}
+          />
         </Animated.View>
 
         <Pressable
