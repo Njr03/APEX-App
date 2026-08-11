@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { X } from 'lucide-react-native';
 
 import { fonts } from '@/constants/theme';
 import { useQuoteStore } from '@/stores/quoteStore';
@@ -17,8 +18,6 @@ import { useQuoteStore } from '@/stores/quoteStore';
 const CARD_BG = '#0d0d1b';
 const QUOTE_TEXT = '#e8e6f0';
 const AUTHOR_TEXT = 'rgba(232, 230, 240, 0.50)';
-const ACCENT = '#c8ff5a';
-const ACCENT_DIVIDER = 'rgba(200, 255, 90, 0.15)';
 const BACKDROP = 'rgba(0, 0, 0, 0.88)';
 
 export function QuoteModal() {
@@ -26,13 +25,10 @@ export function QuoteModal() {
   const isVisible = useQuoteStore((state) => state.isVisible);
   const currentQuote = useQuoteStore((state) => state.currentQuote);
   const closeQuote = useQuoteStore((state) => state.closeQuote);
-  const nextQuote = useQuoteStore((state) => state.nextQuote);
 
   const [mounted, setMounted] = useState(isVisible);
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(0.93)).current;
-  const textOpacity = useRef(new Animated.Value(1)).current;
-  const isAnimatingQuote = useRef(false);
 
   const cardWidth = Math.min(windowWidth * 0.88, 480);
 
@@ -82,35 +78,6 @@ export function QuoteModal() {
     });
   }, [cardScale, isVisible, mounted, overlayOpacity]);
 
-  const handleNextQuote = () => {
-    if (isAnimatingQuote.current) return;
-
-    isAnimatingQuote.current = true;
-
-    Animated.timing(textOpacity, {
-      toValue: 0,
-      duration: 140,
-      easing: Easing.out(Easing.quad),
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (!finished) {
-        isAnimatingQuote.current = false;
-        return;
-      }
-
-      nextQuote();
-
-      Animated.timing(textOpacity, {
-        toValue: 1,
-        duration: 140,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }).start(() => {
-        isAnimatingQuote.current = false;
-      });
-    });
-  };
-
   if (!mounted) {
     return null;
   }
@@ -150,39 +117,26 @@ export function QuoteModal() {
               },
             ]}
           >
+            <Pressable
+              accessibilityLabel="Close"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={closeQuote}
+              style={({ pressed }) => [
+                styles.closeButton,
+                pressed && styles.closeButtonPressed,
+              ]}
+            >
+              <X color="rgba(232, 230, 240, 0.55)" size={18} strokeWidth={2} />
+            </Pressable>
+
             <Text pointerEvents="none" style={styles.decorativeQuote}>
               "
             </Text>
 
-            <Animated.View style={{ marginTop: 32, opacity: textOpacity }}>
+            <View style={{ marginTop: 32 }}>
               <Text style={[styles.quoteText, { minHeight: 80 }]}>{currentQuote.quote}</Text>
               <Text style={styles.authorText}>— {currentQuote.author}</Text>
-            </Animated.View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.buttonRow}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={closeQuote}
-                style={({ pressed }) => [
-                  styles.closeButton,
-                  pressed && styles.closeButtonPressed,
-                ]}
-              >
-                <Text style={styles.closeButtonLabel}>Close</Text>
-              </Pressable>
-
-              <Pressable
-                accessibilityRole="button"
-                onPress={handleNextQuote}
-                style={({ pressed }) => [
-                  styles.newQuoteButton,
-                  pressed && styles.newQuoteButtonPressed,
-                ]}
-              >
-                <Text style={styles.newQuoteButtonLabel}>New Quote →</Text>
-              </Pressable>
             </View>
           </Animated.View>
         </View>
@@ -210,7 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     overflow: 'hidden',
-    paddingBottom: 32,
+    paddingBottom: 36,
     paddingHorizontal: 36,
     paddingTop: 44,
     shadowColor: '#000000',
@@ -218,6 +172,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.75,
     shadowRadius: 64,
     elevation: 24,
+  },
+  closeButton: {
+    alignItems: 'center',
+    borderColor: 'rgba(255, 255, 255, 0.11)',
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 32,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    width: 32,
+    zIndex: 2,
+  },
+  closeButtonPressed: {
+    borderColor: 'rgba(255, 255, 255, 0.22)',
+    opacity: 0.85,
   },
   decorativeQuote: {
     color: 'rgba(200, 255, 90, 0.12)',
@@ -249,50 +220,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'none',
     zIndex: 1,
-  },
-  divider: {
-    backgroundColor: ACCENT_DIVIDER,
-    height: 1,
-    marginBottom: 24,
-    marginTop: 28,
-    width: '100%',
-  },
-  buttonRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  closeButton: {
-    borderColor: 'rgba(255, 255, 255, 0.11)',
-    borderRadius: 10,
-    borderWidth: 1,
-    paddingHorizontal: 22,
-    paddingVertical: 10,
-  },
-  closeButtonPressed: {
-    borderColor: 'rgba(255, 255, 255, 0.22)',
-  },
-  closeButtonLabel: {
-    color: 'rgba(232, 230, 240, 0.55)',
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    fontWeight: '500',
-    textTransform: 'none',
-  },
-  newQuoteButton: {
-    backgroundColor: ACCENT,
-    borderRadius: 10,
-    paddingHorizontal: 22,
-    paddingVertical: 10,
-  },
-  newQuoteButtonPressed: {
-    opacity: 0.85,
-  },
-  newQuoteButtonLabel: {
-    color: '#07070f',
-    fontFamily: fonts.brand,
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'none',
   },
 });

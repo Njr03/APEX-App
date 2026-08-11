@@ -7,7 +7,6 @@ type QuoteStore = {
   currentQuote: Quote;
   openQuote: () => void;
   closeQuote: () => void;
-  nextQuote: () => void;
 };
 
 export const useQuoteStore = create<QuoteStore>((set) => ({
@@ -21,6 +20,4 @@ export const useQuoteStore = create<QuoteStore>((set) => ({
     }),
 
   closeQuote: () => set({ isVisible: false }),
-
-  nextQuote: () => set({ currentQuote: getRandomQuote() }),
 }));
