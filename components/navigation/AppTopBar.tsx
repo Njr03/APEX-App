@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/Text';
 import { format } from 'date-fns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ApexLogo } from '@/components/branding/ApexLogo';
+import { ApexLogoQuoteTrigger } from '@/components/branding/ApexLogoQuoteTrigger';
 import { WorkoutHistoryModal } from '@/components/history/WorkoutHistoryModal';
 import {
   TOPBAR_BG,
@@ -131,7 +131,7 @@ export function AppTopBar() {
       >
         <View className="min-w-0 flex-1 justify-center">
           <View style={{ gap: 2 }}>
-            <ApexLogo height={65} />
+            <ApexLogoQuoteTrigger height={65} />
 
             <View
               className="flex-row items-center justify-between"

@@ -10,6 +10,7 @@ import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { useAppFonts } from '@/hooks/useAppFonts';
+import { QuoteModal } from '@/components/QuoteModal';
 import { AuthNavigationHandler } from '@/components/auth/AuthNavigationHandler';
 import { PortraitOrientationGuard } from '@/components/PortraitOrientationGuard';
 import { WebBrowserChrome } from '@/components/WebBrowserChrome';
@@ -116,6 +117,7 @@ function RootNavigator() {
         <Stack.Screen name="index" />
         <Stack.Screen name="auth/callback" />
       </Stack>
+      <QuoteModal />
     </View>
   );
 }
