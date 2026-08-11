@@ -15,6 +15,7 @@ import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
 import { colors } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
+import { formatLoggedSetLine } from '@/lib/workout/formatSessionVolume';
 import { kgToDisplay, volumeLabel } from '@/lib/units';
 import { countWorkoutPRSets } from '@/lib/workout/volume';
 import { useAuth } from '@/providers/AuthProvider';
@@ -122,9 +123,13 @@ export default function WorkoutSummaryScreen() {
                 <AppText variant="body">{we.exercise.name}</AppText>
                 {completedSets.map((set) => (
                   <AppText className="mt-1" key={set.id} variant="mono">
-                    Set {set.set_number}: {kgToDisplay(set.weight, unit)}{' '}
-                    {volumeLabel(unit)} × {set.reps}
-                    {set.is_pr ? ' 🏆' : ''}
+                    {formatLoggedSetLine(
+                      set.set_number,
+                      set.reps,
+                      set.weight,
+                      unit,
+                      { isPr: set.is_pr },
+                    )}
                   </AppText>
                 ))}
               </Card>

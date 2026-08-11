@@ -9,8 +9,8 @@ import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { useDeleteRoutine, useProfile, useRoutine, useWorkoutHistory } from '@/hooks/queries';
 import { useStartWorkoutSession } from '@/hooks/useStartWorkoutSession';
-import { kgToDisplay, volumeLabel } from '@/lib/units';
 import { colors } from '@/constants/theme';
+import { formatSetRepsWeight } from '@/lib/workout/formatSessionVolume';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import {
@@ -95,10 +95,12 @@ export default function RoutineDetailScreen() {
             <View key={re.id}>
               <AppText variant="body">{re.exercise.name}</AppText>
               <AppText className="mt-1" variant="mono">
-                {re.target_sets ?? '—'} × {re.target_reps ?? '—'} reps
-                {re.target_weight != null
-                  ? ` @ ${kgToDisplay(re.target_weight, unit)} ${volumeLabel(unit)}`
-                  : ''}
+                {formatSetRepsWeight(
+                  re.target_sets,
+                  re.target_reps,
+                  re.target_weight,
+                  unit,
+                )}
               </AppText>
             </View>
           ))}

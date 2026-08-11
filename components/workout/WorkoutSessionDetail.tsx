@@ -5,6 +5,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { formatElapsedDuration } from '@/hooks/useWorkoutTimer';
 import type { WorkoutWithDetails } from '@/lib/supabase';
+import { formatLoggedSetLine } from '@/lib/workout/formatSessionVolume';
 import { kgToDisplay, volumeLabel } from '@/lib/units';
 
 interface WorkoutSessionDetailProps {
@@ -70,9 +71,13 @@ export function WorkoutSessionDetail({
               <AppText variant="body">{we.exercise.name}</AppText>
               {completedSets.map((set) => (
                 <AppText className="mt-1" key={set.id} variant="mono">
-                  Set {set.set_number}: {kgToDisplay(set.weight, unit)}{' '}
-                  {volumeLabel(unit)} × {set.reps}
-                  {set.is_pr ? ' 🏆' : ''}
+                  {formatLoggedSetLine(
+                    set.set_number,
+                    set.reps,
+                    set.weight,
+                    unit,
+                    { isPr: set.is_pr },
+                  )}
                 </AppText>
               ))}
             </Card>

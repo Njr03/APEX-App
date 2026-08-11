@@ -30,7 +30,7 @@ function PRCard({
   onPress: () => void;
 }) {
   const { pressed, handlers } = useDashboardTilePress(onPress);
-  const valueLabel = record.weightDisplayValue;
+  const valueLabel = record.displayValue;
 
   return (
     <Pressable

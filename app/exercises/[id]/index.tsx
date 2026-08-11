@@ -11,7 +11,7 @@ import { useExercise, useExerciseHistory, useProfile } from '@/hooks/queries';
 import { colors } from '@/constants/theme';
 import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
-import { kgToDisplay, volumeLabel } from '@/lib/units';
+import { formatLoggedSetLine } from '@/lib/workout/formatSessionVolume';
 
 export default function ExerciseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -96,13 +96,18 @@ export default function ExerciseDetailScreen() {
                 </AppText>
                 <AppText className="mt-2" variant="mono">
                   {session.sets
-                    .sort((a, b) => a.set_number - b.set_number)
-                    .map(
-                      (set) =>
-                        `${set.reps}×${kgToDisplay(set.weight, unit)}${set.is_pr ? ' 🏆' : ''}`,
-                    )
-                    .join(' · ')}{' '}
-                  {volumeLabel(unit)}
+                  .sort((a, b) => a.set_number - b.set_number)
+                  .map((set) => (
+                    <AppText className="mt-1" key={set.set_number} variant="mono">
+                      {formatLoggedSetLine(
+                        set.set_number,
+                        set.reps,
+                        set.weight,
+                        unit,
+                        { isPr: set.is_pr },
+                      )}
+                    </AppText>
+                  ))}
                 </AppText>
               </Card>
             ))

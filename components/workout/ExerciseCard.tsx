@@ -258,9 +258,9 @@ export function ExerciseCard({
   }, [history?.sessions]);
 
   const targetScheme = formatTargetScheme(
-    exerciseTargets?.targetWeight,
     exerciseTargets?.targetSets,
     exerciseTargets?.targetReps,
+    exerciseTargets?.targetWeight,
     unit,
   );
 

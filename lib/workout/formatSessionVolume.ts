@@ -1,23 +1,54 @@
 import { kgToDisplay, volumeLabel, weightUnitLabel } from '@/lib/units';
 
-/** Formats sets, reps, then weight: "4 sets · 8 reps · 176lbs" */
+const SCHEME_SEPARATOR = ' · ';
+
+function formatWeightPart(
+  weightKg: number | null | undefined,
+  unit: 'kg' | 'lb',
+): string {
+  if (weightKg == null || weightKg <= 0) return '—';
+  return `${kgToDisplay(weightKg, unit)} ${weightUnitLabel(unit)}`;
+}
+
+function formatCountPart(value: number | null | undefined): string {
+  if (value == null || value <= 0) return '—';
+  return String(value);
+}
+
+/** Canonical logged-workout scheme: sets · reps · weight (e.g. "3 · 8 · 135 lb"). */
+export function formatSetRepsWeight(
+  sets: number | null | undefined,
+  reps: number | null | undefined,
+  weightKg: number | null | undefined,
+  unit: 'kg' | 'lb',
+): string {
+  return [
+    formatCountPart(sets),
+    formatCountPart(reps),
+    formatWeightPart(weightKg, unit),
+  ].join(SCHEME_SEPARATOR);
+}
+
+/** Formats a single logged set row: "Set 1: 1 · 8 · 135 lb". */
+export function formatLoggedSetLine(
+  setNumber: number,
+  reps: number | null | undefined,
+  weightKg: number | null | undefined,
+  unit: 'kg' | 'lb',
+  options?: { isPr?: boolean },
+): string {
+  const suffix = options?.isPr ? ' 🏆' : '';
+  return `Set ${setNumber}: ${formatSetRepsWeight(1, reps, weightKg, unit)}${suffix}`;
+}
+
+/** Formats sets, reps, then weight for exercise targets and summaries. */
 export function formatExerciseScheme(
   sets: number,
   reps: number | null | undefined,
   weightKg: number | null | undefined,
   unit: 'kg' | 'lb',
 ): string {
-  const parts: string[] = [`${sets} sets`];
-
-  if (reps != null && reps > 0) {
-    parts.push(`${reps} reps`);
-  }
-
-  if (weightKg != null && weightKg > 0) {
-    parts.push(`${kgToDisplay(weightKg, 'lb')}${weightUnitLabel('lb')}`);
-  }
-
-  return parts.join(' · ');
+  return formatSetRepsWeight(sets, reps, weightKg, unit);
 }
 
 export function summarizeLoggedExerciseSets(
@@ -40,7 +71,9 @@ export function summarizeLoggedExerciseSets(
     return volume > bestVolume ? set : best;
   }, null);
 
-  if (!topSet) return `${completed.length} sets`;
+  if (!topSet) {
+    return formatSetRepsWeight(completed.length, null, null, unit);
+  }
 
   return formatExerciseScheme(
     completed.length,
@@ -66,20 +99,15 @@ export function formatSessionVolume(
 }
 
 export function formatTargetScheme(
-  weightKg: number | null | undefined,
   sets: number | null | undefined,
   reps: number | null | undefined,
+  weightKg: number | null | undefined,
   unit: 'kg' | 'lb',
 ): string | null {
   if (weightKg == null && sets == null && reps == null) return null;
 
-  const parts: string[] = [];
-  if (weightKg != null) {
-    parts.push(`${kgToDisplay(weightKg, unit)}${weightUnitLabel(unit)}`);
-  }
-  if (sets != null && reps != null) {
-    parts.push(`${sets}×${reps}`);
-  }
+  const formatted = formatSetRepsWeight(sets, reps, weightKg, unit);
+  if (formatted === '— · — · —') return null;
 
-  return parts.length > 0 ? parts.join(' · ') : null;
+  return formatted;
 }

@@ -8,7 +8,7 @@ import { useRoutine } from '@/hooks/queries';
 import type { RoutineSummary } from '@/hooks/queries/useRoutineSummaries';
 import { colors, fonts } from '@/constants/theme';
 import { wrapDashboardModalClose } from '@/lib/dashboard/cardStyles';
-import { kgToDisplay } from '@/lib/units';
+import { formatSetRepsWeight } from '@/lib/workout/formatSessionVolume';
 
 const CARD_BG = '#0d0d1b';
 const CARD_BORDER = 'rgba(255,255,255,0.06)';
@@ -144,10 +144,12 @@ export function RoutineCardBreakdownModal({
                         fontSize: 10,
                       }}
                     >
-                      {entry.target_sets ?? 3}×{entry.target_reps ?? '—'}
-                      {entry.target_weight
-                        ? ` · ${kgToDisplay(entry.target_weight, unit)}${unit}`
-                        : ''}
+                      {formatSetRepsWeight(
+                        entry.target_sets,
+                        entry.target_reps,
+                        entry.target_weight,
+                        unit,
+                      )}
                     </Text>
                   </View>
                 ))

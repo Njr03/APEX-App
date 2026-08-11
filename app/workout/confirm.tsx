@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { QueryError } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
-import { useExercises, useWorkoutHistory } from '@/hooks/queries';
+import { useExercises, useProfile, useWorkoutHistory } from '@/hooks/queries';
 import { colors, fonts } from '@/constants/theme';
 import {
   getSplitTemplate,
@@ -24,7 +24,8 @@ import {
   SPLIT_DEFINITIONS,
   type TrainingSplit,
 } from '@/lib/training/splits';
-import { kgToDisplay } from '@/lib/units';
+import { formatSetRepsWeight } from '@/lib/workout/formatSessionVolume';
+import { resolveUnitPreference } from '@/lib/profile/unitPreference';
 import { getSupabaseErrorMessage } from '@/lib/supabase/errors';
 import {
   isSplitCompletedThisWeek,
@@ -75,9 +76,11 @@ export default function WorkoutConfirmScreen() {
   const split = resolveSplit(splitParam);
   const definition = SPLIT_DEFINITIONS[split];
   const { data: exercises, isLoading, isError, error, refetch } = useExercises();
+  const { data: profile } = useProfile();
   const { data: workoutHistory } = useWorkoutHistory();
   const { startFromPlan, isStarting } = useStartWorkoutSession();
   const [startError, setStartError] = useState<string | null>(null);
+  const unit = resolveUnitPreference(profile?.unit_preference);
 
   const splitCompletedThisWeek = useMemo(
     () =>
@@ -304,7 +307,7 @@ export default function WorkoutConfirmScreen() {
                   >
                     <AppText variant="muted">Set {setIndex + 1}</AppText>
                     <AppText style={{ color: definition.color }} variant="mono">
-                      {committed.reps} reps × {kgToDisplay(committed.weightKg, 'kg')} kg
+                      {formatSetRepsWeight(1, committed.reps, committed.weightKg, unit)}
                     </AppText>
                   </View>
                 ))}
